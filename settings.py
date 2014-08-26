@@ -12,10 +12,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+SECRET_KEY = 'I GUESS i haVE To HaVe a SecreT KEY HERE!'
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'edgar.sqlite',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -158,3 +160,5 @@ try:
     from local_settings import *
 except ImportError, exp:
     pass
+
+DATA_DIR='/Users/msherry/projects/finance/pysec/data'

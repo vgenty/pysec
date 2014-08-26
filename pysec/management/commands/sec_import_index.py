@@ -24,12 +24,12 @@ def get_filing_list(year,qtr):
         fileout=file(fn,'w')
         fileout.write(compressed_data)
         fileout.close()
-    
+
     # Extract the compressed file
     zip=ZipFile(fn)
     zdata=zip.read('company.idx')
     zdata = removeNonAscii(zdata)
-    
+
     # Parse the fixed-length fields
     result=[]
     for r in zdata.split('\n')[10:]:
@@ -50,12 +50,12 @@ def get_filing_list(year,qtr):
 
 class Command(NoArgsCommand):
     help = "Download new files representing one month of 990s, ignoring months we already have. Each quarter contains hundreds of thousands of filings; will take a while to run. "
-    
-    
+
+
     def handle_noargs(self, **options):
 
-        for year in range(2013,2014):
-            for qtr in range(1,2):        
+        for year in range(2000,2015):
+            for qtr in range(1,5):
                 quarter = "%s%s" % (year,qtr)
                 Index.objects.filter(quarter=quarter).delete()
                 objs = get_filing_list(year,qtr)

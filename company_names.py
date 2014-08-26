@@ -37,12 +37,13 @@ def find_ciks():
             tt = soup.find('a', text=re.compile('Full Filing.*'))
             href = tt.parent['href']
 
-            html = requests.get(href)
+            html = requests.get(href).text
             soup = BeautifulSoup(''.join(html.splitlines()))
             tt = soup.find(text='CIK:')
             cik = int(''.join(c for c in tt.next.next.next.text if c in '0123456789'))
 
             sym_to_cik[sym] = cik
+            print cik
         except Exception as e:
             print e
 

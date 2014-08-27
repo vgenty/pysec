@@ -16,15 +16,18 @@ class Index(models.Model):
     form = models.CharField(max_length=10, blank=True)
     quarter = models.CharField(max_length=6, blank=True)
 
+    @property
     def xbrl_link(self):
         if self.form.startswith('10-K') or self.form.startswith('10-Q'):
             id = self.filename.split('/')[-1][:-4]
             return 'http://www.sec.gov/Archives/edgar/data/%s/%s/%s-xbrl.zip' % (self.cik, id.replace('-',''), id)
         return None
 
+    @property
     def html_link(self):
         return 'http://www.sec.gov/Archives/%s' % self.filename
 
+    @property
     def index_link(self):
         id = self.filename.split('/')[-1][:-4]
         return 'http://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm' % (self.cik, id.replace('-',''), id)
@@ -44,6 +47,15 @@ class Index(models.Model):
     def localcik(self):
         return '%s/%s/' % (DATA_DIR, self.cik)
 
+    def raw_text(self):
+        filename = self.localfile()
+        if not filename:
+            return None
+        f = open(filename,'r').read()
+        ret = f.read()
+        f.close()
+        return ret
+
     def html(self):
         filename = self.localfile()
         if not filename:
@@ -59,27 +71,32 @@ class Index(models.Model):
     def download(self):
         try:
             os.mkdir(self.localcik())
-        except:
+        except OSError:
             pass
         try:
             os.mkdir(self.localpath())
-        except:
+        except OSError:
             pass
+
+        # Complete shit
+        saved_path = os.getcwd()
         os.chdir(self.localpath())
 
-        if not os.path.exists(self.html_link().split('/')[-1]):
-            os.system('wget -T 30 %s' % self.html_link())
-        if self.xbrl_link():
-            if not os.path.exists(self.xbrl_link().split('/')[-1]):
-                os.system('wget -T 30 %s' % self.xbrl_link())
+        if self.xbrl_link:
+            if not os.path.exists(os.path.basename(self.xbrl_link)):
+                os.system('wget -T 30 %s' % self.xbrl_link)
                 os.system('unzip *.zip')
+        else:
+            # No xbrl, fall back to text
+            if not os.path.exists(os.path.basename(self.html_link)):
+                os.system('wget -T 30 %s' % self.html_link)
+
+        os.chdir(saved_path)
 
     def xbrl_localpath(self):
-        try:
-            os.chdir(self.localpath())
-        except:
+        if not os.path.exists(self.localpath()):
             self.download()
-        files = os.listdir('.')
+        files = os.listdir(self.localpath())
         xml = sorted([elem for elem in files if elem.endswith('.xml')],
                      key=len)
         if not len(xml):
@@ -96,8 +113,8 @@ class Index(models.Model):
         x.fields['FiscalYear'] = x.fields['DocumentFiscalYearFocus']
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
         x.fields['PeriodStartDate'] = x.fields['IncomeStatementPeriodYTD']
-        x.fields['SECFilingPage'] = self.index_link()
-        x.fields['LinkToXBRLInstance'] = self.xbrl_link()
+        x.fields['SECFilingPage'] = self.index_link
+        x.fields['LinkToXBRLInstance'] = self.xbrl_link
 
         return x
 

@@ -5,6 +5,9 @@ import urllib,os,re,os.path
 from zipfile import ZipFile
 import time
 
+from sym_to_ciks import sym_to_ciks
+
+CIKS = sym_to_ciks.values()
 
 DATA_DIR = settings.DATA_DIR
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
@@ -42,6 +45,8 @@ def get_filing_list(year,qtr):
                 'date':date,
                 'quarter': quarter,
                 'filename':r[98:].strip()}
+        if int(filing['cik']) not in CIKS:
+            continue
 
         result.append(Index(**filing))
 
@@ -54,14 +59,19 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
 
-        for year in range(2000,2015):
+        print "LIMITING TO S&P 500 CIKS"
+
+        for year in range(1999,2015):
             for qtr in range(1,5):
                 quarter = "%s%s" % (year,qtr)
                 Index.objects.filter(quarter=quarter).delete()
                 objs = get_filing_list(year,qtr)
-                for obj in objs:
+                for i, obj in enumerate(objs):
+                    if i % 100 == 0:
+                        print i, obj.name, obj.quarter
                     try:
                         obj.save()
                     except:
                         print 'error: %s' % obj
                         pass
+                print i, obj.name, obj.quarter

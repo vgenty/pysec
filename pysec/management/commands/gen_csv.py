@@ -14,6 +14,23 @@ from sym_to_ciks import sym_to_ciks
 
 PICKLE_FILE = 'forms.pkl'
 
+# Fields we don't need in our CSVs
+EXCLUDE_FIELDS = {
+    'BalanceSheetDate',
+    'ContextForDurations',
+    'ContextForInstants',
+    'DocumentFiscalYearFocus',
+    'DocumentType',
+    'EntityCentralIndexKey',
+    'EntityFilerCategory',
+    'EntityRegistrantName',
+    'FiscalYear',
+    'IncomeStatementPeriodYTD',
+    'LinkToXBRLInstance',
+    'PeriodStartDate',
+    'SECFilingPage',
+    'TradingSymbol',
+}
 
 def create_pkl():
     forms = defaultdict(list)
@@ -59,9 +76,10 @@ class Command(NoArgsCommand):
                 print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 
+            fields -= EXCLUDE_FIELDS
             filename = 'data/csv/{}.csv'.format(sym)
             with open(filename, 'w') as f:
-                csv = DictWriter(f, list(fields))
+                csv = DictWriter(f, list(fields), extrasaction='ignore')
                 csv.writeheader()
                 csv.writerows(sorted(forms[sym],
                                      key=lambda x: x['DocumentPeriodEndDate']))

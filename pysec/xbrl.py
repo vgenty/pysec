@@ -5,7 +5,6 @@ import re
 
 class XBRL(object):
 
-
     def __init__(self, XBRLInstanceLocation):
 
         self.XBRLInstanceLocation = XBRLInstanceLocation
@@ -123,14 +122,16 @@ class XBRL(object):
         if oNode is not None:
             self.fields['DocumentFiscalYearFocus'] = oNode.text
         else:
-            self.fields['DocumentFiscalYearFocus'] = "Fiscal year focus not found"
+            self.fields['DocumentFiscalYearFocus'] = (
+                "Fiscal year focus not found")
 
-        #DocumentFiscalPeriodFocus
+        # DocumentFiscalPeriodFocus
         oNode = self.getNode("//dei:DocumentFiscalPeriodFocus[@contextRef]")
         if oNode is not None:
             self.fields['DocumentFiscalPeriodFocus'] = oNode.text
         else:
-            self.fields['DocumentFiscalPeriodFocus'] = "Fiscal period focus not found"
+            self.fields['DocumentFiscalPeriodFocus'] = (
+                "Fiscal period focus not found")
 
         # DocumentType
         oNode = self.getNode("//dei:DocumentType[@contextRef]")
@@ -138,8 +139,6 @@ class XBRL(object):
             self.fields['DocumentType'] = oNode.text
         else:
             self.fields['DocumentType'] = "Fiscal period focus not found"
-
-
 
     def GetCurrentPeriodAndContextInformation(self, EndDate):
         # Figures out the current period and contexts for the current period
@@ -161,14 +160,16 @@ class XBRL(object):
         # This finds the Context ID for that end date (has correct <instant>
         # date plus has no dimensions):
         oNodelist2 = self.getNodeList(
-            "//us-gaap:Assets | //us-gaap:AssetsCurrent | //us-gaap:LiabilitiesAndStockholdersEquity")
+            '//us-gaap:Assets | //us-gaap:AssetsCurrent |'
+            '//us-gaap:LiabilitiesAndStockholdersEquity')
         # Nodelist of all the facts which are us-gaap:Assets
         for i in oNodelist2:
             # print i.XML
 
             ContextID = i.get('contextRef')
             ContextPeriod = self.getNode(
-                "//xbrli:context[@id='" + ContextID + "']/xbrli:period/xbrli:instant").text
+                ("//xbrli:context[@id='" + ContextID +
+                 "']/xbrli:period/xbrli:instant").text)
             # print ContextPeriod
 
             # Nodelist of all the contexts of the fact us-gaap:Assets
@@ -177,9 +178,12 @@ class XBRL(object):
             for j in oNodelist3:
 
                 # Nodes with the right period
-                if self.getNode("xbrli:period/xbrli:instant",j) is not None and self.getNode("xbrli:period/xbrli:instant",j).text==EndDate:
+                if (self.getNode("xbrli:period/xbrli:instant", j) is not None
+                    and self.getNode(
+                        "xbrli:period/xbrli:instant", j).text == EndDate):
 
-                    oNode4 = self.getNodeList("xbrli:entity/xbrli:segment/xbrldi:explicitMember",j)
+                    oNode4 = self.getNodeList(
+                        "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
 
                     if not len(oNode4):
                         UseContext = ContextID
@@ -243,23 +247,33 @@ class XBRL(object):
             # print i.XML
 
             ContextID = i.get('contextRef')
-            ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID + "']/xbrli:period/xbrli:endDate")
+            ContextPeriod = self.getNode(
+                "//xbrli:context[@id='" + ContextID + "']/xbrli:period/xbrli:endDate")
             #Usecontext = ContextID
             #print ContextPeriod
 
-            #Nodelist of all the contexts of the fact us-gaap:Assets
-            oNodelist3 = self.getNodeList("//xbrli:context[@id='" + ContextID + "']")
+            # Nodelist of all the contexts of the fact us-gaap:Assets
+            oNodelist3 = self.getNodeList(
+                "//xbrli:context[@id='" + ContextID + "']")
             for j in oNodelist3:
 
-                #Nodes with the right period
-                if self.getNode("xbrli:period/xbrli:endDate",j).text==EndDate:
+                # Nodes with the right period
+                if self.getNode(
+                        "xbrli:period/xbrli:endDate", j).text == EndDate:
 
-                    oNode4 = self.getNodeList("xbrli:entity/xbrli:segment/xbrldi:explicitMember",j)
+                    oNode4 = self.getNodeList(
+                        "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
 
-                    if not len(oNode4): #Making sure there are no dimensions. Is this the right way to do it?
+                    if not len(oNode4):
+                        # Making sure there are no dimensions. Is this the
+                        # right way to do it?
 
                         #Get the year-to-date context, not the current period
-                        StartDate = self.getNode("xbrli:period/xbrli:startDate",j).text
+
+                        # MARC - this sounds wrong. I want recent, e.g., EPS,
+                        # not YTD
+                        StartDate = self.getNode(
+                            "xbrli:period/xbrli:startDate",j).text
                         # print "Context start date: " + StartDate
                         # print "YTD start date: " + StartDateYTD
 
@@ -274,8 +288,8 @@ class XBRL(object):
                             UseContext = j.get('id')
                             #MsgBox j.selectSingleNode("@id").text
                         else:
-                            #MsgBox "Context is greater"
-                            #Start date is for year
+                            # MsgBox "Context is greater"
+                            # Start date is for year
                             # print "Context start date is greater than YTD, keep current YTD"
                             # print "Context start date: " + StartDate
 
@@ -310,19 +324,22 @@ class XBRL(object):
 
 
     def LookForAlternativeInstanceContext(self):
-        #This deals with the situation where no instance context has no dimensions
-        #Finds something
+        # This deals with the situation where no instance context has no
+        # dimensions. Finds something
 
         something = None
 
-        #See if there are any nodes with the document period focus date
-        oNodeList_Alt = self.getNodeList("//xbrli:context[xbrli:period/xbrli:instant='" + self.fields['BalanceSheetDate'] + "']")
+        # See if there are any nodes with the document period focus date
+        oNodeList_Alt = self.getNodeList(
+            "//xbrli:context[xbrli:period/xbrli:instant='" +
+            self.fields['BalanceSheetDate'] + "']")
 
-        #MsgBox "Node list length: " + oNodeList_Alt.length
+        # MsgBox "Node list length: " + oNodeList_Alt.length
         for oNode_Alt in oNodeList_Alt:
-            #Found possible contexts
-            #MsgBox oNode_Alt.selectSingleNode("@id").text
-            something = self.getNode("//us-gaap:Assets[@contextRef='" + oNode_Alt.get("id") + "']")
+            # Found possible contexts
+            # MsgBox oNode_Alt.selectSingleNode("@id").text
+            something = self.getNode(
+                "//us-gaap:Assets[@contextRef='" + oNode_Alt.get("id") + "']")
             if something:
                 #MsgBox "Use this context: " + oNode_Alt.selectSingleNode("@id").text
                 return oNode_Alt.get("id")

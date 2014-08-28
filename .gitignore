@@ -27,4 +27,7 @@ develop-eggs
 lib
 lib64
 
-
+data
+edgar.sqlite
+*.json
+*.pkl

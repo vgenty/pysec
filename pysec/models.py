@@ -6,6 +6,7 @@ from django.conf import settings
 
 DATA_DIR = settings.DATA_DIR
 
+from sym_to_ciks import cik_to_syms
 
 class Index(models.Model):
 
@@ -117,7 +118,12 @@ class Index(models.Model):
 
     @property
     def ticker(self):  # get a company's stock ticker from an XML filing
+
+        if self.cik in cik_to_syms:
+            return cik_to_syms[self.cik]
+
+        # Complete horseshit
         filepath = self.xbrl_localpath
         if filepath:
-            return filepath.split('-')[0]
+            return os.path.basename(filepath).split('-')[0].upper()
         return None

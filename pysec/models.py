@@ -35,52 +35,47 @@ class Index(models.Model):
     def txt(self):
         return self.filename.split('/')[-1]
 
+    @property
     def localfile(self):
         filename = '%s/%s/%s/%s' % (DATA_DIR, self.cik,self.txt()[:-4],self.txt())
         if os.path.exists(filename):
             return filename
         return None
 
+    @property
     def localpath(self):
         return '%s/%s/%s/' % (DATA_DIR, self.cik,self.txt()[:-4])
 
+    @property
     def localcik(self):
         return '%s/%s/' % (DATA_DIR, self.cik)
 
-    def raw_text(self):
-        filename = self.localfile()
-        if not filename:
-            return None
-        f = open(filename,'r').read()
-        ret = f.read()
-        f.close()
-        return ret
-
+    @property
     def html(self):
-        filename = self.localfile()
+        filename = self.localfile
         if not filename:
             return None
-        f = open(filename,'r').read()
+        f = open(filename, 'r').read()
         f_lower = f.lower()
         try:
-            return f[f_lower.find('<html>'):f_lower.find('</html>')+4]
+            return f[f_lower.find('<html>'):f_lower.find('</html>') + 4]
         except:
             print 'html tag not found'
             return f
 
     def download(self):
         try:
-            os.mkdir(self.localcik())
+            os.mkdir(self.localcik)
         except OSError:
             pass
         try:
-            os.mkdir(self.localpath())
+            os.mkdir(self.localpath)
         except OSError:
             pass
 
         # Complete shit
         saved_path = os.getcwd()
-        os.chdir(self.localpath())
+        os.chdir(self.localpath)
 
         if self.xbrl_link:
             if not os.path.exists(os.path.basename(self.xbrl_link)):
@@ -93,18 +88,20 @@ class Index(models.Model):
 
         os.chdir(saved_path)
 
+    @property
     def xbrl_localpath(self):
-        if not os.path.exists(self.localpath()):
+        if not os.path.exists(self.localpath):
             self.download()
-        files = os.listdir(self.localpath())
+        files = os.listdir(self.localpath)
         xml = sorted([elem for elem in files if elem.endswith('.xml')],
                      key=len)
         if not len(xml):
             return None
-        return self.localpath() + xml[0]
+        return self.localpath + xml[0]
 
+    @property
     def xbrl(self):
-        filepath = self.xbrl_localpath()
+        filepath = self.xbrl_localpath
         if not filepath:
             print 'no xbrl found. this option is for 10-ks.'
             return None
@@ -118,8 +115,9 @@ class Index(models.Model):
 
         return x
 
+    @property
     def ticker(self):  # get a company's stock ticker from an XML filing
-        filepath = self.xbrl_localpath()
+        filepath = self.xbrl_localpath
         if filepath:
             return filepath.split('-')[0]
         return None

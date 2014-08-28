@@ -1,9 +1,8 @@
 from pysec.models import *
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
-import urllib,os,re,os.path
+import urllib, os, os.path
 from zipfile import ZipFile
-import time
 
 from sym_to_ciks import sym_to_ciks
 
@@ -20,32 +19,38 @@ def get_filing_list(year,qtr):
     print url
 
     # Download the data and save to a file
-    fn='%s/company_%d_%d.zip' % (DATA_DIR, year,qtr)
+    fn = '%s/company_%d_%d.zip' % (DATA_DIR, year,qtr)
 
     if not os.path.exists(fn):
-        compressed_data=urllib.urlopen(url).read()
-        fileout=file(fn,'w')
+        compressed_data = urllib.urlopen(url).read()
+        fileout = file(fn, 'w')
         fileout.write(compressed_data)
         fileout.close()
 
     # Extract the compressed file
-    zip=ZipFile(fn)
-    zdata=zip.read('company.idx')
+    zip_file = ZipFile(fn)
+    zdata = zip_file.read('company.idx')
     zdata = removeNonAscii(zdata)
 
     # Parse the fixed-length fields
-    result=[]
+    result = []
     for r in zdata.split('\n')[10:]:
         date = r[86:98].strip()
-        if date=='': date = None
-        if r.strip()=='': continue
-        filing={'name':r[0:62].strip(),
-                'form':r[62:74].strip(),
-                'cik':r[74:86].strip(),
-                'date':date,
-                'quarter': quarter,
-                'filename':r[98:].strip()}
-        if int(filing['cik']) not in CIKS:
+        if date == '':
+            date = None
+        if r.strip() == '':
+            continue
+        filing = {'name': r[0:62].strip(),
+                  'form': r[62:74].strip(),
+                  'cik': r[74:86].strip(),
+                  'date': date,
+                  'quarter': quarter,
+                  'filename': r[98:].strip()}
+        try:
+            if int(filing['cik']) not in CIKS:
+                continue
+        except ValueError:
+            print 'Problem with filing: {}'.format(filing)
             continue
 
         result.append(Index(**filing))
@@ -61,11 +66,11 @@ class Command(NoArgsCommand):
 
         print "LIMITING TO S&P 500 CIKS"
 
-        for year in range(1999,2015):
-            for qtr in range(1,5):
-                quarter = "%s%s" % (year,qtr)
+        for year in range(1999, 2015):
+            for qtr in range(1, 5):
+                quarter = "%s%s" % (year, qtr)
                 Index.objects.filter(quarter=quarter).delete()
-                objs = get_filing_list(year,qtr)
+                objs = get_filing_list(year, qtr)
                 for i, obj in enumerate(objs):
                     if i % 100 == 0:
                         print i, obj.name, obj.quarter
@@ -73,5 +78,4 @@ class Command(NoArgsCommand):
                         obj.save()
                     except:
                         print 'error: %s' % obj
-                        pass
                 print i, obj.name, obj.quarter

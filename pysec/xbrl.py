@@ -287,8 +287,6 @@ class XBRL(object):
                             # print "Current min: " + StartDateYTD
 
                             StartDateYTD = StartDate
-                            UseContext = j.get('id')
-                            # MsgBox j.selectSingleNode("@id").text
                         elif StartDate > StartDateLatest:
                             # MsgBox "Context is greater"
                             # Start date is for year

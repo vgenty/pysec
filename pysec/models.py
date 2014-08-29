@@ -41,15 +41,14 @@ class Index(models.Model):
         return self.filename.split('/')[-1]
 
     @property
-    def localfile(self):
-        filename = '%s/%s/%s/%s' % (DATA_DIR, self.cik,self.txt()[:-4],self.txt())
-        if os.path.exists(filename):
-            return filename
-        return None
+    def local_file_path(self):
+        filename = '%s/%s/%s/%s' % (DATA_DIR,
+                                    self.cik,self.txt()[:-4], self.txt())
+        return filename
 
     @property
-    def localpath(self):
-        return '%s/%s/%s/' % (DATA_DIR, self.cik,self.txt()[:-4])
+    def local_dir(self):
+        return '%s/%s/%s/' % (DATA_DIR, self.cik, self.txt()[:-4])
 
     @property
     def localcik(self):
@@ -57,9 +56,11 @@ class Index(models.Model):
 
     @property
     def html(self):
-        filename = self.localfile
+        filename = self.local_file_path
         if not filename:
             return None
+        if not os.path.exists(filename):
+            self.download()
         f = open(filename, 'r').read()
         f_lower = f.lower()
         try:
@@ -74,13 +75,13 @@ class Index(models.Model):
         except OSError:
             pass
         try:
-            os.mkdir(self.localpath)
+            os.mkdir(self.local_dir)
         except OSError:
             pass
 
         # Complete shit
         saved_path = os.getcwd()
-        os.chdir(self.localpath)
+        os.chdir(self.local_dir)
 
         if self.xbrl_link:
             if not os.path.exists(os.path.basename(self.xbrl_link)):
@@ -96,14 +97,14 @@ class Index(models.Model):
 
     @property
     def xbrl_localpath(self):
-        if not os.path.exists(self.localpath):
+        if not os.path.exists(self.local_dir):
             self.download()
-        files = os.listdir(self.localpath)
+        files = os.listdir(self.local_dir)
         xml = sorted([elem for elem in files if elem.endswith('.xml')],
                      key=len)
         if not len(xml):
             return None
-        return self.localpath + xml[0]
+        return self.local_dir + xml[0]
 
     @property
     def financial_fields(self):

@@ -69,7 +69,7 @@ class Index(models.Model):
             print 'html tag not found'
             return f
 
-    def download(self):
+    def download(self, force_html_download=False):
         try:
             os.mkdir(self.localcik)
         except OSError:
@@ -88,7 +88,7 @@ class Index(models.Model):
                 os.system('wget -T 30 %s' % self.xbrl_link)
                 os.system('unzip *.zip')
 
-        if not self.xbrl_localpath:
+        if force_html_download or not self.xbrl_localpath:
             # No xbrl, fall back to text
             if not os.path.exists(os.path.basename(self.html_link)):
                 os.system('wget -T 30 %s' % self.html_link)
@@ -100,7 +100,8 @@ class Index(models.Model):
         if not os.path.exists(self.local_dir):
             self.download()
         files = os.listdir(self.local_dir)
-        xml = sorted([elem for elem in files if elem.endswith('.xml')],
+        xml = sorted([elem for elem in files if elem.endswith('.xml')
+                      and elem not in ['defnref.xml']],
                      key=len)
         if not len(xml):
             return None

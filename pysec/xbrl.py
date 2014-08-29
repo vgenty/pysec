@@ -42,7 +42,11 @@ class XBRL(object):
     def getNodeList(self, xpath, root=None):
         if root is None:
             root = self.oInstance
-        oNodelist = root.xpath(xpath, namespaces=self.ns)
+        try:
+            oNodelist = root.xpath(xpath, namespaces=self.ns)
+        except etree.XPathEvalError:
+            print 'xpath:', xpath
+            return []                     # TODO: ?
         return oNodelist
 
     def getNode(self, xpath, root=None):
@@ -170,9 +174,9 @@ class XBRL(object):
             # print i.XML
 
             ContextID = i.get('contextRef')
-            ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
-                 "']/xbrli:period/xbrli:instant").text
-            print 'ContextPeriod:', ContextPeriod
+            # ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
+            #      "']/xbrli:period/xbrli:instant").text
+            # print 'ContextPeriod:', ContextPeriod
 
             # Nodelist of all the contexts of the fact us-gaap:Assets
             oNodelist3 = self.getNodeList(

@@ -18,14 +18,19 @@ class EdgarHTML(object):
         node = self.soup.find(text=re.compile(text, re.IGNORECASE))
         return node
 
-    def parse(self):
-        # EarningsPerShare
-        node = self.find_node(r'Earnings per (common)? share:')
-        while True:
+    def find_value(self, match):
+        val = None
+        node = self.find_node(match)
+        while node is not None:
             try:
                 val = float(node)
                 break
             except (TypeError, ValueError):
                 pass
             node = node.next
-        self.fields['EarningsPerShare'] = val
+        return val
+
+    def parse(self):
+        # EarningsPerShare
+        self.fields['EarningsPerShare'] = self.find_value(
+            r'Earnings per (common)? share:')

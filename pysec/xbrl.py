@@ -10,8 +10,7 @@ class XBRL(object):
         self.XBRLInstanceLocation = XBRLInstanceLocation
         self.fields = {}
 
-        self.EntireInstanceDocument = open(XBRLInstanceLocation, 'r').read()
-        self.oInstance = etree.fromstring(self.EntireInstanceDocument)
+        self.oInstance = etree.parse(XBRLInstanceLocation).getroot()
         self.ns = {}
         for k in self.oInstance.nsmap.keys():
             if k != None:

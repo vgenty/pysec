@@ -92,7 +92,7 @@ class FundamentantalAccountingConcepts:
         # TemporaryEquity
         self.xbrl.fields['TemporaryEquity'] = self.first_valid_field(
             [
-                'us-gaap:TemporaryEquityRedemptionValue'
+                'us-gaap:TemporaryEquityRedemptionValue',
                 'us-gaap:RedeemablePreferredStockCarryingAmount',
                 'us-gaap:TemporaryEquityCarryingAmount',
                 'us-gaap:TemporaryEquityValueExcludingAdditionalPaidInCapital',

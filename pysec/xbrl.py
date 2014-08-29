@@ -45,7 +45,6 @@ class XBRL(object):
         try:
             oNodelist = root.xpath(xpath, namespaces=self.ns)
         except etree.XPathEvalError:
-            print 'xpath:', xpath
             return []                     # TODO: ?
         return oNodelist
 

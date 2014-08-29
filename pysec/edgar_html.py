@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from BeautifulSoup import BeautifulSoup
-
+import re
 
 class EdgarHTML(object):
 
@@ -12,11 +12,16 @@ class EdgarHTML(object):
         self.fields = {}
         self.parse()
 
+    def find_node(self, text):
+        # Lowercase, with arbitrary whitespace
+        text = '\\s*'.join(text.lower().split())
+        node = self.soup.find(text=re.compile(text, re.IGNORECASE))
+        return node
+
     def parse(self):
         # EarningsPerShare
-        node = self.soup.find(text='Earnings per common share:')
+        node = self.find_node(r'Earnings per (common)? share:')
         while True:
-            print node
             try:
                 val = float(node)
                 break

@@ -5,9 +5,10 @@ import lxml
 from django.db import models
 from django.conf import settings
 
-DATA_DIR = settings.DATA_DIR
-
+from edgar_html import EdgarHTML
 from sym_to_ciks import cik_to_syms
+
+DATA_DIR = settings.DATA_DIR
 
 class Index(models.Model):
 
@@ -21,8 +22,9 @@ class Index(models.Model):
     @property
     def xbrl_link(self):
         if self.form.startswith('10-K') or self.form.startswith('10-Q'):
-            id = self.filename.split('/')[-1][:-4]
-            return 'http://www.sec.gov/Archives/edgar/data/%s/%s/%s-xbrl.zip' % (self.cik, id.replace('-',''), id)
+            xbrl_id = self.filename.split('/')[-1][:-4]
+            return ('http://www.sec.gov/Archives/edgar/data/%s/%s/%s-xbrl.zip'
+                    % (self.cik, xbrl_id.replace('-', ''), xbrl_id))
         return None
 
     @property
@@ -31,8 +33,9 @@ class Index(models.Model):
 
     @property
     def index_link(self):
-        id = self.filename.split('/')[-1][:-4]
-        return 'http://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm' % (self.cik, id.replace('-',''), id)
+        index_id = self.filename.split('/')[-1][:-4]
+        return ('http://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm' %
+                (self.cik, index_id.replace('-', ''), index_id))
 
     def txt(self):
         return self.filename.split('/')[-1]
@@ -83,7 +86,8 @@ class Index(models.Model):
             if not os.path.exists(os.path.basename(self.xbrl_link)):
                 os.system('wget -T 30 %s' % self.xbrl_link)
                 os.system('unzip *.zip')
-        else:
+
+        if not self.xbrl_localpath:
             # No xbrl, fall back to text
             if not os.path.exists(os.path.basename(self.html_link)):
                 os.system('wget -T 30 %s' % self.html_link)
@@ -103,27 +107,32 @@ class Index(models.Model):
 
     @property
     def financial_fields(self):
-        x = None
-        try:
-            x = self.xbrl
-        # TODO: this isn't my concern
-        except (lxml.etree.XPathEvalError, lxml.etree.XMLSyntaxError):
-            pass
-        if not x:
-            # TODO: fall back to parsing html
-            return None
-        return x.fields
+        fields = None
+        if self.xbrl:
+            try:
+                fields = self.xbrl.fields
+            # TODO: this isn't my concern
+            except (lxml.etree.XPathEvalError, lxml.etree.XMLSyntaxError):
+                pass
+        if not fields:
+            fields = self.html_financial_fields
+        return fields
 
     @property
     def xbrl(self):
         filepath = self.xbrl_localpath
         if not filepath:
-            print 'no xbrl found. this option is for 10-ks.'
             return None
         x = xbrl.XBRL(filepath)
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
 
         return x
+
+    @property
+    def html_financial_fields(self):
+        # TODO: this name sucks, fix it.
+        hh = EdgarHTML(self.html)
+        return hh.fields
 
     @property
     def ticker(self):

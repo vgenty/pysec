@@ -34,49 +34,49 @@ class FundamentantalAccountingConcepts:
         print "Balance Sheet Date (document period end date): %s" % self.xbrl.fields['BalanceSheetDate']
         print "Income Statement Period (YTD, current period, period start date): %s to %s" % (self.xbrl.fields['IncomeStatementPeriodYTD'], self.xbrl.fields['BalanceSheetDate'])
 
-        print "Context ID for document period focus (instants): %s" % self.xbrl.fields['ContextForInstants']
-        print "Context ID for YTD period (durations): %s" % self.xbrl.fields['ContextForDurations']
+        print "Context ID for document period focus (instants): %s" % self.xbrl.context_for_instants
+        print "Context ID for YTD period (durations): %s" % self.xbrl.context_for_durations
         print
 
-
-
-
         # Assets
-        self.xbrl.fields['Assets'] = self.xbrl.GetFactValue("us-gaap:Assets", "Instant")
+        self.xbrl.fields['Assets'] = self.xbrl.GetFactValue(
+            "us-gaap:Assets", "Instant")
         if self.xbrl.fields['Assets'] == None:
             self.xbrl.fields['Assets'] = 0
 
         # Current Assets
-        self.xbrl.fields['CurrentAssets'] = self.xbrl.GetFactValue("us-gaap:AssetsCurrent", "Instant")
+        self.xbrl.fields['CurrentAssets'] = self.xbrl.GetFactValue(
+            "us-gaap:AssetsCurrent", "Instant")
         if self.xbrl.fields['CurrentAssets'] == None:
             self.xbrl.fields['CurrentAssets'] = 0
 
         # Noncurrent Assets
-        self.xbrl.fields['NoncurrentAssets'] = self.xbrl.GetFactValue("us-gaap:AssetsNoncurrent", "Instant")
+        self.xbrl.fields['NoncurrentAssets'] = self.xbrl.GetFactValue(
+            "us-gaap:AssetsNoncurrent", "Instant")
         if self.xbrl.fields['NoncurrentAssets'] == None:
             if self.xbrl.fields['Assets'] and self.xbrl.fields['CurrentAssets']:
                 self.xbrl.fields['NoncurrentAssets'] = self.xbrl.fields['Assets'] - self.xbrl.fields['CurrentAssets']
             else:
                 self.xbrl.fields['NoncurrentAssets'] = 0
 
-        #LiabilitiesAndEquity
+        # LiabilitiesAndEquity
         self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndStockholdersEquity", "Instant")
         if self.xbrl.fields['LiabilitiesAndEquity'] == None:
             self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndPartnersCapital", "Instant")
             if self.xbrl.fields['LiabilitiesAndEquity'] == None:
                 self.xbrl.fields['LiabilitiesAndEquity'] = 0
 
-        #Liabilities
+        # Liabilities
         self.xbrl.fields['Liabilities'] = self.xbrl.GetFactValue("us-gaap:Liabilities", "Instant")
         if self.xbrl.fields['Liabilities'] == None:
             self.xbrl.fields['Liabilities'] = 0
 
-        #CurrentLiabilities
+        # CurrentLiabilities
         self.xbrl.fields['CurrentLiabilities'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesCurrent", "Instant")
         if self.xbrl.fields['CurrentLiabilities'] == None:
             self.xbrl.fields['CurrentLiabilities'] = 0
 
-        #Noncurrent Liabilities
+        # Noncurrent Liabilities
         self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesNoncurrent", "Instant")
         if self.xbrl.fields['NoncurrentLiabilities'] == None:
             if self.xbrl.fields['Liabilities'] and self.xbrl.fields['CurrentLiabilities']:
@@ -84,25 +84,23 @@ class FundamentantalAccountingConcepts:
             else:
                 self.xbrl.fields['NoncurrentLiabilities'] = 0
 
-        #CommitmentsAndContingencies
+        # CommitmentsAndContingencies
         self.xbrl.fields['CommitmentsAndContingencies'] = self.xbrl.GetFactValue("us-gaap:CommitmentsAndContingencies", "Instant")
         if self.xbrl.fields['CommitmentsAndContingencies'] == None:
             self.xbrl.fields['CommitmentsAndContingencies'] = 0
 
-        #TemporaryEquity
-        self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:TemporaryEquityRedemptionValue", "Instant")
-        if self.xbrl.fields['TemporaryEquity'] == None:
-            self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:RedeemablePreferredStockCarryingAmount", "Instant")
-            if self.xbrl.fields['TemporaryEquity'] == None:
-                self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:TemporaryEquityCarryingAmount", "Instant")
-                if self.xbrl.fields['TemporaryEquity'] == None:
-                    self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:TemporaryEquityValueExcludingAdditionalPaidInCapital", "Instant")
-                    if self.xbrl.fields['TemporaryEquity'] == None:
-                        self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:TemporaryEquityCarryingAmountAttributableToParent", "Instant")
-                        if self.xbrl.fields['TemporaryEquity'] == None:
-                            self.xbrl.fields['TemporaryEquity'] = self.xbrl.GetFactValue("us-gaap:RedeemableNoncontrollingInterestEquityFairValue", "Instant")
-                            if self.xbrl.fields['TemporaryEquity'] == None:
-                                self.xbrl.fields['TemporaryEquity'] = 0
+        # TemporaryEquity
+        self.xbrl.fields['TemporaryEquity'] = self.first_valid_field(
+            [
+                'us-gaap:TemporaryEquityRedemptionValue'
+                'us-gaap:RedeemablePreferredStockCarryingAmount',
+                'us-gaap:TemporaryEquityCarryingAmount',
+                'us-gaap:TemporaryEquityValueExcludingAdditionalPaidInCapital',
+                'us-gaap:TemporaryEquityCarryingAmountAttributableToParent',
+                'us-gaap:RedeemableNoncontrollingInterestEquityFairValue',
+            ],
+            'Instant'
+        )
 
         #RedeemableNoncontrollingInterest (added to temporary equity)
         RedeemableNoncontrollingInterest = None
@@ -136,25 +134,27 @@ class FundamentantalAccountingConcepts:
                                     self.xbrl.fields['Equity'] = 0
 
 
-        #EquityAttributableToNoncontrollingInterest
-        self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:MinorityInterest", "Instant")
-        if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
-            self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:PartnersCapitalAttributableToNoncontrollingInterest", "Instant")
-            if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = 0
+        # EquityAttributableToNoncontrollingInterest
+        self.xbrl.fields[
+            'EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:MinorityInterest", "Instant")
+        if self.xbrl.fields[
+                'EquityAttributableToNoncontrollingInterest'] == None:
+            self.xbrl.fields[
+                'EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:PartnersCapitalAttributableToNoncontrollingInterest", "Instant")
+            if self.xbrl.fields[
+                    'EquityAttributableToNoncontrollingInterest'] == None:
+                self.xbrl.fields[
+                    'EquityAttributableToNoncontrollingInterest'] = 0
 
-        #EquityAttributableToParent
+        # EquityAttributableToParent
         self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:StockholdersEquity", "Instant")
         if self.xbrl.fields['EquityAttributableToParent'] == None:
             self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndPartnersCapital", "Instant")
             if self.xbrl.fields['EquityAttributableToParent'] == None:
                 self.xbrl.fields['EquityAttributableToParent'] = 0
 
-
-
-
-        #BS Adjustments
-        #if total assets is missing, try using current assets
+        # BS Adjustments
+        # if total assets is missing, try using current assets
         if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['Assets'] == self.xbrl.fields['LiabilitiesAndEquity'] and self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']:
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
@@ -162,11 +162,12 @@ class FundamentantalAccountingConcepts:
         if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
-        #Added to fix Assets even more
-        if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['LiabilitiesAndEquity'] ==self.xbrl.fields['Liabilities']+self.xbrl.fields['Equity']):
+        # Added to fix Assets even more
+        if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['LiabilitiesAndEquity'] == self.xbrl.fields['Liabilities'] + self.xbrl.fields['Equity']):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
-        if self.xbrl.fields['Assets']!=0 and self.xbrl.fields['CurrentAssets']!=0:
+        if (self.xbrl.fields['Assets'] != 0 and
+                self.xbrl.fields['CurrentAssets'] != 0):
             self.xbrl.fields['NoncurrentAssets'] = self.xbrl.fields['Assets'] - self.xbrl.fields['CurrentAssets']
 
         if self.xbrl.fields['LiabilitiesAndEquity'] ==0 and self.xbrl.fields['Assets']!=0:
@@ -212,7 +213,7 @@ class FundamentantalAccountingConcepts:
             lngBSCheck4 = 0
 
         else:
-            #balance sheet IS classified
+            # balance sheet IS classified
             lngBSCheck3 = self.xbrl.fields['Assets'] - (self.xbrl.fields['CurrentAssets'] + self.xbrl.fields['NoncurrentAssets'])
             lngBSCheck4 = self.xbrl.fields['Liabilities'] - (self.xbrl.fields['CurrentLiabilities'] + self.xbrl.fields['NoncurrentLiabilities'])
 
@@ -232,6 +233,20 @@ class FundamentantalAccountingConcepts:
 
 
 
+        # CUSTOM FIELDS
+
+        # Earnings
+        self.xbrl.fields['EarningsPerShare'] = self.first_valid_field(
+            [
+                'us-gaap:EarningsPerShareBasic',
+            ],
+            'Duration'
+        )
+
+
+        # END CUSTOM FIELDS
+
+
         # Income statement
 
         # Revenues
@@ -249,6 +264,7 @@ class FundamentantalAccountingConcepts:
                 'us-gaap:OilAndGasRevenue',
                 'us-gaap:FinancialServicesRevenue',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
+                'us-gaap:FoodAndBeverageRevenue',
             ],
             'Duration'
         )
@@ -272,14 +288,16 @@ class FundamentantalAccountingConcepts:
             'Duration'
         )
 
-        #OperatingExpenses
-        self.xbrl.fields['OperatingExpenses'] = self.xbrl.GetFactValue("us-gaap:OperatingExpenses", "Duration")
-        if self.xbrl.fields['OperatingExpenses'] == None:
-            self.xbrl.fields['OperatingExpenses'] = self.xbrl.GetFactValue("us-gaap:OperatingCostsAndExpenses", "Duration")  #This concept seems incorrect.
-            if self.xbrl.fields['OperatingExpenses'] == None:
-                self.xbrl.fields['OperatingExpenses'] = 0
+        # OperatingExpenses
+        self.xbrl.fields['OperatingExpenses'] = self.first_valid_field(
+            [
+                'us-gaap:OperatingExpenses',
+                'us-gaap:OperatingCostsAndExpenses'
+            ],
+            'Duration'
+        )
 
-        #CostsAndExpenses
+        # CostsAndExpenses
         self.xbrl.fields['CostsAndExpenses'] = self.xbrl.GetFactValue("us-gaap:CostsAndExpenses", "Duration")
         if self.xbrl.fields['CostsAndExpenses'] == None:
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.GetFactValue("us-gaap:CostsAndExpenses", "Duration")

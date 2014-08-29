@@ -1,5 +1,6 @@
 import os
 from pysec import xbrl
+import lxml
 
 from django.db import models
 from django.conf import settings
@@ -101,29 +102,31 @@ class Index(models.Model):
         return self.localpath + xml[0]
 
     @property
+    def financial_fields(self):
+        try:
+            x = self.xbrl
+        # TODO: this isn't my concern
+        except (lxml.etree.XPathEvalError, lxml.etree.XMLSyntaxError):
+            pass
+        if not x:
+            # TODO: fall back to parsing html
+            return None
+        return x.fields
+
+    @property
     def xbrl(self):
         filepath = self.xbrl_localpath
         if not filepath:
             print 'no xbrl found. this option is for 10-ks.'
             return None
         x = xbrl.XBRL(filepath)
-        x.fields['FiscalPeriod'] = x.fields['DocumentFiscalPeriodFocus']
-        x.fields['FiscalYear'] = x.fields['DocumentFiscalYearFocus']
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
-        x.fields['PeriodStartDate'] = x.fields['IncomeStatementPeriodYTD']
-        x.fields['SECFilingPage'] = self.index_link
-        x.fields['LinkToXBRLInstance'] = self.xbrl_link
 
         return x
 
     @property
-    def ticker(self):  # get a company's stock ticker from an XML filing
-
-        if self.cik in cik_to_syms:
-            return cik_to_syms[self.cik]
-
-        # Complete horseshit
-        filepath = self.xbrl_localpath
-        if filepath:
-            return os.path.basename(filepath).split('-')[0].upper()
-        return None
+    def ticker(self):
+        # TODO: depends on an externally-maintained data source, but the
+        # previous method of inferring the ticker from the xbrl filename would
+        # occsionally return flat-out wrong results.
+        return cik_to_syms.get(self.cik, None)

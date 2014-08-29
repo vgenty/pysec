@@ -103,6 +103,7 @@ class Index(models.Model):
 
     @property
     def financial_fields(self):
+        x = None
         try:
             x = self.xbrl
         # TODO: this isn't my concern

@@ -24,6 +24,7 @@ EXCLUDE_FIELDS = {
     'EntityCentralIndexKey',
     'EntityFilerCategory',
     'EntityRegistrantName',
+    'FiscalYear',
     'IncomeStatementPeriodYTD',
     'TradingSymbol',
 }

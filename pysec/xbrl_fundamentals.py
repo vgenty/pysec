@@ -307,72 +307,56 @@ class FundamentantalAccountingConcepts:
         # CostsAndExpenses
         self.xbrl.fields['CostsAndExpenses'] = self.xbrl.GetFactValue("us-gaap:CostsAndExpenses", "Duration")
         if self.xbrl.fields['CostsAndExpenses'] == None:
-            self.xbrl.fields['CostsAndExpenses'] = self.xbrl.GetFactValue("us-gaap:CostsAndExpenses", "Duration")
-            if self.xbrl.fields['CostsAndExpenses'] == None:
-                self.xbrl.fields['CostsAndExpenses'] = 0
+            self.xbrl.fields['CostsAndExpenses'] = 0
 
-        #OtherOperatingIncome
+        # OtherOperatingIncome
         self.xbrl.fields['OtherOperatingIncome'] = self.xbrl.GetFactValue("us-gaap:OtherOperatingIncome", "Duration")
         if self.xbrl.fields['OtherOperatingIncome'] == None:
-            self.xbrl.fields['OtherOperatingIncome'] = self.xbrl.GetFactValue("us-gaap:OtherOperatingIncome", "Duration")
-            if self.xbrl.fields['OtherOperatingIncome'] == None:
-                self.xbrl.fields['OtherOperatingIncome'] = 0
+            self.xbrl.fields['OtherOperatingIncome'] = 0
 
-        #OperatingIncomeLoss
+        # OperatingIncomeLoss
         self.xbrl.fields['OperatingIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:OperatingIncomeLoss", "Duration")
         if self.xbrl.fields['OperatingIncomeLoss'] == None:
-            self.xbrl.fields['OperatingIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:OperatingIncomeLoss", "Duration")
-            if self.xbrl.fields['OperatingIncomeLoss'] == None:
-                self.xbrl.fields['OperatingIncomeLoss'] = 0
+            self.xbrl.fields['OperatingIncomeLoss'] = 0
 
-        #NonoperatingIncomeLoss
+        # NonoperatingIncomeLoss
         self.xbrl.fields['NonoperatingIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:NonoperatingIncomeExpense", "Duration")
         if self.xbrl.fields['NonoperatingIncomeLoss'] == None:
-            self.xbrl.fields['NonoperatingIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:NonoperatingIncomeExpense", "Duration")
-            if self.xbrl.fields['NonoperatingIncomeLoss'] == None:
-                self.xbrl.fields['NonoperatingIncomeLoss'] = 0
+            self.xbrl.fields['NonoperatingIncomeLoss'] = 0
 
-        #InterestAndDebtExpense
+        # InterestAndDebtExpense
         self.xbrl.fields['InterestAndDebtExpense'] = self.xbrl.GetFactValue("us-gaap:InterestAndDebtExpense", "Duration")
         if self.xbrl.fields['InterestAndDebtExpense'] == None:
-            self.xbrl.fields['InterestAndDebtExpense'] = self.xbrl.GetFactValue("us-gaap:InterestAndDebtExpense", "Duration")
-            if self.xbrl.fields['InterestAndDebtExpense'] == None:
-                self.xbrl.fields['InterestAndDebtExpense'] = 0
+            self.xbrl.fields['InterestAndDebtExpense'] = 0
 
-        #IncomeBeforeEquityMethodInvestments
+        # IncomeBeforeEquityMethodInvestments
         self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments", "Duration")
         if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == None:
-            self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments", "Duration")
-            if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == None:
-                self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = 0
+            self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = 0
 
-        #IncomeFromEquityMethodInvestments
+        # IncomeFromEquityMethodInvestments
         self.xbrl.fields['IncomeFromEquityMethodInvestments'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromEquityMethodInvestments", "Duration")
         if self.xbrl.fields['IncomeFromEquityMethodInvestments'] == None:
-            self.xbrl.fields['IncomeFromEquityMethodInvestments'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromEquityMethodInvestments", "Duration")
-            if self.xbrl.fields['IncomeFromEquityMethodInvestments'] == None:
-                self.xbrl.fields['IncomeFromEquityMethodInvestments'] = 0
+            self.xbrl.fields['IncomeFromEquityMethodInvestments'] = 0
 
-        #IncomeFromContinuingOperationsBeforeTax
+        # IncomeFromContinuingOperationsBeforeTax
         self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments", "Duration")
         if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == None:
             self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest", "Duration")
             if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == None:
                 self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = 0
 
-        #IncomeTaxExpenseBenefit
+        # IncomeTaxExpenseBenefit
         self.xbrl.fields['IncomeTaxExpenseBenefit'] = self.xbrl.GetFactValue("us-gaap:IncomeTaxExpenseBenefit", "Duration")
         if self.xbrl.fields['IncomeTaxExpenseBenefit'] == None:
             self.xbrl.fields['IncomeTaxExpenseBenefit'] = self.xbrl.GetFactValue("us-gaap:IncomeTaxExpenseBenefitContinuingOperations", "Duration")
             if self.xbrl.fields['IncomeTaxExpenseBenefit'] == None:
                 self.xbrl.fields['IncomeTaxExpenseBenefit'] = 0
 
-        #IncomeFromContinuingOperationsAfterTax
+        # IncomeFromContinuingOperationsAfterTax
         self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.GetFactValue("us-gaap:IncomeLossBeforeExtraordinaryItemsAndCumulativeEffectOfChangeInAccountingPrinciple", "Duration")
         if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == None:
-            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.GetFactValue("us-gaap:IncomeLossBeforeExtraordinaryItemsAndCumulativeEffectOfChangeInAccountingPrinciple", "Duration")
-            if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == None:
-                self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = 0
+            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = 0
 
         #IncomeFromDiscontinuedOperations
         self.xbrl.fields['IncomeFromDiscontinuedOperations'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromDiscontinuedOperationsNetOfTax", "Duration")
@@ -499,75 +483,82 @@ class FundamentantalAccountingConcepts:
         if self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0:
             self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']
 
-        #Impute: IncomeFromContinuingOperations*Before*Tax2 (if income before tax is missing)
+        # Impute: IncomeFromContinuingOperations*Before*Tax2 (if income before
+        # tax is missing)
         if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']!=0:
             self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeTaxExpenseBenefit']
 
-        #Impute: IncomeFromContinuingOperations*After*Tax
+        # Impute: IncomeFromContinuingOperations*After*Tax
         if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == 0 and \
-            (self.xbrl.fields['IncomeTaxExpenseBenefit']!=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] == 0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
+            (self.xbrl.fields['IncomeTaxExpenseBenefit'] !=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] == 0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
             self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']
 
+        # Impute: GrossProfit
+        if (self.xbrl.fields['GrossProfit'] == 0 and
+                self.xbrl.fields['Revenues'] != 0 and
+                self.xbrl.fields['CostOfRevenue'] != 0):
+            self.xbrl.fields['GrossProfit'] = (
+                self.xbrl.fields['Revenues'] -
+                self.xbrl.fields['CostOfRevenue'])
 
-        #Impute: GrossProfit
-        if self.xbrl.fields['GrossProfit'] == 0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
-            self.xbrl.fields['GrossProfit'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['CostOfRevenue']
-
-        #Impute: GrossProfit
-        if self.xbrl.fields['GrossProfit'] == 0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
-            self.xbrl.fields['GrossProfit'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['CostOfRevenue']
-
-        #Impute: Revenues
-        if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues'] == 0 and self.xbrl.fields['CostOfRevenue']!=0):
-            self.xbrl.fields['Revenues'] = self.xbrl.fields['GrossProfit'] + self.xbrl.fields['CostOfRevenue']
-
-        #Impute: CostOfRevenue
+        # Impute: Revenues
+        if (self.xbrl.fields['GrossProfit'] != 0 and
+                self.xbrl.fields['Revenues'] == 0 and
+                self.xbrl.fields['CostOfRevenue'] != 0):
+            self.xbrl.fields['Revenues'] = (self.xbrl.fields['GrossProfit'] +
+                                            self.xbrl.fields['CostOfRevenue'])
+        # Impute: CostOfRevenue
         if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue'] == 0):
             self.xbrl.fields['CostOfRevenue'] = self.xbrl.fields['GrossProfit'] + self.xbrl.fields['Revenues']
 
-        #Impute: CostsAndExpenses (would NEVER have costs and expenses if has gross profit, gross profit is multi-step and costs and expenses is single-step)
+        # Impute: CostsAndExpenses (would NEVER have costs and expenses if has
+        # gross profit, gross profit is multi-step and costs and expenses is
+        # single-step)
         if self.xbrl.fields['GrossProfit'] == 0 and self.xbrl.fields['CostsAndExpenses'] == 0 and (self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['OperatingExpenses']!=0):
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['CostOfRevenue'] + self.xbrl.fields['OperatingExpenses']
 
-        #Impute: CostsAndExpenses based on existance of both costs of revenues and operating expenses
+        # Impute: CostsAndExpenses based on existance of both costs of revenues
+        # and operating expenses
         if self.xbrl.fields['CostsAndExpenses'] == 0 and self.xbrl.fields['OperatingExpenses']!=0 and (self.xbrl.fields['CostOfRevenue']!=0):
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['CostOfRevenue'] + self.xbrl.fields['OperatingExpenses']
 
-        #Impute: CostsAndExpenses
+        # Impute: CostsAndExpenses
         if self.xbrl.fields['GrossProfit'] == 0 and self.xbrl.fields['CostsAndExpenses'] == 0 and self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['OperatingIncomeLoss']!=0 and self.xbrl.fields['OtherOperatingIncome']!=0:
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['OperatingIncomeLoss'] - self.xbrl.fields['OtherOperatingIncome']
 
-        #Impute: OperatingExpenses based on existance of costs and expenses and cost of revenues
+        # Impute: OperatingExpenses based on existance of costs and expenses
+        # and cost of revenues
         if self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['CostsAndExpenses']!=0 and self.xbrl.fields['OperatingExpenses'] == 0:
             self.xbrl.fields['OperatingExpenses'] = self.xbrl.fields['CostsAndExpenses'] - self.xbrl.fields['CostOfRevenue']
 
-        #Impute: CostOfRevenues single-step method
+        # Impute: CostOfRevenues single-step method
         if self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['GrossProfit'] == 0 and \
             (self.xbrl.fields['Revenues'] - self.xbrl.fields['CostsAndExpenses'] ==self.xbrl.fields['OperatingIncomeLoss']) and \
             self.xbrl.fields['OperatingExpenses'] == 0 and self.xbrl.fields['OtherOperatingIncome'] == 0:
             self.xbrl.fields['CostOfRevenue'] = self.xbrl.fields['CostsAndExpenses'] - self.xbrl.fields['OperatingExpenses']
 
-        #Impute: IncomeBeforeEquityMethodInvestments
+        # Impute: IncomeBeforeEquityMethodInvestments
         if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
             self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
 
-        #Impute: IncomeBeforeEquityMethodInvestments
+        # Impute: IncomeBeforeEquityMethodInvestments
         if self.xbrl.fields['OperatingIncomeLoss']!=0 and (self.xbrl.fields['NonoperatingIncomeLoss']!=0 and \
             self.xbrl.fields['InterestAndDebtExpense'] == 0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0):
             self.xbrl.fields['InterestAndDebtExpense'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] - (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLoss'])
 
-        #Impute: OtherOperatingIncome
+        # Impute: OtherOperatingIncome
         if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['OperatingExpenses']!=0 and self.xbrl.fields['OperatingIncomeLoss']!=0):
             self.xbrl.fields['OtherOperatingIncome'] = self.xbrl.fields['OperatingIncomeLoss'] - (self.xbrl.fields['GrossProfit'] - self.xbrl.fields['OperatingExpenses'])
 
-        #Move IncomeFromEquityMethodInvestments
+        # Move IncomeFromEquityMethodInvestments
         if self.xbrl.fields['IncomeFromEquityMethodInvestments']!=0 and \
             self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']:
             self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
             self.xbrl.fields['OperatingIncomeLoss'] = self.xbrl.fields['OperatingIncomeLoss'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
 
-        #DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this imputing. if it is higher,: keep the test
-        #Impute: OperatingIncomeLoss
+        # DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this
+        # imputing. if it is higher,: keep the test
+        # Impute: OperatingIncomeLoss
         if self.xbrl.fields['OperatingIncomeLoss'] == 0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0:
             self.xbrl.fields['OperatingIncomeLoss'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['NonoperatingIncomeLoss'] - self.xbrl.fields['InterestAndDebtExpense']
 
@@ -739,10 +730,13 @@ class FundamentantalAccountingConcepts:
 
 
         lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
-        if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])==(self.xbrl.fields['ExchangeGainsLosses']*-1)):
+        if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses']) == (self.xbrl.fields['ExchangeGainsLosses'] * -1)):
             lngCF1 = 888888
-            #What is going on here is that 171 filers compute net cash flow differently than everyone else.
-            #What I am doing is marking these by setting the value of the test to a number 888888 which would never occur naturally, so that I can differentiate this from errors.
+            # What is going on here is that 171 filers compute net cash flow
+            # differently than everyone else. What I am doing is marking these
+            # by setting the value of the test to a number 888888 which would
+            # never occur naturally, so that I can differentiate this from
+            # errors.
         lngCF2 = self.xbrl.fields['NetCashFlowsContinuing'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing'])
         lngCF3 = self.xbrl.fields['NetCashFlowsDiscontinued'] - (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
         lngCF4 = self.xbrl.fields['NetCashFlowsOperating'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsOperatingDiscontinued'])
@@ -772,15 +766,6 @@ class FundamentantalAccountingConcepts:
             pass
 
         try:
-            # http://www.investopedia.com/terms/s/sustainablegrowthrate.asp
-            self.xbrl.fields['SGR'] = (
-                (self.xbrl.fields['NetIncomeLoss'] /
-                 self.xbrl.fields['Revenues']) *
-                (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
-        except:
-            pass
-
-        try:
             self.xbrl.fields['ROA'] = (self.xbrl.fields['NetIncomeLoss'] /
                                        self.xbrl.fields['Assets'])
         except:
@@ -789,5 +774,13 @@ class FundamentantalAccountingConcepts:
         try:
             self.xbrl.fields['ROS'] = (self.xbrl.fields['NetIncomeLoss'] /
                                        self.xbrl.fields['Revenues'])
+        except:
+            pass
+
+        try:
+            # http://www.investopedia.com/terms/s/sustainablegrowthrate.asp
+            self.xbrl.fields['SGR'] = (
+                self.xbrl.fields['ROS'] *
+                (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
         except:
             pass

@@ -6,7 +6,7 @@ class FundamentantalAccountingConcepts:
 
         self.xbrl = xbrl
         self.parse()
-
+        self.impute()                     # TODO: run this in a loop?
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
         for fieldname in fieldnames:
@@ -180,7 +180,8 @@ class FundamentantalAccountingConcepts:
         if self.xbrl.fields['LiabilitiesAndEquity'] == 0 and self.xbrl.fields['Assets']!=0:
             self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.fields['Assets']
 
-        #Impute: Equity based no parent and noncontrolling interest being present
+    def impute(self):
+        # Impute: Equity based no parent and noncontrolling interest being present
         if self.xbrl.fields['EquityAttributableToNoncontrollingInterest']!=0 and self.xbrl.fields['EquityAttributableToParent']!=0:
             self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
 

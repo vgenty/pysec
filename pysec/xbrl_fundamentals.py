@@ -60,19 +60,23 @@ class FundamentantalAccountingConcepts:
                 self.xbrl.fields['NoncurrentAssets'] = 0
 
         # LiabilitiesAndEquity
-        self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndStockholdersEquity", "Instant")
+        self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue(
+            "us-gaap:LiabilitiesAndStockholdersEquity", "Instant")
         if self.xbrl.fields['LiabilitiesAndEquity'] == None:
-            self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndPartnersCapital", "Instant")
+            self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue(
+                "us-gaap:LiabilitiesAndPartnersCapital", "Instant")
             if self.xbrl.fields['LiabilitiesAndEquity'] == None:
                 self.xbrl.fields['LiabilitiesAndEquity'] = 0
 
         # Liabilities
-        self.xbrl.fields['Liabilities'] = self.xbrl.GetFactValue("us-gaap:Liabilities", "Instant")
+        self.xbrl.fields['Liabilities'] = self.xbrl.GetFactValue(
+            "us-gaap:Liabilities", "Instant")
         if self.xbrl.fields['Liabilities'] == None:
             self.xbrl.fields['Liabilities'] = 0
 
         # CurrentLiabilities
-        self.xbrl.fields['CurrentLiabilities'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesCurrent", "Instant")
+        self.xbrl.fields['CurrentLiabilities'] = self.xbrl.GetFactValue(
+            "us-gaap:LiabilitiesCurrent", "Instant")
         if self.xbrl.fields['CurrentLiabilities'] == None:
             self.xbrl.fields['CurrentLiabilities'] = 0
 
@@ -102,21 +106,28 @@ class FundamentantalAccountingConcepts:
             'Instant'
         )
 
-        #RedeemableNoncontrollingInterest (added to temporary equity)
+        # RedeemableNoncontrollingInterest (added to temporary equity)
         RedeemableNoncontrollingInterest = None
 
-        RedeemableNoncontrollingInterest = self.xbrl.GetFactValue("us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount", "Instant")
+        RedeemableNoncontrollingInterest = self.xbrl.GetFactValue(
+            "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+            "Instant")
         if RedeemableNoncontrollingInterest == None:
-            RedeemableNoncontrollingInterest = self.xbrl.GetFactValue("us-gaap:RedeemableNoncontrollingInterestEquityCommonCarryingAmount", "Instant")
+            RedeemableNoncontrollingInterest = self.xbrl.GetFactValue(
+                "us-gaap:RedeemableNoncontrollingInterestEquityCommonCarryingAmount",
+                "Instant")
             if RedeemableNoncontrollingInterest == None:
                 RedeemableNoncontrollingInterest = 0
 
-        #This adds redeemable noncontrolling interest and temporary equity which are rare, but can be reported seperately
+        # This adds redeemable noncontrolling interest and temporary equity
+        # which are rare, but can be reported separately
         if self.xbrl.fields['TemporaryEquity']:
-            self.xbrl.fields['TemporaryEquity'] = float(self.xbrl.fields['TemporaryEquity']) + float(RedeemableNoncontrollingInterest)
+            self.xbrl.fields['TemporaryEquity'] = (
+                float(self.xbrl.fields['TemporaryEquity']) +
+                float(RedeemableNoncontrollingInterest))
 
 
-        #Equity
+        # Equity
         self.xbrl.fields['Equity'] = self.xbrl.GetFactValue("us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest", "Instant")
         if self.xbrl.fields['Equity'] == None:
             self.xbrl.fields['Equity'] = self.xbrl.GetFactValue("us-gaap:StockholdersEquity", "Instant")
@@ -137,14 +148,10 @@ class FundamentantalAccountingConcepts:
         # EquityAttributableToNoncontrollingInterest
         self.xbrl.fields[
             'EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:MinorityInterest", "Instant")
-        if self.xbrl.fields[
-                'EquityAttributableToNoncontrollingInterest'] == None:
-            self.xbrl.fields[
-                'EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:PartnersCapitalAttributableToNoncontrollingInterest", "Instant")
-            if self.xbrl.fields[
-                    'EquityAttributableToNoncontrollingInterest'] == None:
-                self.xbrl.fields[
-                    'EquityAttributableToNoncontrollingInterest'] = 0
+        if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
+            self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:PartnersCapitalAttributableToNoncontrollingInterest", "Instant")
+            if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
+                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = 0
 
         # EquityAttributableToParent
         self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:StockholdersEquity", "Instant")
@@ -170,29 +177,29 @@ class FundamentantalAccountingConcepts:
                 self.xbrl.fields['CurrentAssets'] != 0):
             self.xbrl.fields['NoncurrentAssets'] = self.xbrl.fields['Assets'] - self.xbrl.fields['CurrentAssets']
 
-        if self.xbrl.fields['LiabilitiesAndEquity'] ==0 and self.xbrl.fields['Assets']!=0:
+        if self.xbrl.fields['LiabilitiesAndEquity'] == 0 and self.xbrl.fields['Assets']!=0:
             self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.fields['Assets']
 
         #Impute: Equity based no parent and noncontrolling interest being present
         if self.xbrl.fields['EquityAttributableToNoncontrollingInterest']!=0 and self.xbrl.fields['EquityAttributableToParent']!=0:
             self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
 
-        if self.xbrl.fields['Equity'] ==0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] ==0 and self.xbrl.fields['EquityAttributableToParent']!=0:
+        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent']!=0:
             self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent']
 
-        if self.xbrl.fields['Equity'] ==0:
+        if self.xbrl.fields['Equity'] == 0:
             self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
 
         #Added: Impute Equity attributable to parent based on existence of equity and noncontrolling interest.
-        if self.xbrl.fields['Equity']!=0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest']!=0 and self.xbrl.fields['EquityAttributableToParent'] ==0:
+        if self.xbrl.fields['Equity']!=0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest']!=0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
             self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity'] - self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
 
         #Added: Impute Equity attributable to parent based on existence of equity and noncontrolling interest.
-        if self.xbrl.fields['Equity']!=0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] ==0 and self.xbrl.fields['EquityAttributableToParent'] ==0:
+        if self.xbrl.fields['Equity']!=0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
             self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity']
 
         #if total liabilities is missing, figure it out based on liabilities and equity
-        if self.xbrl.fields['Liabilities'] ==0 and self.xbrl.fields['Equity']!=0:
+        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['Equity']!=0:
             self.xbrl.fields['Liabilities'] = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
 
         #This seems incorrect because liabilities might not be reported
@@ -200,14 +207,14 @@ class FundamentantalAccountingConcepts:
             self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.fields['Liabilities'] - self.xbrl.fields['CurrentLiabilities']
 
         #Added to fix liabilities based on current liabilities
-        if self.xbrl.fields['Liabilities'] ==0 and self.xbrl.fields['CurrentLiabilities']!=0 and self.xbrl.fields['NoncurrentLiabilities'] ==0:
+        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities']!=0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
             self.xbrl.fields['Liabilities'] = self.xbrl.fields['CurrentLiabilities']
 
 
         lngBSCheck1 = self.xbrl.fields['Equity'] - (self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
         lngBSCheck2 = self.xbrl.fields['Assets'] - self.xbrl.fields['LiabilitiesAndEquity']
 
-        if self.xbrl.fields['CurrentAssets'] ==0 and self.xbrl.fields['NoncurrentAssets'] ==0 and self.xbrl.fields['CurrentLiabilities'] ==0 and self.xbrl.fields['NoncurrentLiabilities'] ==0:
+        if self.xbrl.fields['CurrentAssets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['CurrentLiabilities'] == 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
             #if current assets/liabilities are zero and noncurrent assets/liabilities;: don't do this test because the balance sheet is not classified
             lngBSCheck3 = 0
             lngBSCheck4 = 0
@@ -461,92 +468,92 @@ class FundamentantalAccountingConcepts:
         self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense'] = self.xbrl.fields['NonoperatingIncomeLoss'] + self.xbrl.fields['InterestAndDebtExpense']
 
         #Impute: Net income available to common stockholders  (if it does not exist)
-        if self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] ==0 and self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] ==0 and self.xbrl.fields['NetIncomeAttributableToParent']!=0:
+        if self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] == 0 and self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent']!=0:
             self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] = self.xbrl.fields['NetIncomeAttributableToParent']
 
         #Impute NetIncomeLoss
-        if self.xbrl.fields['NetIncomeLoss']!=0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] ==0:
+        if self.xbrl.fields['NetIncomeLoss']!=0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == 0:
             self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.fields['NetIncomeLoss'] - self.xbrl.fields['IncomeFromDiscontinuedOperations'] - self.xbrl.fields['ExtraordaryItemsGainLoss']
 
         #Impute: Net income attributable to parent if it does not exist
-        if self.xbrl.fields['NetIncomeAttributableToParent'] ==0 and self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] ==0 and self.xbrl.fields['NetIncomeLoss']!=0:
+        if self.xbrl.fields['NetIncomeAttributableToParent'] == 0 and self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['NetIncomeLoss']!=0:
             self.xbrl.fields['NetIncomeAttributableToParent'] = self.xbrl.fields['NetIncomeLoss']
 
         #Impute: PreferredStockDividendsAndOtherAdjustments
-        if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] ==0 and self.xbrl.fields['NetIncomeAttributableToParent']!=0 and self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']!=0:
+        if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent']!=0 and self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']!=0:
             self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
 
         #Impute: comprehensive income
-        if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] ==0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==0 and self.xbrl.fields['ComprehensiveIncome'] ==0 and self.xbrl.fields['OtherComprehensiveIncome'] ==0:
+        if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:
             self.xbrl.fields['ComprehensiveIncome'] = self.xbrl.fields['NetIncomeLoss']
 
         #Impute: other comprehensive income
-        if self.xbrl.fields['ComprehensiveIncome']!=0 and self.xbrl.fields['OtherComprehensiveIncome'] ==0:
+        if self.xbrl.fields['ComprehensiveIncome']!=0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:
             self.xbrl.fields['OtherComprehensiveIncome'] = self.xbrl.fields['ComprehensiveIncome'] - self.xbrl.fields['NetIncomeLoss']
 
         #Impute: comprehensive income attributable to parent if it does not exist
-        if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] ==0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==0 and self.xbrl.fields['ComprehensiveIncome']!=0:
+        if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome']!=0:
             self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] = self.xbrl.fields['ComprehensiveIncome']
 
         #Impute: IncomeFromContinuingOperations*Before*Tax
-        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] ==0:
+        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromEquityMethodInvestments']!=0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0:
             self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']
 
         #Impute: IncomeFromContinuingOperations*Before*Tax2 (if income before tax is missing)
-        if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] ==0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']!=0:
+        if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']!=0:
             self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeTaxExpenseBenefit']
 
         #Impute: IncomeFromContinuingOperations*After*Tax
-        if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] ==0 and \
-            (self.xbrl.fields['IncomeTaxExpenseBenefit']!=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] ==0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
+        if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == 0 and \
+            (self.xbrl.fields['IncomeTaxExpenseBenefit']!=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] == 0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
             self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']
 
 
         #Impute: GrossProfit
-        if self.xbrl.fields['GrossProfit'] ==0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
+        if self.xbrl.fields['GrossProfit'] == 0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
             self.xbrl.fields['GrossProfit'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['CostOfRevenue']
 
         #Impute: GrossProfit
-        if self.xbrl.fields['GrossProfit'] ==0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
+        if self.xbrl.fields['GrossProfit'] == 0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue']!=0):
             self.xbrl.fields['GrossProfit'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['CostOfRevenue']
 
         #Impute: Revenues
-        if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues'] ==0 and self.xbrl.fields['CostOfRevenue']!=0):
+        if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues'] == 0 and self.xbrl.fields['CostOfRevenue']!=0):
             self.xbrl.fields['Revenues'] = self.xbrl.fields['GrossProfit'] + self.xbrl.fields['CostOfRevenue']
 
         #Impute: CostOfRevenue
-        if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue'] ==0):
+        if self.xbrl.fields['GrossProfit']!=0 and (self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['CostOfRevenue'] == 0):
             self.xbrl.fields['CostOfRevenue'] = self.xbrl.fields['GrossProfit'] + self.xbrl.fields['Revenues']
 
         #Impute: CostsAndExpenses (would NEVER have costs and expenses if has gross profit, gross profit is multi-step and costs and expenses is single-step)
-        if self.xbrl.fields['GrossProfit'] ==0 and self.xbrl.fields['CostsAndExpenses'] ==0 and (self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['OperatingExpenses']!=0):
+        if self.xbrl.fields['GrossProfit'] == 0 and self.xbrl.fields['CostsAndExpenses'] == 0 and (self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['OperatingExpenses']!=0):
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['CostOfRevenue'] + self.xbrl.fields['OperatingExpenses']
 
         #Impute: CostsAndExpenses based on existance of both costs of revenues and operating expenses
-        if self.xbrl.fields['CostsAndExpenses'] ==0 and self.xbrl.fields['OperatingExpenses']!=0 and (self.xbrl.fields['CostOfRevenue']!=0):
+        if self.xbrl.fields['CostsAndExpenses'] == 0 and self.xbrl.fields['OperatingExpenses']!=0 and (self.xbrl.fields['CostOfRevenue']!=0):
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['CostOfRevenue'] + self.xbrl.fields['OperatingExpenses']
 
         #Impute: CostsAndExpenses
-        if self.xbrl.fields['GrossProfit'] ==0 and self.xbrl.fields['CostsAndExpenses'] ==0 and self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['OperatingIncomeLoss']!=0 and self.xbrl.fields['OtherOperatingIncome']!=0:
+        if self.xbrl.fields['GrossProfit'] == 0 and self.xbrl.fields['CostsAndExpenses'] == 0 and self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['OperatingIncomeLoss']!=0 and self.xbrl.fields['OtherOperatingIncome']!=0:
             self.xbrl.fields['CostsAndExpenses'] = self.xbrl.fields['Revenues'] - self.xbrl.fields['OperatingIncomeLoss'] - self.xbrl.fields['OtherOperatingIncome']
 
         #Impute: OperatingExpenses based on existance of costs and expenses and cost of revenues
-        if self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['CostsAndExpenses']!=0 and self.xbrl.fields['OperatingExpenses'] ==0:
+        if self.xbrl.fields['CostOfRevenue']!=0 and self.xbrl.fields['CostsAndExpenses']!=0 and self.xbrl.fields['OperatingExpenses'] == 0:
             self.xbrl.fields['OperatingExpenses'] = self.xbrl.fields['CostsAndExpenses'] - self.xbrl.fields['CostOfRevenue']
 
         #Impute: CostOfRevenues single-step method
-        if self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['GrossProfit'] ==0 and \
+        if self.xbrl.fields['Revenues']!=0 and self.xbrl.fields['GrossProfit'] == 0 and \
             (self.xbrl.fields['Revenues'] - self.xbrl.fields['CostsAndExpenses'] ==self.xbrl.fields['OperatingIncomeLoss']) and \
-            self.xbrl.fields['OperatingExpenses'] ==0 and self.xbrl.fields['OtherOperatingIncome'] ==0:
+            self.xbrl.fields['OperatingExpenses'] == 0 and self.xbrl.fields['OtherOperatingIncome'] == 0:
             self.xbrl.fields['CostOfRevenue'] = self.xbrl.fields['CostsAndExpenses'] - self.xbrl.fields['OperatingExpenses']
 
         #Impute: IncomeBeforeEquityMethodInvestments
-        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] ==0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
+        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']!=0:
             self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
 
         #Impute: IncomeBeforeEquityMethodInvestments
         if self.xbrl.fields['OperatingIncomeLoss']!=0 and (self.xbrl.fields['NonoperatingIncomeLoss']!=0 and \
-            self.xbrl.fields['InterestAndDebtExpense'] ==0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0):
+            self.xbrl.fields['InterestAndDebtExpense'] == 0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0):
             self.xbrl.fields['InterestAndDebtExpense'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] - (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLoss'])
 
         #Impute: OtherOperatingIncome
@@ -561,7 +568,7 @@ class FundamentantalAccountingConcepts:
 
         #DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this imputing. if it is higher,: keep the test
         #Impute: OperatingIncomeLoss
-        if self.xbrl.fields['OperatingIncomeLoss'] ==0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0:
+        if self.xbrl.fields['OperatingIncomeLoss'] == 0 and self.xbrl.fields['IncomeBeforeEquityMethodInvestments']!=0:
             self.xbrl.fields['OperatingIncomeLoss'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['NonoperatingIncomeLoss'] - self.xbrl.fields['InterestAndDebtExpense']
 
 
@@ -697,23 +704,23 @@ class FundamentantalAccountingConcepts:
 
         ####Adjustments
         #Impute: total net cash flows discontinued if not reported
-        if self.xbrl.fields['NetCashFlowsDiscontinued'] ==0:
+        if self.xbrl.fields['NetCashFlowsDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsDiscontinued'] = self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued']
 
         #Impute: cash flows from continuing
-        if self.xbrl.fields['NetCashFlowsOperating']!=0 and self.xbrl.fields['NetCashFlowsOperatingContinuing'] ==0:
+        if self.xbrl.fields['NetCashFlowsOperating']!=0 and self.xbrl.fields['NetCashFlowsOperatingContinuing'] == 0:
             self.xbrl.fields['NetCashFlowsOperatingContinuing'] = self.xbrl.fields['NetCashFlowsOperating'] - self.xbrl.fields['NetCashFlowsOperatingDiscontinued']
-        if self.xbrl.fields['NetCashFlowsInvesting']!=0 and self.xbrl.fields['NetCashFlowsInvestingContinuing'] ==0:
+        if self.xbrl.fields['NetCashFlowsInvesting']!=0 and self.xbrl.fields['NetCashFlowsInvestingContinuing'] == 0:
             self.xbrl.fields['NetCashFlowsInvestingContinuing'] = self.xbrl.fields['NetCashFlowsInvesting'] - self.xbrl.fields['NetCashFlowsInvestingDiscontinued']
-        if self.xbrl.fields['NetCashFlowsFinancing']!=0 and self.xbrl.fields['NetCashFlowsFinancingContinuing'] ==0:
+        if self.xbrl.fields['NetCashFlowsFinancing']!=0 and self.xbrl.fields['NetCashFlowsFinancingContinuing'] == 0:
             self.xbrl.fields['NetCashFlowsFinancingContinuing'] = self.xbrl.fields['NetCashFlowsFinancing'] - self.xbrl.fields['NetCashFlowsFinancingDiscontinued']
 
 
-        if self.xbrl.fields['NetCashFlowsOperating'] ==0 and self.xbrl.fields['NetCashFlowsOperatingContinuing']!=0 and self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] ==0:
+        if self.xbrl.fields['NetCashFlowsOperating'] == 0 and self.xbrl.fields['NetCashFlowsOperatingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.fields['NetCashFlowsOperatingContinuing']
-        if self.xbrl.fields['NetCashFlowsInvesting'] ==0 and self.xbrl.fields['NetCashFlowsInvestingContinuing']!=0 and self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] ==0:
+        if self.xbrl.fields['NetCashFlowsInvesting'] == 0 and self.xbrl.fields['NetCashFlowsInvestingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsInvesting'] = self.xbrl.fields['NetCashFlowsInvestingContinuing']
-        if self.xbrl.fields['NetCashFlowsFinancing'] ==0 and self.xbrl.fields['NetCashFlowsFinancingContinuing']!=0 and self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] ==0:
+        if self.xbrl.fields['NetCashFlowsFinancing'] == 0 and self.xbrl.fields['NetCashFlowsFinancingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.fields['NetCashFlowsFinancingContinuing']
 
 
@@ -721,8 +728,14 @@ class FundamentantalAccountingConcepts:
 
         # Impute: if net cash flow is missing,: this tries to figure out the
         # value by adding up the detail
-        if self.xbrl.fields['NetCashFlow'] == 0 and (self.xbrl.fields['NetCashFlowsOperating']!=0 or self.xbrl.fields['NetCashFlowsInvesting']!=0 or self.xbrl.fields['NetCashFlowsFinancing']!=0):
-            self.xbrl.fields['NetCashFlow'] = self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing']
+        if (self.xbrl.fields['NetCashFlow'] == 0 and
+            (self.xbrl.fields['NetCashFlowsOperating'] != 0 or
+             self.xbrl.fields['NetCashFlowsInvesting'] != 0 or
+             self.xbrl.fields['NetCashFlowsFinancing'] != 0 )):
+            self.xbrl.fields['NetCashFlow'] = (
+                self.xbrl.fields['NetCashFlowsOperating'] +
+                self.xbrl.fields['NetCashFlowsInvesting'] +
+                self.xbrl.fields['NetCashFlowsFinancing'])
 
 
         lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
@@ -751,23 +764,30 @@ class FundamentantalAccountingConcepts:
         #     # print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
 
 
-        #Key ratios
+        # Key ratios
         try:
-            self.xbrl.fields['SGR'] = ((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
+            self.xbrl.fields['ROE'] = (self.xbrl.fields['NetIncomeLoss'] /
+                                       self.xbrl.fields['Equity'])
         except:
             pass
 
         try:
-            self.xbrl.fields['ROA'] = self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Assets']
+            # http://www.investopedia.com/terms/s/sustainablegrowthrate.asp
+            self.xbrl.fields['SGR'] = (
+                (self.xbrl.fields['NetIncomeLoss'] /
+                 self.xbrl.fields['Revenues']) *
+                (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
         except:
             pass
 
         try:
-            self.xbrl.fields['ROE'] = self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Equity']
+            self.xbrl.fields['ROA'] = (self.xbrl.fields['NetIncomeLoss'] /
+                                       self.xbrl.fields['Assets'])
         except:
             pass
 
         try:
-            self.xbrl.fields['ROS'] = self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']
+            self.xbrl.fields['ROS'] = (self.xbrl.fields['NetIncomeLoss'] /
+                                       self.xbrl.fields['Revenues'])
         except:
             pass

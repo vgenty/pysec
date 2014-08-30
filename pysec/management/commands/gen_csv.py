@@ -34,8 +34,8 @@ def create_pkl():
 
     for ii in Index.objects.filter(
             form__in=['10-Q', '10-K'],
-            cik__in=sym_to_ciks.values()).order_by('date', 'name'):
-        print ii.name, ii.quarter
+            cik__in=sym_to_ciks.values()).order_by('quarter', 'name'):
+        print ii.name, ii.quarter, ii.cik
         ff = ii.financial_fields
         if not ff:
             continue

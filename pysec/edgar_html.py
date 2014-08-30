@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from BeautifulSoup import BeautifulSoup
 import re
 
+
 class EdgarHTML(object):
 
     def __init__(self, html):
@@ -33,4 +34,4 @@ class EdgarHTML(object):
     def parse(self):
         # EarningsPerShare
         self.fields['EarningsPerShare'] = self.find_value(
-            r'Earnings per (common)? share:')
+            r'Earnings per (common)? share')

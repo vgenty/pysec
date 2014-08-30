@@ -117,7 +117,9 @@ class Index(models.Model):
             except (lxml.etree.XPathEvalError, lxml.etree.XMLSyntaxError):
                 pass
         if not fields:
-            fields = self.html_financial_fields
+            return None
+            # TODO: html parsing not ready yet
+            # fields = self.html_financial_fields
         return fields
 
     @property

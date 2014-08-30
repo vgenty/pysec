@@ -34,7 +34,8 @@ class XBRL(object):
             thisend = '%s-%s-%s' % (
                 year, asdate.groups()[1], asdate.groups()[2])
             self.GetCurrentPeriodAndContextInformation(thisend)
-            FundamentantalAccountingConcepts(self)
+            self.FundamentantalAccountingConcepts = (
+                FundamentantalAccountingConcepts(self))
             return True
         else:
             # print currentEnd, ' is not a date'

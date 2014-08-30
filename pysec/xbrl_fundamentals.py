@@ -5,7 +5,6 @@ class FundamentantalAccountingConcepts:
     def __init__(self, xbrl):
 
         self.xbrl = xbrl
-        self.parse()
         self.non_imputed()
         self.impute()
 
@@ -19,27 +18,93 @@ class FundamentantalAccountingConcepts:
             val = 0
         return val
 
+    def print_info_block(self):
+        print
+        print "FUNDAMENTAL ACCOUNTING CONCEPTS CHECK REPORT:"
+        print "XBRL instance: %s" % self.xbrl.XBRLInstanceLocation
+        print ("XBRL Cloud Viewer: https://edgardashboard.xbrlcloud.com/"
+               "flex/viewer/XBRLViewer.html#instance=%s") % (
+                   self.xbrl.XBRLInstanceLocation)
+
+        print "Entity regiant name: %s" % self.xbrl.fields['EntityRegistrantName']
+        print "CIK: %s" % self.xbrl.fields['EntityCentralIndexKey']
+        print "Entity filer category: %s" % self.xbrl.fields['EntityFilerCategory']
+        print "Trading symbol: %s" % self.xbrl.fields['TradingSymbol']
+        print "Fiscal year: %s" % self.xbrl.fields['DocumentFiscalYearFocus']
+        print "Fiscal period: %s" % self.xbrl.fields['DocumentFiscalPeriodFocus']
+        print "Document type: %s" % self.xbrl.fields['DocumentType']
+
+        print "Balance Sheet Date (document period end date): %s" % self.xbrl.fields['BalanceSheetDate']
+        print "Income Statement Period (YTD, current period, period start date): %s to %s" % (self.xbrl.fields['IncomeStatementPeriodYTD'], self.xbrl.fields['BalanceSheetDate'])
+
+        print "Context ID for document period focus (instants): %s" % self.xbrl.context_for_instants
+        print "Context ID for YTD period (durations): %s" % self.xbrl.context_for_durations
+        print
+
     def parse(self):
-        # print
-        # print "FUNDAMENTAL ACCOUNTING CONCEPTS CHECK REPORT:"
-        # print "XBRL instance: %s" % self.xbrl.XBRLInstanceLocation
-        # print "XBRL Cloud Viewer: https://edgardashboard.xbrlcloud.com/flex/viewer/XBRLViewer.html#instance=%s" % self.xbrl.XBRLInstanceLocation
+        lngBSCheck1 = self.xbrl.fields['Equity'] - (self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
+        lngBSCheck2 = self.xbrl.fields['Assets'] - self.xbrl.fields['LiabilitiesAndEquity']
 
-        # print "Entity regiant name: %s" % self.xbrl.fields['EntityRegistrantName']
-        # print "CIK: %s" % self.xbrl.fields['EntityCentralIndexKey']
-        # print "Entity filer category: %s" % self.xbrl.fields['EntityFilerCategory']
-        # print "Trading symbol: %s" % self.xbrl.fields['TradingSymbol']
-        # print "Fiscal year: %s" % self.xbrl.fields['DocumentFiscalYearFocus']
-        # print "Fiscal period: %s" % self.xbrl.fields['DocumentFiscalPeriodFocus']
-        # print "Document type: %s" % self.xbrl.fields['DocumentType']
+        if self.xbrl.fields['CurrentAssets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['CurrentLiabilities'] == 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
+            # if current assets/liabilities are zero and noncurrent
+            # assets/liabilities;: don't do this test because the balance sheet
+            # is not classified
+            lngBSCheck3 = 0
+            lngBSCheck4 = 0
 
-        # print "Balance Sheet Date (document period end date): %s" % self.xbrl.fields['BalanceSheetDate']
-        # print "Income Statement Period (YTD, current period, period start date): %s to %s" % (self.xbrl.fields['IncomeStatementPeriodYTD'], self.xbrl.fields['BalanceSheetDate'])
+        else:
+            # balance sheet IS classified
+            lngBSCheck3 = self.xbrl.fields['Assets'] - (self.xbrl.fields['CurrentAssets'] + self.xbrl.fields['NoncurrentAssets'])
+            lngBSCheck4 = self.xbrl.fields['Liabilities'] - (self.xbrl.fields['CurrentLiabilities'] + self.xbrl.fields['NoncurrentLiabilities'])
 
-        # print "Context ID for document period focus (instants): %s" % self.xbrl.context_for_instants
-        # print "Context ID for YTD period (durations): %s" % self.xbrl.context_for_durations
-        # print
 
+        lngBSCheck5 = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['Liabilities'] + self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
+
+        # if lngBSCheck1:
+        #     print "BS1: Equity(" , self.xbrl.fields['Equity'] , ") = EquityAttributableToParent(" , self.xbrl.fields['EquityAttributableToParent'] , ") , EquityAttributableToNoncontrollingInterest(" , self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] , "): " , lngBSCheck1
+        # if lngBSCheck2:
+        #     print "BS2: Assets(" , self.xbrl.fields['Assets'] , ") = LiabilitiesAndEquity(" , self.xbrl.fields['LiabilitiesAndEquity'] , "): " , lngBSCheck2
+        # if lngBSCheck3:
+        #     print "BS3: Assets(" , self.xbrl.fields['Assets'] , ") = CurrentAssets(" , self.xbrl.fields['CurrentAssets'] , ") , NoncurrentAssets(" , self.xbrl.fields['NoncurrentAssets'] , "): " , lngBSCheck3
+        # if lngBSCheck4:
+        #     print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ")= CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
+        # if lngBSCheck5:
+        #     print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ")= Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
+
+
+
+        ####Adjustments
+
+        lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
+        if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses']) == (self.xbrl.fields['ExchangeGainsLosses'] * -1)):
+            lngCF1 = 888888
+            # What is going on here is that 171 filers compute net cash flow
+            # differently than everyone else. What I am doing is marking these
+            # by setting the value of the test to a number 888888 which would
+            # never occur naturally, so that I can differentiate this from
+            # errors.
+        lngCF2 = self.xbrl.fields['NetCashFlowsContinuing'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing'])
+        lngCF3 = self.xbrl.fields['NetCashFlowsDiscontinued'] - (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
+        lngCF4 = self.xbrl.fields['NetCashFlowsOperating'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsOperatingDiscontinued'])
+        lngCF5 = self.xbrl.fields['NetCashFlowsInvesting'] - (self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'])
+        lngCF6 = self.xbrl.fields['NetCashFlowsFinancing'] - (self.xbrl.fields['NetCashFlowsFinancingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
+
+
+        # if lngCF1:
+        #     # print "CF1: NetCashFlow(" , self.xbrl.fields['NetCashFlow'] , ") = (NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") , (NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") , (NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") , ExchangeGainsLosses(" , self.xbrl.fields['ExchangeGainsLosses'] , "): " , lngCF1
+        # if lngCF2:
+        #     # print "CF2: NetCashFlowsContinuing(" , self.xbrl.fields['NetCashFlowsContinuing'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , "): " , lngCF2
+        # if lngCF3:
+        #     # print "CF3: NetCashFlowsDiscontinued(" , self.xbrl.fields['NetCashFlowsDiscontinued'] , ") = NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF3
+        # if lngCF4:
+        #     # print "CF4: NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , "): " , lngCF4
+        # if lngCF5:
+        #     # print "CF5: NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") = NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , "): " , lngCF5
+        # if lngCF6:
+        #     # print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
+
+
+    def non_imputed(self):
         # Assets
         self.xbrl.fields['Assets'] = self.xbrl.GetFactValue(
             "us-gaap:Assets", "Instant")
@@ -160,7 +225,7 @@ class FundamentantalAccountingConcepts:
         if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['Assets'] == self.xbrl.fields['LiabilitiesAndEquity'] and self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']:
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
-        #Added to fix Assets
+        # Added to fix Assets
         if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
@@ -174,86 +239,6 @@ class FundamentantalAccountingConcepts:
 
         if self.xbrl.fields['LiabilitiesAndEquity'] == 0 and self.xbrl.fields['Assets'] != 0:
             self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.fields['Assets']
-
-        # Impute: Equity based no parent and noncontrolling interest being
-        # present
-        if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
-            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
-
-        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
-            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent']
-
-        if self.xbrl.fields['Equity'] == 0:
-            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
-
-        # Added: Impute Equity attributable to parent based on existence of
-        # equity and noncontrolling interest.
-        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
-            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity'] - self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
-
-        # Added: Impute Equity attributable to parent based on existence of
-        # equity and noncontrolling interest.
-        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
-            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity']
-
-        # if total liabilities is missing, figure it out based on liabilities
-        # and equity
-        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['Equity'] != 0:
-            self.xbrl.fields['Liabilities'] = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
-
-        # This seems incorrect because liabilities might not be reported
-        if self.xbrl.fields['Liabilities'] != 0 and self.xbrl.fields['CurrentLiabilities'] != 0:
-            self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.fields['Liabilities'] - self.xbrl.fields['CurrentLiabilities']
-
-        # Added to fix liabilities based on current liabilities
-        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities'] != 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
-            self.xbrl.fields['Liabilities'] = self.xbrl.fields['CurrentLiabilities']
-
-
-        lngBSCheck1 = self.xbrl.fields['Equity'] - (self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
-        lngBSCheck2 = self.xbrl.fields['Assets'] - self.xbrl.fields['LiabilitiesAndEquity']
-
-        if self.xbrl.fields['CurrentAssets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['CurrentLiabilities'] == 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
-            # if current assets/liabilities are zero and noncurrent
-            # assets/liabilities;: don't do this test because the balance sheet
-            # is not classified
-            lngBSCheck3 = 0
-            lngBSCheck4 = 0
-
-        else:
-            # balance sheet IS classified
-            lngBSCheck3 = self.xbrl.fields['Assets'] - (self.xbrl.fields['CurrentAssets'] + self.xbrl.fields['NoncurrentAssets'])
-            lngBSCheck4 = self.xbrl.fields['Liabilities'] - (self.xbrl.fields['CurrentLiabilities'] + self.xbrl.fields['NoncurrentLiabilities'])
-
-
-        lngBSCheck5 = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['Liabilities'] + self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
-
-        # if lngBSCheck1:
-        #     print "BS1: Equity(" , self.xbrl.fields['Equity'] , ") = EquityAttributableToParent(" , self.xbrl.fields['EquityAttributableToParent'] , ") , EquityAttributableToNoncontrollingInterest(" , self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] , "): " , lngBSCheck1
-        # if lngBSCheck2:
-        #     print "BS2: Assets(" , self.xbrl.fields['Assets'] , ") = LiabilitiesAndEquity(" , self.xbrl.fields['LiabilitiesAndEquity'] , "): " , lngBSCheck2
-        # if lngBSCheck3:
-        #     print "BS3: Assets(" , self.xbrl.fields['Assets'] , ") = CurrentAssets(" , self.xbrl.fields['CurrentAssets'] , ") , NoncurrentAssets(" , self.xbrl.fields['NoncurrentAssets'] , "): " , lngBSCheck3
-        # if lngBSCheck4:
-        #     print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ")= CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
-        # if lngBSCheck5:
-        #     print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ")= Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
-
-
-
-        # CUSTOM FIELDS
-
-        # Earnings
-        self.xbrl.fields['EarningsPerShare'] = self.first_valid_field(
-            [
-                'us-gaap:EarningsPerShareBasic',
-            ],
-            'Duration'
-        )
-
-
-        # END CUSTOM FIELDS
-
 
         # Income statement
 
@@ -482,6 +467,143 @@ class FundamentantalAccountingConcepts:
             if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==None:
                 self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = 0
 
+        # Earnings
+        self.xbrl.fields['EarningsPerShare'] = self.first_valid_field(
+            [
+                'us-gaap:EarningsPerShareBasic',
+            ],
+            'Duration'
+        )
+
+        ### Cash flow statement
+
+        # NetCashFlow
+        self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
+            "us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease",
+            "Duration")
+        if self.xbrl.fields['NetCashFlow'] == None:
+            self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
+                "us-gaap:CashPeriodIncreaseDecrease",
+                "Duration")
+            if self.xbrl.fields['NetCashFlow'] == None:
+                self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
+                    "us-gaap:NetCashProvidedByUsedInContinuingOperations",
+                    "Duration")
+                if self.xbrl.fields['NetCashFlow'] == None:
+                    self.xbrl.fields['NetCashFlow'] = 0
+
+        # NetCashFlowsOperating
+        self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.GetFactValue(
+            "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+            "Duration")
+        if self.xbrl.fields['NetCashFlowsOperating'] == None:
+            self.xbrl.fields['NetCashFlowsOperating'] = 0
+
+        # NetCashFlowsInvesting
+        self.xbrl.fields['NetCashFlowsInvesting'] = self.xbrl.GetFactValue(
+            "us-gaap:NetCashProvidedByUsedInInvestingActivities",
+            "Duration")
+        if self.xbrl.fields['NetCashFlowsInvesting'] == None:
+            self.xbrl.fields['NetCashFlowsInvesting'] = 0
+
+        # NetCashFlowsFinancing
+        self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.GetFactValue(
+            "us-gaap:NetCashProvidedByUsedInFinancingActivities",
+            "Duration")
+        if self.xbrl.fields['NetCashFlowsFinancing'] == None:
+            self.xbrl.fields['NetCashFlowsFinancing'] = 0
+
+        # NetCashFlowsOperatingContinuing
+        self.xbrl.fields[
+            'NetCashFlowsOperatingContinuing'] = self.xbrl.GetFactValue(
+                "us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsOperatingContinuing'] == None:
+            self.xbrl.fields['NetCashFlowsOperatingContinuing'] = 0
+
+        #NetCashFlowsInvestingContinuing
+        self.xbrl.fields['NetCashFlowsInvestingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInInvestingActivitiesContinuingOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsInvestingContinuing'] == None:
+            self.xbrl.fields['NetCashFlowsInvestingContinuing'] = 0
+
+        #NetCashFlowsFinancingContinuing
+        self.xbrl.fields['NetCashFlowsFinancingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInFinancingActivitiesContinuingOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsFinancingContinuing'] == None:
+            self.xbrl.fields['NetCashFlowsFinancingContinuing'] = 0
+
+        #NetCashFlowsOperatingDiscontinued
+        self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] ==None:
+            self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = 0
+
+        #NetCashFlowsInvestingDiscontinued
+        self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == None:
+            self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = 0
+
+        #NetCashFlowsFinancingDiscontinued
+        self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == None:
+            self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = 0
+
+        #NetCashFlowsDiscontinued
+        self.xbrl.fields['NetCashFlowsDiscontinued'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInDiscontinuedOperations", "Duration")
+        if self.xbrl.fields['NetCashFlowsDiscontinued'] == None:
+            self.xbrl.fields['NetCashFlowsDiscontinued'] = 0
+
+        #ExchangeGainsLosses
+        self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents", "Duration")
+        if self.xbrl.fields['ExchangeGainsLosses'] == None:
+            self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalentsContinuingOperations", "Duration")
+            if self.xbrl.fields['ExchangeGainsLosses'] == None:
+                self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
+                if self.xbrl.fields['ExchangeGainsLosses'] == None:
+                    self.xbrl.fields['ExchangeGainsLosses'] = 0
+
+
+
+
+
+    def impute(self):
+
+        # Impute: Equity based no parent and noncontrolling interest being
+        # present
+        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
+            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
+
+        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
+            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent']
+
+        # Added: Impute Equity attributable to parent based on existence of
+        # equity and noncontrolling interest.
+        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
+            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity'] - self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
+
+        # Added: Impute Equity attributable to parent based on existence of
+        # equity and noncontrolling interest.
+        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
+            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity']
+
+        # if total liabilities is missing, figure it out based on liabilities
+        # and equity
+        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['Equity'] != 0:
+            self.xbrl.fields['Liabilities'] = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
+
+        # This seems incorrect because liabilities might not be reported
+        if self.xbrl.fields['Liabilities'] != 0 and self.xbrl.fields['CurrentLiabilities'] != 0:
+            self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.fields['Liabilities'] - self.xbrl.fields['CurrentLiabilities']
+
+        # Added to fix liabilities based on current liabilities
+        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities'] != 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
+            self.xbrl.fields['Liabilities'] = self.xbrl.fields['CurrentLiabilities']
+
+
+
+
+
+
+
+
+
 
 
         #########'Adjustments to income statement information
@@ -648,92 +770,6 @@ class FundamentantalAccountingConcepts:
         #     # print "IS11: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostsAndExpenses(" , self.xbrl.fields['CostsAndExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS11
 
 
-
-        ### Cash flow statement
-
-        # NetCashFlow
-        self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-            "us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease",
-            "Duration")
-        if self.xbrl.fields['NetCashFlow'] == None:
-            self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                "us-gaap:CashPeriodIncreaseDecrease",
-                "Duration")
-            if self.xbrl.fields['NetCashFlow'] == None:
-                self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                    "us-gaap:NetCashProvidedByUsedInContinuingOperations",
-                    "Duration")
-                if self.xbrl.fields['NetCashFlow'] == None:
-                    self.xbrl.fields['NetCashFlow'] = 0
-
-        # NetCashFlowsOperating
-        self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInOperatingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsOperating'] == None:
-            self.xbrl.fields['NetCashFlowsOperating'] = 0
-
-        # NetCashFlowsInvesting
-        self.xbrl.fields['NetCashFlowsInvesting'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInInvestingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsInvesting'] == None:
-            self.xbrl.fields['NetCashFlowsInvesting'] = 0
-
-        # NetCashFlowsFinancing
-        self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInFinancingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancing'] == None:
-            self.xbrl.fields['NetCashFlowsFinancing'] = 0
-
-        # NetCashFlowsOperatingContinuing
-        self.xbrl.fields[
-            'NetCashFlowsOperatingContinuing'] = self.xbrl.GetFactValue(
-                "us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsOperatingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsOperatingContinuing'] = 0
-
-        #NetCashFlowsInvestingContinuing
-        self.xbrl.fields['NetCashFlowsInvestingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInInvestingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsInvestingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsInvestingContinuing'] = 0
-
-        #NetCashFlowsFinancingContinuing
-        self.xbrl.fields['NetCashFlowsFinancingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInFinancingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsFinancingContinuing'] = 0
-
-        #NetCashFlowsOperatingDiscontinued
-        self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] ==None:
-            self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = 0
-
-        #NetCashFlowsInvestingDiscontinued
-        self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = 0
-
-        #NetCashFlowsFinancingDiscontinued
-        self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = 0
-
-        #NetCashFlowsDiscontinued
-        self.xbrl.fields['NetCashFlowsDiscontinued'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsDiscontinued'] = 0
-
-        #ExchangeGainsLosses
-        self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents", "Duration")
-        if self.xbrl.fields['ExchangeGainsLosses'] == None:
-            self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalentsContinuingOperations", "Duration")
-            if self.xbrl.fields['ExchangeGainsLosses'] == None:
-                self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
-                if self.xbrl.fields['ExchangeGainsLosses'] == None:
-                    self.xbrl.fields['ExchangeGainsLosses'] = 0
-
-        ####Adjustments
         # Impute: total net cash flows discontinued if not reported
         if self.xbrl.fields['NetCashFlowsDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsDiscontinued'] = self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued']
@@ -769,35 +805,6 @@ class FundamentantalAccountingConcepts:
                 self.xbrl.fields['NetCashFlowsFinancing'])
 
 
-        lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
-        if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses']) == (self.xbrl.fields['ExchangeGainsLosses'] * -1)):
-            lngCF1 = 888888
-            # What is going on here is that 171 filers compute net cash flow
-            # differently than everyone else. What I am doing is marking these
-            # by setting the value of the test to a number 888888 which would
-            # never occur naturally, so that I can differentiate this from
-            # errors.
-        lngCF2 = self.xbrl.fields['NetCashFlowsContinuing'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing'])
-        lngCF3 = self.xbrl.fields['NetCashFlowsDiscontinued'] - (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
-        lngCF4 = self.xbrl.fields['NetCashFlowsOperating'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsOperatingDiscontinued'])
-        lngCF5 = self.xbrl.fields['NetCashFlowsInvesting'] - (self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'])
-        lngCF6 = self.xbrl.fields['NetCashFlowsFinancing'] - (self.xbrl.fields['NetCashFlowsFinancingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
-
-
-        # if lngCF1:
-        #     # print "CF1: NetCashFlow(" , self.xbrl.fields['NetCashFlow'] , ") = (NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") , (NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") , (NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") , ExchangeGainsLosses(" , self.xbrl.fields['ExchangeGainsLosses'] , "): " , lngCF1
-        # if lngCF2:
-        #     # print "CF2: NetCashFlowsContinuing(" , self.xbrl.fields['NetCashFlowsContinuing'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , "): " , lngCF2
-        # if lngCF3:
-        #     # print "CF3: NetCashFlowsDiscontinued(" , self.xbrl.fields['NetCashFlowsDiscontinued'] , ") = NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF3
-        # if lngCF4:
-        #     # print "CF4: NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , "): " , lngCF4
-        # if lngCF5:
-        #     # print "CF5: NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") = NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , "): " , lngCF5
-        # if lngCF6:
-        #     # print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
-
-
         # Key ratios
         try:
             self.xbrl.fields['ROE'] = (self.xbrl.fields['NetIncomeLoss'] /
@@ -824,9 +831,3 @@ class FundamentantalAccountingConcepts:
                 (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
         except:
             pass
-
-    def non_imputed(self):
-        pass
-
-    def impute(self):
-        pass

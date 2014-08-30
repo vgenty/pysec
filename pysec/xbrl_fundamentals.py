@@ -469,9 +469,7 @@ class FundamentantalAccountingConcepts(object):
         # OtherComprehensiveIncome
         self.xbrl.fields['OtherComprehensiveIncome'] = self.xbrl.GetFactValue("us-gaap:OtherComprehensiveIncomeLossNetOfTax", "Duration")
         if self.xbrl.fields['OtherComprehensiveIncome'] == None:
-            self.xbrl.fields['OtherComprehensiveIncome'] = self.xbrl.GetFactValue("us-gaap:OtherComprehensiveIncomeLossNetOfTax", "Duration")
-            if self.xbrl.fields['OtherComprehensiveIncome'] == None:
-                self.xbrl.fields['OtherComprehensiveIncome'] = 0
+            self.xbrl.fields['OtherComprehensiveIncome'] = 0
 
         # ComprehensiveIncome
         self.xbrl.fields['ComprehensiveIncome'] = self.xbrl.GetFactValue(
@@ -659,7 +657,7 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent'] != 0 and self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] != 0:
             self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
 
-        #Impute: comprehensive income
+        # Impute: comprehensive income
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:
             self.xbrl.fields['ComprehensiveIncome'] = self.xbrl.fields['NetIncomeLoss']
 

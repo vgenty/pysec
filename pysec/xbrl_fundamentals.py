@@ -17,8 +17,10 @@ class FundamentantalAccountingConcepts(object):
 
         self.xbrl = xbrl
         self.non_imputed()
-        self.impute_loop()
-        self.check()
+        impute_passes = self.impute_loop()
+        _valid = self.check()
+
+        print '{} impute passes'.format(impute_passes)
 
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
@@ -40,6 +42,7 @@ class FundamentantalAccountingConcepts(object):
             if count >= 10:
                 print dict_diff(old_fields, self.xbrl.fields)
                 raise ValueError('Failed to converge after 10 iterations')
+        return count
 
     def print_info_block(self):
         print
@@ -72,7 +75,6 @@ class FundamentantalAccountingConcepts(object):
         print "Context ID for YTD period (durations): %s" % (
             self.xbrl.context_for_durations)
         print
-
 
     def non_imputed(self):
         # Assets
@@ -192,7 +194,11 @@ class FundamentantalAccountingConcepts(object):
 
         # BS Adjustments
         # if total assets is missing, try using current assets
-        if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['Assets'] == self.xbrl.fields['LiabilitiesAndEquity'] and self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']:
+        if (self.xbrl.fields['Assets'] == 0
+                and (self.xbrl.fields['Assets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])
+                and (self.xbrl.fields['CurrentAssets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
         # Added to fix Assets
@@ -200,15 +206,25 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
         # Added to fix Assets even more
-        if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['LiabilitiesAndEquity'] == self.xbrl.fields['Liabilities'] + self.xbrl.fields['Equity']):
+        # TODO: does this belong in impute?
+        if (self.xbrl.fields['Assets'] == 0
+                and self.xbrl.fields['NoncurrentAssets'] == 0
+                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
+                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
+                     self.xbrl.fields['Liabilities'] +
+                     self.xbrl.fields['Equity'])):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
         if (self.xbrl.fields['Assets'] != 0 and
                 self.xbrl.fields['CurrentAssets'] != 0):
-            self.xbrl.fields['NoncurrentAssets'] = self.xbrl.fields['Assets'] - self.xbrl.fields['CurrentAssets']
+            self.xbrl.fields['NoncurrentAssets'] = (
+                self.xbrl.fields['Assets'] -
+                self.xbrl.fields['CurrentAssets'])
 
-        if self.xbrl.fields['LiabilitiesAndEquity'] == 0 and self.xbrl.fields['Assets'] != 0:
-            self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.fields['Assets']
+        if (self.xbrl.fields['LiabilitiesAndEquity'] == 0
+                and self.xbrl.fields['Assets'] != 0):
+            self.xbrl.fields['LiabilitiesAndEquity'] = (
+                self.xbrl.fields['Assets'])
 
         # Income statement
 
@@ -670,7 +686,10 @@ class FundamentantalAccountingConcepts(object):
                 and self.xbrl.fields['CostsAndExpenses'] == 0
                 and self.xbrl.fields['Revenues'] != 0
                 and self.xbrl.fields['OperatingIncomeLoss'] != 0
-                and self.xbrl.fields['OtherOperatingIncome'] != 0):
+                # MARC - this is sometimes entirely zero, let's see if it's bad
+                # to ignore it
+                # and self.xbrl.fields['OtherOperatingIncome'] != 0
+        ):
             self.xbrl.fields['CostsAndExpenses'] = (
                 self.xbrl.fields['Revenues'] -
                 self.xbrl.fields['OperatingIncomeLoss'] -
@@ -829,12 +848,16 @@ class FundamentantalAccountingConcepts(object):
 
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
-                          (self.xbrl.fields['EquityAttributableToParent'] +
-                           self.xbrl.fields['EquityAttributableToNoncontrollingInterest']))
+                       (self.xbrl.fields['EquityAttributableToParent'] +
+                        self.xbrl.fields['EquityAttributableTo'
+                                         'NoncontrollingInterest']))
         lngBSCheck2 = (self.xbrl.fields['Assets'] -
                        self.xbrl.fields['LiabilitiesAndEquity'])
 
-        if self.xbrl.fields['CurrentAssets'] == 0 and self.xbrl.fields['NoncurrentAssets'] == 0 and self.xbrl.fields['CurrentLiabilities'] == 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
+        if (self.xbrl.fields['CurrentAssets'] == 0
+                and self.xbrl.fields['NoncurrentAssets'] == 0 and
+                self.xbrl.fields['CurrentLiabilities'] == 0 and
+                self.xbrl.fields['NoncurrentLiabilities'] == 0):
             # if current assets/liabilities are zero and noncurrent
             # assets/liabilities;: don't do this test because the balance sheet
             # is not classified
@@ -844,11 +867,17 @@ class FundamentantalAccountingConcepts(object):
         else:
             # balance sheet IS classified
             lngBSCheck3 = (self.xbrl.fields['Assets'] -
-                           (self.xbrl.fields['CurrentAssets'] + self.xbrl.fields['NoncurrentAssets']))
-            lngBSCheck4 = self.xbrl.fields['Liabilities'] - (self.xbrl.fields['CurrentLiabilities'] + self.xbrl.fields['NoncurrentLiabilities'])
+                           (self.xbrl.fields['CurrentAssets'] +
+                            self.xbrl.fields['NoncurrentAssets']))
+            lngBSCheck4 = (self.xbrl.fields['Liabilities'] -
+                           (self.xbrl.fields['CurrentLiabilities'] +
+                            self.xbrl.fields['NoncurrentLiabilities']))
 
-
-        lngBSCheck5 = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['Liabilities'] + self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
+        lngBSCheck5 = (self.xbrl.fields['LiabilitiesAndEquity'] -
+                       (self.xbrl.fields['Liabilities'] +
+                        self.xbrl.fields['CommitmentsAndContingencies'] +
+                        self.xbrl.fields['TemporaryEquity'] +
+                        self.xbrl.fields['Equity']))
 
         if lngBSCheck1:
             print "BS1: Equity(" , self.xbrl.fields['Equity'] , ") = EquityAttributableToParent(" , self.xbrl.fields['EquityAttributableToParent'] , ") , EquityAttributableToNoncontrollingInterest(" , self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] , "): " , lngBSCheck1
@@ -861,7 +890,7 @@ class FundamentantalAccountingConcepts(object):
         if lngBSCheck5:
             print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ")= Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
 
-        ####Adjustments
+        #### Adjustments
 
         lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
         if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses']) == (self.xbrl.fields['ExchangeGainsLosses'] * -1)):
@@ -891,11 +920,11 @@ class FundamentantalAccountingConcepts(object):
             print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
 
         lngIS1 = ((self.xbrl.fields['Revenues'] -
-                      self.xbrl.fields['CostOfRevenue']) -
+                   self.xbrl.fields['CostOfRevenue']) -
                   self.xbrl.fields['GrossProfit'])
         lngIS2 = ((self.xbrl.fields['GrossProfit'] -
-                       self.xbrl.fields['OperatingExpenses'] +
-                       self.xbrl.fields['OtherOperatingIncome']) -
+                   self.xbrl.fields['OperatingExpenses'] +
+                   self.xbrl.fields['OtherOperatingIncome']) -
                   self.xbrl.fields['OperatingIncomeLoss'])
         lngIS3 = (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) - self.xbrl.fields['IncomeBeforeEquityMethodInvestments']
         lngIS4 = (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']) - self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']
@@ -903,8 +932,13 @@ class FundamentantalAccountingConcepts(object):
         lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
         lngIS7 = (self.xbrl.fields['NetIncomeAttributableToParent'] + self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) - self.xbrl.fields['NetIncomeLoss']
         lngIS8 = (self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
-        lngIS9 = (self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] + self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest']) - self.xbrl.fields['ComprehensiveIncome']
-        lngIS10 = (self.xbrl.fields['NetIncomeLoss'] + self.xbrl.fields['OtherComprehensiveIncome']) - self.xbrl.fields['ComprehensiveIncome']
+        lngIS9 = ((self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] +
+                   self.xbrl.fields['ComprehensiveIncomeAttributable'
+                                    'ToNoncontrollingInterest']) -
+                  self.xbrl.fields['ComprehensiveIncome'])
+        lngIS10 = ((self.xbrl.fields['NetIncomeLoss'] +
+                    self.xbrl.fields['OtherComprehensiveIncome']) -
+                   self.xbrl.fields['ComprehensiveIncome'])
         lngIS11 = self.xbrl.fields['OperatingIncomeLoss'] - (self.xbrl.fields['Revenues'] - self.xbrl.fields['CostsAndExpenses'] + self.xbrl.fields['OtherOperatingIncome'])
 
         if lngIS1:
@@ -918,7 +952,7 @@ class FundamentantalAccountingConcepts(object):
 
         if lngIS5:
             print "IS5: IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") = IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") - IncomeTaxExpenseBenefit(" , self.xbrl.fields['IncomeTaxExpenseBenefit'] , "): " , lngIS5
-        if  lngIS6:
+        if lngIS6:
             print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordaryItemsGainLoss(" , self.xbrl.fields['ExtraordaryItemsGainLoss'] , "): " , lngIS6
         if lngIS7:
             print "IS7: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = NetIncomeAttributableToParent(" , self.xbrl.fields['NetIncomeAttributableToParent'] , ") , NetIncomeAttributableToNoncontrollingInterest(" , self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] , "): " , lngIS7

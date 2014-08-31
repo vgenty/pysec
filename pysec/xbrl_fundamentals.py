@@ -317,19 +317,26 @@ class FundamentantalAccountingConcepts(object):
         )
 
         # IncomeBeforeEquityMethodInvestments
-        self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = self.first_valid_field(
-            [
-                'us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments',
-            ],
-            'Duration',
+        self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = (
+            self.first_valid_field(
+                [
+                    # All one field
+                    'us-gaap:IncomeLossFromContinuingOperations'
+                    'BeforeIncomeTaxesMinorityInterestAndIncomeLoss'
+                    'FromEquityMethodInvestments',
+                ],
+                'Duration',
+            )
         )
 
         # IncomeFromEquityMethodInvestments
-        self.xbrl.fields['IncomeFromEquityMethodInvestments'] = self.first_valid_field(
-            [
-                'us-gaap:IncomeLossFromEquityMethodInvestments',
-            ],
-            'Duration',
+        self.xbrl.fields['IncomeFromEquityMethodInvestments'] = (
+            self.first_valid_field(
+                [
+                    'us-gaap:IncomeLossFromEquityMethodInvestments',
+                ],
+                'Duration',
+            )
         )
 
         # IncomeFromContinuingOperationsBeforeTax

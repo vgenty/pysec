@@ -320,10 +320,9 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = (
             self.first_valid_field(
                 [
-                    # All one field
-                    'us-gaap:IncomeLossFromContinuingOperations'
-                    'BeforeIncomeTaxesMinorityInterestAndIncomeLoss'
-                    'FromEquityMethodInvestments',
+                    ('us-gaap:IncomeLossFromContinuingOperations'
+                     'BeforeIncomeTaxesMinorityInterestAndIncomeLoss'
+                     'FromEquityMethodInvestments'),
                 ],
                 'Duration',
             )
@@ -458,13 +457,43 @@ class FundamentantalAccountingConcepts(object):
             if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==None:
                 self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = 0
 
+        ### MARC
+
         # Earnings
         self.xbrl.fields['EarningsPerShare'] = self.first_valid_field(
             [
                 'us-gaap:EarningsPerShareBasic',
+                'us-gaap:EarningsPerShareDiluted',
             ],
             'Duration'
         )
+
+        # Cash
+        self.xbrl.fields['Cash'] = self.first_valid_field(
+            [
+                'us-gaap:Cash',
+                'us-gaap:CashAndCashEquivalentsAtCarryingValue',
+                'us-gaap:CashCashEquivalentsAndShortTermInvestments',
+            ],
+            'Instant'
+        )
+
+        # Securities available for sale
+        self.xbrl.fields['MarketableSecurities'] = self.first_valid_field(
+            [
+                'us-gaap:AvailableForSaleSecuritiesCurrent',
+            ],
+            'Instant'
+        )
+
+        # Accounts receivable
+        self.xbrl.fields['AccountsReceivable'] = self.first_valid_field(
+            [
+                'us-gaap:AccountsReceivableNetCurrent',
+            ],
+            'Instant'
+        )
+
 
         ### Cash flow statement
 
@@ -542,24 +571,28 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields['NetCashFlowsDiscontinued'] = 0
 
         # ExchangeGainsLosses
-        self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents", "Duration")
-        if self.xbrl.fields['ExchangeGainsLosses'] == None:
-            self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:EffectOfExchangeRateOnCashAndCashEquivalentsContinuingOperations", "Duration")
-            if self.xbrl.fields['ExchangeGainsLosses'] == None:
-                self.xbrl.fields['ExchangeGainsLosses'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
-                if self.xbrl.fields['ExchangeGainsLosses'] == None:
-                    self.xbrl.fields['ExchangeGainsLosses'] = 0
-
-
-
-
+        self.xbrl.fields['ExchangeGainsLosses'] = self.first_valid_field(
+            [
+                'us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents',
+                ('us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents'
+                 'ContinuingOperations'),
+                ('us-gaap:CashProvidedByUsedInFinancingActivities'
+                 'DiscontinuedOperations'),
+            ],
+            'Duration'
+        )
 
     def impute(self, impute_pass):
 
-        # Impute: Equity based no parent and noncontrolling interest being
+        # Impute: Equity based on parent and noncontrolling interest being
         # present
-        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
-            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent'] + self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
+        if (self.xbrl.fields['Equity'] == 0 and
+                self.xbrl.fields[
+                    'EquityAttributableToNoncontrollingInterest'] != 0 and
+                self.xbrl.fields['EquityAttributableToParent'] != 0):
+            self.xbrl.fields['Equity'] = (
+                self.xbrl.fields['EquityAttributableToParent'] +
+                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
 
         if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
             self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent']
@@ -812,7 +845,6 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['NetCashFlowsFinancing'] == 0 and self.xbrl.fields['NetCashFlowsFinancingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == 0:
             self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.fields['NetCashFlowsFinancingContinuing']
 
-
         self.xbrl.fields['NetCashFlowsContinuing'] = self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing']
 
         # Impute: if net cash flow is missing,: this tries to figure out the
@@ -850,6 +882,18 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields['SGR'] = (
                 self.xbrl.fields['ROS'] *
                 (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
+        except:
+            pass
+
+        # MARC: http://www.slideshare.net/afalk42/xbrl-us-altova-webinar
+        try:
+            self.xbql.fields['QuickRatio'] = (
+                (
+                    self.xbrl.fields['Cash'] +
+                    self.xbrl.fields['MarketableSecurities'] +
+                    self.xbrl.fields['AccountsReceivable']
+                ) / self.xbrl.fields['CurrentLiabilities']
+            )
         except:
             pass
 

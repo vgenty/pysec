@@ -84,8 +84,8 @@ class XBRL(object):
             try:
                 factValue = float(factValue)
             except:
-                # print 'couldnt convert %s=%s to string' %
-                # (SeekConcept,factValue)
+                # print 'couldnt convert %s=%s to float' %
+                # (SeekConcept, factValue)
                 factValue = None
 
         return factValue

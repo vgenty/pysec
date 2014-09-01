@@ -74,7 +74,8 @@ class Command(NoArgsCommand):
             fields -= EXCLUDE_FIELDS
             filename = 'data/csv/{}.csv'.format(sym)
             with open(filename, 'w') as f:
-                csv = DictWriter(f, list(fields), extrasaction='ignore')
+                csv = DictWriter(f, sorted(list(fields)),
+                                 extrasaction='ignore')
                 csv.writeheader()
                 csv.writerows(sorted(forms[sym],
                                      key=lambda x: x['DocumentPeriodEndDate']))

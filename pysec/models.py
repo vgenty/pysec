@@ -10,6 +10,7 @@ from sym_to_ciks import cik_to_syms
 
 DATA_DIR = settings.DATA_DIR
 
+
 class Index(models.Model):
 
     filename = models.TextField()
@@ -43,7 +44,7 @@ class Index(models.Model):
     @property
     def local_file_path(self):
         filename = '%s/%s/%s/%s' % (DATA_DIR,
-                                    self.cik,self.txt()[:-4], self.txt())
+                                    self.cik, self.txt()[:-4], self.txt())
         return filename
 
     @property

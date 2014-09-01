@@ -24,10 +24,15 @@ class XBRL(object):
         self.context_for_durations = None
 
         self.GetBaseInformation()
-        self.loadYear(0)
+        got_context = self.loadYear(0)
+        if got_context:
+            self.FundamentantalAccountingConcepts = (
+                FundamentantalAccountingConcepts(self))
 
     def loadYear(self, yearminus=0):
-        # TODO: when the report is filed in february for FY ending the previous
+        got_context = False
+        # Try the end period the report tells us
+        # When the report is filed in february for FY ending the previous
         # december, this fails (818479/0001144204-10-009164/xray-20091231.xml)
         currentEnd = self.getNode("//dei:DocumentPeriodEndDate").text
         asdate = re.match(r'\s*(\d{4})-(\d{2})-(\d{2})\s*', currentEnd)
@@ -35,13 +40,18 @@ class XBRL(object):
             year = int(asdate.groups()[0]) - yearminus
             thisend = '%s-%s-%s' % (
                 year, asdate.groups()[1], asdate.groups()[2])
-            self.GetCurrentPeriodAndContextInformation(thisend)
-            self.FundamentantalAccountingConcepts = (
-                FundamentantalAccountingConcepts(self))
+            got_context = self.GetCurrentPeriodAndContextInformation(thisend)
+
+        if got_context:
             return True
-        else:
-            # print currentEnd, ' is not a date'
-            return False
+        # That didn't work, find the latest endDate referenced. Don't use
+        # instants, because that can include the bogus, next-fiscal-year date.
+        end_dates = self.getNodeList('//xbrli:endDate')
+        thisend = max(end_dates, key=lambda x: x.text).text
+        got_context = self.GetCurrentPeriodAndContextInformation(thisend)
+        if got_context:
+            return True
+        return False
 
     def getNodeList(self, xpath, root=None):
         if root is None:
@@ -285,6 +295,7 @@ class XBRL(object):
 
         ContextForDurations = UseContext
         self.context_for_durations = ContextForDurations
+        return ContextForDurations != 'ERROR'
 
     def LookForAlternativeInstanceContext(self):
         # This deals with the situation where no instance context has no

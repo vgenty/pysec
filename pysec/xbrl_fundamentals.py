@@ -271,7 +271,8 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['OperatingExpenses'] = self.first_valid_field(
             [
                 'us-gaap:OperatingExpenses',
-                'us-gaap:OperatingCostsAndExpenses'
+                'us-gaap:OperatingCostsAndExpenses',
+                'us-gaap:OtherSellingGeneralAndAdministrativeExpense',
             ],
             'Duration'
         )
@@ -304,6 +305,7 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['NonoperatingIncomeLoss'] = self.first_valid_field(
             [
                 'us-gaap:NonoperatingIncomeExpense',
+                'us-gaap:RestructuringSettlementAndImpairmentProvisions',
             ],
             'Duration',
         )
@@ -534,27 +536,27 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['NetCashFlowsOperatingContinuing'] == None:
             self.xbrl.fields['NetCashFlowsOperatingContinuing'] = 0
 
-        #NetCashFlowsInvestingContinuing
+        # NetCashFlowsInvestingContinuing
         self.xbrl.fields['NetCashFlowsInvestingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInInvestingActivitiesContinuingOperations", "Duration")
         if self.xbrl.fields['NetCashFlowsInvestingContinuing'] == None:
             self.xbrl.fields['NetCashFlowsInvestingContinuing'] = 0
 
-        #NetCashFlowsFinancingContinuing
+        # NetCashFlowsFinancingContinuing
         self.xbrl.fields['NetCashFlowsFinancingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInFinancingActivitiesContinuingOperations", "Duration")
         if self.xbrl.fields['NetCashFlowsFinancingContinuing'] == None:
             self.xbrl.fields['NetCashFlowsFinancingContinuing'] = 0
 
-        #NetCashFlowsOperatingDiscontinued
+        # NetCashFlowsOperatingDiscontinued
         self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations", "Duration")
         if self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] ==None:
             self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = 0
 
-        #NetCashFlowsInvestingDiscontinued
+        # NetCashFlowsInvestingDiscontinued
         self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations", "Duration")
         if self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == None:
             self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = 0
 
-        #NetCashFlowsFinancingDiscontinued
+        # NetCashFlowsFinancingDiscontinued
         self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
         if self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == None:
             self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = 0
@@ -880,6 +882,7 @@ class FundamentantalAccountingConcepts(object):
             pass
 
         # MARC: http://www.slideshare.net/afalk42/xbrl-us-altova-webinar
+        # TODO: this belongs in R, not here
         try:
             self.xbql.fields['QuickRatio'] = (
                 (

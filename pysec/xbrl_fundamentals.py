@@ -370,12 +370,10 @@ class FundamentantalAccountingConcepts(object):
                 if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
                     self.xbrl.fields['IncomeFromDiscontinuedOperations'] = 0
 
-        #ExtraordaryItemsGainLoss
+        # ExtraordaryItemsGainLoss
         self.xbrl.fields['ExtraordaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
         if self.xbrl.fields['ExtraordaryItemsGainLoss'] == None:
-            self.xbrl.fields['ExtraordaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
-            if self.xbrl.fields['ExtraordaryItemsGainLoss'] == None:
-                self.xbrl.fields['ExtraordaryItemsGainLoss'] = 0
+            self.xbrl.fields['ExtraordaryItemsGainLoss'] = 0
 
         # NetIncomeLoss
         self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue(
@@ -443,19 +441,15 @@ class FundamentantalAccountingConcepts(object):
             if self.xbrl.fields['ComprehensiveIncome'] == None:
                 self.xbrl.fields['ComprehensiveIncome'] = 0
 
-        #ComprehensiveIncomeAttributableToParent
+        # ComprehensiveIncomeAttributableToParent
         self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:ComprehensiveIncomeNetOfTax", "Duration")
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == None:
-            self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:ComprehensiveIncomeNetOfTax", "Duration")
-            if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == None:
-                self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] = 0
+            self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] = 0
 
-        #ComprehensiveIncomeAttributableToNoncontrollingInterest
+        # ComprehensiveIncomeAttributableToNoncontrollingInterest
         self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest", "Duration")
         if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==None:
-            self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest", "Duration")
-            if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==None:
-                self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = 0
+            self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = 0
 
         ### MARC
 

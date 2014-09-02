@@ -34,7 +34,7 @@ class XBRL(object):
         # Try the end period the report tells us
         # When the report is filed in february for FY ending the previous
         # december, this fails (818479/0001144204-10-009164/xray-20091231.xml)
-        currentEnd = self.getNode("//dei:DocumentPeriodEndDate").text
+        currentEnd = self.getNode("//dei:DocumentPeriodEndDate").text.strip()
         asdate = re.match(r'\s*(\d{4})-(\d{2})-(\d{2})\s*', currentEnd)
         if asdate:
             year = int(asdate.groups()[0]) - yearminus
@@ -45,9 +45,10 @@ class XBRL(object):
         if got_context:
             return True
         # That didn't work, find the latest endDate referenced. Don't use
-        # instants, because that can include the bogus, next-fiscal-year date.
+        # instants, because that can include the bogus, next-fiscal-year
+        # date. They can include newlines, as well.
         end_dates = self.getNodeList('//xbrli:endDate')
-        thisend = max(end_dates, key=lambda x: x.text).text
+        thisend = max(end_dates, key=lambda x: x.text).text.strip()
         got_context = self.GetCurrentPeriodAndContextInformation(thisend)
         if got_context:
             return True
@@ -173,8 +174,6 @@ class XBRL(object):
         # This finds the period end date for the database table, and instant
         # date (for balance sheet):
         UseContext = "ERROR"
-        # EndDate = self.getNode("//dei:DocumentPeriodEndDate").text
-        # This is the <instant> or the <endDate>
 
         # Uses the concept ASSETS to find the correct instance context
         # This finds the Context ID for that end date (has correct <instant>
@@ -188,7 +187,7 @@ class XBRL(object):
 
             ContextID = i.get('contextRef')
             ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
-                 "']/xbrli:period/xbrli:instant").text
+                 "']/xbrli:period/xbrli:instant").text.strip()
             print 'ContextPeriod:', ContextPeriod
 
             # Nodelist of all the contexts of the fact us-gaap:Assets
@@ -199,7 +198,8 @@ class XBRL(object):
                 # Nodes with the right period
                 if (self.getNode("xbrli:period/xbrli:instant", j) is not None
                         and self.getNode(
-                            "xbrli:period/xbrli:instant", j).text == EndDate):
+                            "xbrli:period/xbrli:instant", j).text.strip() ==
+                        EndDate):
 
                     oNode4 = self.getNodeList(
                         "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
@@ -241,8 +241,9 @@ class XBRL(object):
             for j in oNodelist3:
 
                 # Nodes with the right period
-                if self.getNode(
-                        "xbrli:period/xbrli:endDate", j).text == EndDate:
+                if (self.getNode(
+                        "xbrli:period/xbrli:endDate", j).text.strip() ==
+                        EndDate):
 
                     oNode4 = self.getNodeList(
                         "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
@@ -255,7 +256,7 @@ class XBRL(object):
                         # MARC - this sounds wrong. I want recent, e.g., EPS,
                         # not YTD
                         StartDate = self.getNode(
-                            'xbrli:period/xbrli:startDate', j).text
+                            'xbrli:period/xbrli:startDate', j).text.strip()
                         print "Context start date: " + StartDate
                         print "YTD start date: " + StartDateYTD
 
@@ -311,7 +312,6 @@ class XBRL(object):
         # MsgBox "Node list length: " + oNodeList_Alt.length
         for oNode_Alt in oNodeList_Alt:
             # Found possible contexts
-            # MsgBox oNode_Alt.selectSingleNode("@id").text
             something = self.getNode(
                 "//us-gaap:Assets[@contextRef='" + oNode_Alt.get("id") + "']")
             if something:

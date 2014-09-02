@@ -37,8 +37,8 @@ def create_pkl():
                .objects
                .filter(form__in=['10-Q', '10-K'],
                        cik__in=sym_to_ciks.values())
-               # .order_by('quarter', 'name')
-               .order_by('?')
+               .order_by('quarter', 'name')
+               # .order_by('?')
     ):
         print ii.name, ii.quarter, ii.cik, ii.local_dir
         ff = ii.financial_fields

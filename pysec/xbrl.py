@@ -249,6 +249,11 @@ class XBRL(object):
                     if not len(oNode4):
                         # Making sure there are no dimensions. Is this the
                         # right way to do it?
+                        # TODO: 926660/0000922864-12-000009/aiv-20120630.xml
+                        # contains TemporaryEquityCarryingAmount only under a
+                        # context with explicitMember/dimensions. I've never
+                        # seen TemporaryEquity be non-zero, so I suspect this
+                        # is widespread.
 
                         # Get the year-to-date context, not the current period
                         # MARC - this sounds wrong. I want recent, e.g., EPS,

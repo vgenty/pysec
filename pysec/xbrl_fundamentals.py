@@ -312,7 +312,9 @@ class FundamentantalAccountingConcepts(object):
         # IncomeFromContinuingOperationsBeforeTax
         self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.first_valid_field(
             [
-                'us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments',
+                ('us-gaap:IncomeLossFromContinuingOperationsBefore'
+                 'IncomeTaxesMinorityInterestAndIncomeLossFrom'
+                 'EquityMethodInvestments'),
             ],
             'Duration',
         )
@@ -347,25 +349,18 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields['ExtraordaryItemsGainLoss'] = 0
 
         # NetIncomeLoss
-        self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue(
-            "us-gaap:ProfitLoss", "Duration")
-        if self.xbrl.fields['NetIncomeLoss'] == None:
-            self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue(
-                "us-gaap:NetIncomeLoss", "Duration")
-            if self.xbrl.fields['NetIncomeLoss'] == None:
-                self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue(
-                    "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
-                    "Duration")
-                if self.xbrl.fields['NetIncomeLoss'] == None:
-                    self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue(
-                        "us-gaap:IncomeLossFromContinuingOperations",
-                        "Duration")
-                    if self.xbrl.fields['NetIncomeLoss'] == None:
-                        self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:IncomeLossAttributableToParent", "Duration")
-                        if self.xbrl.fields['NetIncomeLoss'] == None:
-                            self.xbrl.fields['NetIncomeLoss'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest", "Duration")
-                            if self.xbrl.fields['NetIncomeLoss'] == None:
-                                self.xbrl.fields['NetIncomeLoss'] = 0
+        self.xbrl.fields['NetIncomeLoss'] = self.first_valid_field(
+            [
+                'us-gaap:ProfitLoss',
+                'us-gaap:NetIncomeLoss',
+                'us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic',
+                'us-gaap:IncomeLossFromContinuingOperations',
+                'us-gaap:IncomeLossAttributableToParent',
+                ('us-gaap:IncomeLossFromContinuingOperationsIncluding'
+                 'PortionAttributableToNoncontrollingInterest'),
+            ],
+            'Duration'
+        )
 
         # NetIncomeAvailableToCommonStockholdersBasic
         self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] = (
@@ -650,8 +645,12 @@ class FundamentantalAccountingConcepts(object):
                  self.xbrl.fields['Equity']))
 
         # This seems incorrect because liabilities might not be reported
-        if self.xbrl.fields['Liabilities'] != 0 and self.xbrl.fields['CurrentLiabilities'] != 0:
-            self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.fields['Liabilities'] - self.xbrl.fields['CurrentLiabilities']
+        if (self.xbrl.fields['NoncurrentLiabilities'] == 0 and
+                self.xbrl.fields['Liabilities'] != 0 and
+                self.xbrl.fields['CurrentLiabilities'] != 0):
+            self.xbrl.fields['NoncurrentLiabilities'] = (
+                self.xbrl.fields['Liabilities'] -
+                self.xbrl.fields['CurrentLiabilities'])
 
         # Added to fix liabilities based on current liabilities
         if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities'] != 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:

@@ -195,40 +195,6 @@ class FundamentantalAccountingConcepts(object):
             if self.xbrl.fields['EquityAttributableToParent'] == None:
                 self.xbrl.fields['EquityAttributableToParent'] = 0
 
-        # BS Adjustments
-        # if total assets is missing, try using current assets
-        if (self.xbrl.fields['Assets'] == 0
-                and (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])
-                and (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # Added to fix Assets
-        if self.xbrl.fields['Assets'] == 0 and self.xbrl.fields['LiabilitiesAndEquity'] != 0 and (self.xbrl.fields['CurrentAssets'] == self.xbrl.fields['LiabilitiesAndEquity']):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # Added to fix Assets even more
-        # TODO: does this belong in impute?
-        if (self.xbrl.fields['Assets'] == 0
-                and self.xbrl.fields['NoncurrentAssets'] == 0
-                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
-                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
-                     self.xbrl.fields['Liabilities'] +
-                     self.xbrl.fields['Equity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        if (self.xbrl.fields['Assets'] != 0 and
-                self.xbrl.fields['CurrentAssets'] != 0):
-            self.xbrl.fields['NoncurrentAssets'] = (
-                self.xbrl.fields['Assets'] -
-                self.xbrl.fields['CurrentAssets'])
-
-        if (self.xbrl.fields['LiabilitiesAndEquity'] == 0
-                and self.xbrl.fields['Assets'] != 0):
-            self.xbrl.fields['LiabilitiesAndEquity'] = (
-                self.xbrl.fields['Assets'])
-
         # Income statement
 
         # Revenues
@@ -586,6 +552,66 @@ class FundamentantalAccountingConcepts(object):
 
     def impute(self, impute_pass):
 
+        # BS Adjustments
+        # if total assets is missing, try using current assets
+        if (self.xbrl.fields['Assets'] == 0
+                and (self.xbrl.fields['Assets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])
+                and (self.xbrl.fields['CurrentAssets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])):
+            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
+
+        # MARC - same, but in reverse
+        if (self.xbrl.fields['CurrentAssets'] == 0
+                and (self.xbrl.fields['Assets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])
+                and (self.xbrl.fields['CurrentAssets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])):
+            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+
+        # Added to fix Assets
+        if (self.xbrl.fields['Assets'] == 0 and
+                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
+                    (self.xbrl.fields['CurrentAssets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])):
+            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
+
+        # MARC - same, but in reverse
+        if (self.xbrl.fields['CurrentAssets'] == 0 and
+                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
+                    (self.xbrl.fields['Assets'] ==
+                     self.xbrl.fields['LiabilitiesAndEquity'])):
+            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+
+        # Added to fix Assets even more
+        if (self.xbrl.fields['Assets'] == 0
+                and self.xbrl.fields['NoncurrentAssets'] == 0
+                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
+                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
+                     self.xbrl.fields['Liabilities'] +
+                     self.xbrl.fields['Equity'])):
+            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
+
+        # MARC - same, but in reverse
+        if (self.xbrl.fields['CurrentAssets'] == 0
+                and self.xbrl.fields['NoncurrentAssets'] == 0
+                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
+                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
+                     self.xbrl.fields['Liabilities'] +
+                     self.xbrl.fields['Equity'])):
+            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+
+        if (self.xbrl.fields['Assets'] != 0 and
+                self.xbrl.fields['CurrentAssets'] != 0):
+            self.xbrl.fields['NoncurrentAssets'] = (
+                self.xbrl.fields['Assets'] -
+                self.xbrl.fields['CurrentAssets'])
+
+        if (self.xbrl.fields['LiabilitiesAndEquity'] == 0
+                and self.xbrl.fields['Assets'] != 0):
+            self.xbrl.fields['LiabilitiesAndEquity'] = (
+                self.xbrl.fields['Assets'])
+
         # Impute: Equity based on parent and noncontrolling interest being
         # present
         if (self.xbrl.fields['Equity'] == 0 and
@@ -615,8 +641,13 @@ class FundamentantalAccountingConcepts(object):
 
         # if total liabilities is missing, figure it out based on liabilities
         # and equity
-        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['Equity'] != 0:
-            self.xbrl.fields['Liabilities'] = self.xbrl.fields['LiabilitiesAndEquity'] - (self.xbrl.fields['CommitmentsAndContingencies'] + self.xbrl.fields['TemporaryEquity'] + self.xbrl.fields['Equity'])
+        if (self.xbrl.fields['Liabilities'] == 0 and
+                self.xbrl.fields['Equity'] != 0):
+            self.xbrl.fields['Liabilities'] = (
+                self.xbrl.fields['LiabilitiesAndEquity'] -
+                (self.xbrl.fields['CommitmentsAndContingencies'] +
+                 self.xbrl.fields['TemporaryEquity'] +
+                 self.xbrl.fields['Equity']))
 
         # This seems incorrect because liabilities might not be reported
         if self.xbrl.fields['Liabilities'] != 0 and self.xbrl.fields['CurrentLiabilities'] != 0:
@@ -626,6 +657,11 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities'] != 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
             self.xbrl.fields['Liabilities'] = self.xbrl.fields['CurrentLiabilities']
 
+        # MARC - same, but in reverse
+        if (self.xbrl.fields['CurrentLiabilities'] == 0 and
+                self.xbrl.fields['Liabilities'] != 0 and
+                self.xbrl.fields['NoncurrentLiabilities'] == 0):
+            self.xbrl.fields['CurrentLiabilities'] = self.xbrl.fields['Liabilities']
 
         #########'Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense
@@ -933,7 +969,7 @@ class FundamentantalAccountingConcepts(object):
         if lngBSCheck4:
             print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ")= CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
         if lngBSCheck5:
-            print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ")= Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
+            print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ") = Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
 
         #### Adjustments
 
@@ -1014,7 +1050,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-        if len(failed_tests) >= 4:
-            raise ValueError('\n'.join(['Too many check failures:',
-                                        ', '.join(failed_tests)]))
+        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+        # if len(failed_tests) >= 4:
+        #     raise ValueError('\n'.join(['Too many check failures:',
+        #                                 ', '.join(failed_tests)]))

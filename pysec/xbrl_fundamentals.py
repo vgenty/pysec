@@ -414,7 +414,7 @@ class FundamentantalAccountingConcepts(object):
 
         # ComprehensiveIncomeAttributableToNoncontrollingInterest
         self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest", "Duration")
-        if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] ==None:
+        if self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == None:
             self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] = 0
 
         ### MARC
@@ -424,6 +424,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:EarningsPerShareBasic',
                 'us-gaap:EarningsPerShareDiluted',
+                'us-gaap:EarningsPerShareBasicAndDiluted',
             ],
             'Duration'
         )
@@ -442,9 +443,10 @@ class FundamentantalAccountingConcepts(object):
         # Securities available for sale
         self.xbrl.fields['MarketableSecurities'] = self.first_valid_field(
             [
+                'us-gaap:AvailableForSaleSecurities',
                 'us-gaap:AvailableForSaleSecuritiesCurrent',
                 ('us-gaap:AvailableForSaleSecuritiesAndHeldTo'
-                'MaturitySecurities'),
+                 'MaturitySecurities'),
             ],
             'Instant'
         )
@@ -596,7 +598,8 @@ class FundamentantalAccountingConcepts(object):
                      self.xbrl.fields['Equity'])):
             self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
 
-        if (self.xbrl.fields['Assets'] != 0 and
+        if (self.xbrl.fields['NoncurrentAssets'] == 0 and
+                self.xbrl.fields['Assets'] != 0 and
                 self.xbrl.fields['CurrentAssets'] != 0):
             self.xbrl.fields['NoncurrentAssets'] = (
                 self.xbrl.fields['Assets'] -
@@ -617,8 +620,11 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['EquityAttributableToParent'] +
                 self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
 
-        if self.xbrl.fields['Equity'] == 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] != 0:
-            self.xbrl.fields['Equity'] = self.xbrl.fields['EquityAttributableToParent']
+        if (self.xbrl.fields['Equity'] == 0 and
+                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0
+                and self.xbrl.fields['EquityAttributableToParent'] != 0):
+            self.xbrl.fields['Equity'] = (
+                self.xbrl.fields['EquityAttributableToParent'])
 
         # Added: Impute Equity attributable to parent based on existence of
         # equity and noncontrolling interest.
@@ -631,8 +637,11 @@ class FundamentantalAccountingConcepts(object):
 
         # Added: Impute Equity attributable to parent based on existence of
         # equity and noncontrolling interest.
-        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
-            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity']
+        if (self.xbrl.fields['Equity'] != 0 and
+            self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0
+            and self.xbrl.fields['EquityAttributableToParent'] == 0):
+            self.xbrl.fields['EquityAttributableToParent'] = (
+                self.xbrl.fields['Equity'])
 
         # if total liabilities is missing, figure it out based on liabilities
         # and equity
@@ -692,8 +701,13 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['NetIncomeLoss'])
 
         # Impute: PreferredStockDividendsAndOtherAdjustments
-        if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent'] != 0 and self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] != 0:
-            self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
+        if (self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0
+                and self.xbrl.fields['NetIncomeAttributableToParent'] != 0
+                and self.xbrl.fields['NetIncomeAvailableTo'
+                                     'CommonStockholdersBasic'] != 0):
+            self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = (
+                self.xbrl.fields['NetIncomeAttributableToParent'] -
+                self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'])
 
         # Impute: comprehensive income
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:

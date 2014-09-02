@@ -891,19 +891,6 @@ class FundamentantalAccountingConcepts(object):
         except:
             pass
 
-        # MARC: http://www.slideshare.net/afalk42/xbrl-us-altova-webinar
-        # TODO: this belongs in R, not here
-        try:
-            self.xbrl.fields['QuickRatio'] = (
-                (
-                    self.xbrl.fields['Cash'] +
-                    self.xbrl.fields['MarketableSecurities'] +
-                    self.xbrl.fields['AccountsReceivable']
-                ) / self.xbrl.fields['CurrentLiabilities']
-            )
-        except:
-            pass
-
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
                        (self.xbrl.fields['EquityAttributableToParent'] +

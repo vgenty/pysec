@@ -33,10 +33,14 @@ EXCLUDE_FIELDS = {
 def create_pkl():
     forms = defaultdict(list)
 
-    for ii in Index.objects.filter(
-            form__in=['10-Q', '10-K'],
-            cik__in=sym_to_ciks.values()).order_by('quarter', 'name'):
-        print ii.name, ii.quarter, ii.cik
+    for ii in (Index
+               .objects
+               .filter(form__in=['10-Q', '10-K'],
+                       cik__in=sym_to_ciks.values())
+               # .order_by('quarter', 'name')
+               .order_by('?')
+    ):
+        print ii.name, ii.quarter, ii.cik, ii.local_dir
         ff = ii.financial_fields
         if not ff:
             continue

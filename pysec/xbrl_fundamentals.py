@@ -93,8 +93,11 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['NoncurrentAssets'] = self.xbrl.GetFactValue(
             "us-gaap:AssetsNoncurrent", "Instant")
         if self.xbrl.fields['NoncurrentAssets'] == None:
-            if self.xbrl.fields['Assets'] and self.xbrl.fields['CurrentAssets']:
-                self.xbrl.fields['NoncurrentAssets'] = self.xbrl.fields['Assets'] - self.xbrl.fields['CurrentAssets']
+            if (self.xbrl.fields['Assets'] and
+                    self.xbrl.fields['CurrentAssets']):
+                self.xbrl.fields['NoncurrentAssets'] = (
+                    self.xbrl.fields['Assets'] -
+                    self.xbrl.fields['CurrentAssets'])
             else:
                 self.xbrl.fields['NoncurrentAssets'] = 0
 
@@ -109,7 +112,7 @@ class FundamentantalAccountingConcepts(object):
 
         # Liabilities
         self.xbrl.fields['Liabilities'] = self.first_valid_field(
-            ["us-gaap:Liabilities",], 'Instant')
+            ["us-gaap:Liabilities"], 'Instant')
 
         # CurrentLiabilities
         self.xbrl.fields['CurrentLiabilities'] = self.first_valid_field(
@@ -470,6 +473,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:Cash',
                 'us-gaap:CashAndCashEquivalentsAtCarryingValue',
                 'us-gaap:CashCashEquivalentsAndShortTermInvestments',
+                'us-gaap:CashAndDueFromBanks',   # TODO: yes?
             ],
             'Instant'
         )
@@ -478,6 +482,8 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['MarketableSecurities'] = self.first_valid_field(
             [
                 'us-gaap:AvailableForSaleSecuritiesCurrent',
+                ('us-gaap:AvailableForSaleSecuritiesAndHeldTo'
+                'MaturitySecurities'),
             ],
             'Instant'
         )
@@ -485,11 +491,11 @@ class FundamentantalAccountingConcepts(object):
         # Accounts receivable
         self.xbrl.fields['AccountsReceivable'] = self.first_valid_field(
             [
+                'us-gaap:AccountsReceivableNet',
                 'us-gaap:AccountsReceivableNetCurrent',
             ],
             'Instant'
         )
-
 
         ### Cash flow statement
 
@@ -595,8 +601,12 @@ class FundamentantalAccountingConcepts(object):
 
         # Added: Impute Equity attributable to parent based on existence of
         # equity and noncontrolling interest.
-        if self.xbrl.fields['Equity'] != 0 and self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0 and self.xbrl.fields['EquityAttributableToParent'] == 0:
-            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.fields['Equity'] - self.xbrl.fields['EquityAttributableToNoncontrollingInterest']
+        if (self.xbrl.fields['Equity'] != 0 and
+                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0
+                and self.xbrl.fields['EquityAttributableToParent'] == 0):
+            self.xbrl.fields['EquityAttributableToParent'] = (
+                self.xbrl.fields['Equity'] -
+                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
 
         # Added: Impute Equity attributable to parent based on existence of
         # equity and noncontrolling interest.
@@ -884,7 +894,7 @@ class FundamentantalAccountingConcepts(object):
         # MARC: http://www.slideshare.net/afalk42/xbrl-us-altova-webinar
         # TODO: this belongs in R, not here
         try:
-            self.xbql.fields['QuickRatio'] = (
+            self.xbrl.fields['QuickRatio'] = (
                 (
                     self.xbrl.fields['Cash'] +
                     self.xbrl.fields['MarketableSecurities'] +
@@ -1012,3 +1022,12 @@ class FundamentantalAccountingConcepts(object):
             print "IS10: ComprehensiveIncome(" , self.xbrl.fields['ComprehensiveIncome'] , ") = NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") , OtherComprehensiveIncome(" , self.xbrl.fields['OtherComprehensiveIncome'] , "): " , lngIS10
         if lngIS11:
             print "IS11: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostsAndExpenses(" , self.xbrl.fields['CostsAndExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS11
+
+        test_names = [n for n in locals() if n not in ['self', 'failed']]
+        test_values = [locals()[n] for n in test_names]
+        test_results = {k: v for k, v in zip(test_names, test_values)}
+
+        failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+        if len(failed_tests) >= 4:
+            raise ValueError('\n'.join(['Too many check failures:',
+                                        ', '.join(failed_tests)]))

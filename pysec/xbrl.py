@@ -183,12 +183,11 @@ class XBRL(object):
             '//us-gaap:LiabilitiesAndStockholdersEquity')
         # Nodelist of all the facts which are us-gaap:Assets
         for i in oNodelist2:
-            # print i.XML
 
             ContextID = i.get('contextRef')
-            ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
-                 "']/xbrli:period/xbrli:instant").text.strip()
-            print 'ContextPeriod:', ContextPeriod
+            # ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
+            #      "']/xbrli:period/xbrli:instant").text.strip()
+            # print 'ContextPeriod:', ContextPeriod
 
             # Nodelist of all the contexts of the fact us-gaap:Assets
             oNodelist3 = self.getNodeList(
@@ -227,7 +226,6 @@ class XBRL(object):
         UseContext = "ERROR"
 
         for i in oNodelist2:
-            # print i.XML
 
             ContextID = i.get('contextRef')
 
@@ -257,29 +255,29 @@ class XBRL(object):
                         # not YTD
                         StartDate = self.getNode(
                             'xbrli:period/xbrli:startDate', j).text.strip()
-                        print "Context start date: " + StartDate
-                        print "YTD start date: " + StartDateYTD
+                        # print "Context start date: " + StartDate
+                        # print "YTD start date: " + StartDateYTD
 
                         if StartDate < StartDateYTD:
                             # Start date is for quarter
-                            print ('Context start date is less than '
-                                   'current year to date, replace')
-                            print "Context start date (new min): " + StartDate
-                            print "Current min: " + StartDateYTD
+                            # print ('Context start date is less than '
+                            #        'current year to date, replace')
+                            # print "Context start date (new min): " + StartDate
+                            # print "Current min: " + StartDateYTD
 
                             StartDateYTD = StartDate
                         if StartDate > StartDateLatest:
                             # Start date is for year
                             StartDateLatest = StartDate
                             UseContext = j.get('id')
-                            print ('Context start date is greater than '
-                                   'current max, replace')
-                            print 'New latest start date:', StartDateLatest
+                        #     print ('Context start date is greater than '
+                        #            'current max, replace')
+                        #     print 'New latest start date:', StartDateLatest
 
-                        print "Use context ID: " + UseContext
-                        print "Current min: " + StartDateYTD
-                        print 'Current max:', StartDateLatest
-                        print " "
+                        # print "Use context ID: " + UseContext
+                        # print "Current min: " + StartDateYTD
+                        # print 'Current max:', StartDateLatest
+                        # print " "
 
         # Balance sheet date of current period
         self.fields['BalanceSheetDate'] = EndDate

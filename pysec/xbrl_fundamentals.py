@@ -456,6 +456,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:AccountsReceivableNet',
                 'us-gaap:AccountsReceivableNetCurrent',
+                'us-gaap:AccountsNotesAndLoansReceivableNetCurrent',
             ],
             'Instant'
         )
@@ -914,6 +915,7 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['NetCashFlowsFinancing'])
 
         # Key ratios
+        # TODO: these should be moved to R
         try:
             self.xbrl.fields['ROE'] = (self.xbrl.fields['NetIncomeLoss'] /
                                        self.xbrl.fields['Equity'])

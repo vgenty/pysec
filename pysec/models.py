@@ -112,11 +112,7 @@ class Index(models.Model):
     def financial_fields(self):
         fields = None
         if self.xbrl:
-            try:
-                fields = self.xbrl.fields
-            # TODO: this isn't my concern
-            except (lxml.etree.XPathEvalError, lxml.etree.XMLSyntaxError):
-                pass
+            fields = self.xbrl.fields
         if not fields:
             return None
             # TODO: html parsing not ready yet

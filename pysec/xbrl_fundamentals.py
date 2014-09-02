@@ -20,7 +20,8 @@ class FundamentantalAccountingConcepts(object):
         impute_passes = self.impute_loop()
         _valid = self.check()
 
-        print '{} impute passes'.format(impute_passes)
+        print '{} impute {}'.format(impute_passes,
+                                    'pass' if impute_passes == 1 else 'passes')
 
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
@@ -33,6 +34,10 @@ class FundamentantalAccountingConcepts(object):
         return val
 
     def impute_loop(self):
+        """
+        Attempt to infer missing values from what we have. Returns the number
+        of passes after which we converged.
+        """
         old_fields = {}
         count = 0
         while old_fields != self.xbrl.fields:
@@ -42,7 +47,7 @@ class FundamentantalAccountingConcepts(object):
             if count >= 10:
                 print dict_diff(old_fields, self.xbrl.fields)
                 raise ValueError('Failed to converge after 10 iterations')
-        return count
+        return count - 1
 
     def print_info_block(self):
         print

@@ -1,6 +1,5 @@
 import os
 from pysec import xbrl
-import lxml
 
 from django.db import models
 from django.conf import settings

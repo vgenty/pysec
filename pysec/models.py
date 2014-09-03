@@ -121,12 +121,13 @@ class Index(models.Model):
 
     @property
     def xbrl(self):
+        # TODO: would be nice not to calculate this every time it's accessed,
+        # but we run out of memory if we do it naively
         filepath = self.xbrl_localpath
         if not filepath:
             return None
         x = xbrl.XBRL(filepath)
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
-
         return x
 
     @property

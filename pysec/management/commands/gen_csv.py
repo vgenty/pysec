@@ -16,6 +16,7 @@ PICKLE_FILE = 'forms.pkl'
 # Fields we don't need in our CSVs
 EXCLUDE_FIELDS = {
     'BalanceSheetDate',
+    'Changed',
     'ContextForDurations',
     'ContextForInstants',
     'DocumentFiscalPeriodFocus',

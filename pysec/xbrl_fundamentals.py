@@ -244,6 +244,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CostOfNaturalGasPurchases',
                 'us-gaap:RefiningAndMarketingCosts',
                 'us-gaap:CostOfGoodsAndServicesEnergyCommoditiesAndServices',
+                'us-gaap:DirectCostsOfLeasedAndRentedPropertyOrEquipment',
                 # Company-specific costs of revenue
                 'dd:CostOfGoodsSoldAndOtherOperatingCharges',
                 'omc:SalaryAndServiceCosts',

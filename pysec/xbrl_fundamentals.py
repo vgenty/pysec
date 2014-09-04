@@ -137,6 +137,7 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields['CommitmentsAndContingencies'] = 0
 
         # TemporaryEquity
+        # TODO: this uses a different duration than most other fields
         self.xbrl.fields['TemporaryEquity'] = self.first_valid_field(
             [
                 'us-gaap:TemporaryEquityRedemptionValue',
@@ -145,6 +146,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:TemporaryEquityValueExcludingAdditionalPaidInCapital',
                 'us-gaap:TemporaryEquityCarryingAmountAttributableToParent',
                 'us-gaap:RedeemableNoncontrollingInterestEquityFairValue',
+                'us-gaap:TemporaryEquityStockIssuedDuringPeriodValueNewIssues',
             ],
             'Instant'
         )
@@ -220,12 +222,16 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:OilAndGasRevenue',
                 'us-gaap:RefiningAndMarketingRevenue',
                 'us-gaap:FinancialServicesRevenue',
+                'us-gaap:UtilityRevenue',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:FoodAndBeverageRevenue',
                 'us-gaap:RevenueMineralSales',
                 'us-gaap:AssetManagementFees',
                 # Company-specific revenues? FML
                 'fcx:RevenuesFCX',
+                # TODO: this one's not great
+                ('nbr:OperatingRevenuesAndIncomeLossFrom'
+                 'EquityMethodOfInvestment'),
             ],
             'Duration'
         )
@@ -247,8 +253,18 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:DirectCostsOfLeasedAndRentedPropertyOrEquipment',
                 # Company-specific costs of revenue
                 'dd:CostOfGoodsSoldAndOtherOperatingCharges',
+                'ice:RevenuesLessTransactionBasedExpenses',
+                'nee:FuelPurchasedPowerAndInterchangeExpense',
                 'omc:SalaryAndServiceCosts',
                 'px:CostOfRevenueExcludingDepreciationandAmortization',
+            ],
+            'Duration'
+        )
+
+        # Rare, but until we TODO: have a sum() method, add this in
+        self.xbrl.fields['CostOfRevenue'] += self.first_valid_field(
+            [
+                'nee:OtherOperationsAndMaintenanceExpenses',
             ],
             'Duration'
         )
@@ -1123,5 +1139,6 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['GrossProfit'] == 0:
             failed_tests = [k for k, v in test_results.iteritems() if v != 0]
             if len(failed_tests) >= 4:
-                raise ValueError('\n'.join(['Too many check failures:',
+                print('\n'.join(['Too many check failures:',
                                             ', '.join(failed_tests)]))
+                import ipdb; ipdb.set_trace()

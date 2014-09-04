@@ -218,6 +218,7 @@ class XBRL(object):
             '//us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease | '
             '//us-gaap:CashPeriodIncreaseDecrease | '
             '//us-gaap:NetIncomeLoss | '
+            '//us-gaap:NetIncomeLossAttributableToNoncontrollingInterest | '
             '//dei:DocumentPeriodEndDate')
 
         StartDate = "ERROR"

@@ -207,6 +207,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:Revenues',
                 'us-gaap:SalesRevenueNet',
+                'us-gaap:SalesRevenueGoodsNet',
                 'us-gaap:SalesRevenueServicesNet',
                 'us-gaap:RevenuesNetOfInterestExpense',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
@@ -370,6 +371,19 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:IncomeLossAttributableToParent',
                 ('us-gaap:IncomeLossFromContinuingOperationsIncluding'
                  'PortionAttributableToNoncontrollingInterest'),
+                # Company-specific
+                'cpb:IncomeLossAvailableToCommonShareholders',
+            ],
+            'Duration'
+        )
+
+        # Add in income reclassified from other things
+        # TODO: Need a way to say NetIncomeLoss = sum(field1, field2, ...)
+        # TODO: this is in some weird context we can't get yet
+        self.xbrl.fields['NetIncomeLoss'] += self.first_valid_field(
+            [
+                ('us-gaap:DerivativeInstrumentsGainLossReclassified'
+                 'FromAccumulatedOCIIntoIncomeEffectivePortionNet'),
             ],
             'Duration'
         )
@@ -379,6 +393,8 @@ class FundamentantalAccountingConcepts(object):
             self.first_valid_field(
                 [
                     'us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic',
+                    # Company-specific
+                    'cpb:IncomeLossAvailableToCommonShareholders',
                 ],
                 'Duration',
             )
@@ -1077,7 +1093,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-        # if len(failed_tests) >= 4:
-        #     raise ValueError('\n'.join(['Too many check failures:',
-        #                                 ', '.join(failed_tests)]))
+        failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+        if len(failed_tests) >= 4:
+            raise ValueError('\n'.join(['Too many check failures:',
+                                        ', '.join(failed_tests)]))

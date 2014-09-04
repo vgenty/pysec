@@ -234,6 +234,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:RevenuesExcludingInterestAndDividends',
                 # Company-specific revenues? FML
                 'fcx:RevenuesFCX',
+                'fcx:RevenuesGoodsAndServices',
                 # TODO: this one's not great
                 ('nbr:OperatingRevenuesAndIncomeLossFrom'
                  'EquityMethodOfInvestment'),
@@ -1154,9 +1155,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        if self.xbrl.fields['GrossProfit'] == 0:
-            failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-            if len(failed_tests) >= 4:
-                print('\n'.join(['Too many check failures:',
-                                            ', '.join(failed_tests)]))
-                import ipdb; ipdb.set_trace()
+        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+        # if len(failed_tests) >= 4:
+        #     print ('\n'.join(['Too many check failures:',
+        #                       ', '.join(failed_tests)]))

@@ -218,6 +218,9 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:FinancialServicesRevenue',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:FoodAndBeverageRevenue',
+                'us-gaap:RevenueMineralSales',
+                # Company-specific revenues? FML
+                'fcx:RevenuesFCX',
             ],
             'Duration'
         )
@@ -228,7 +231,11 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CostOfRevenue',
                 'us-gaap:CostOfServices',
                 'us-gaap:CostOfGoodsSold',
-                'us-gaap:CostOfGoodsAndServicesSold'
+                'us-gaap:CostOfGoodsAndServicesSold',
+                'us-gaap:CostOfPurchasedPower',
+                'us-gaap:CostOfGoldProductsAndServices',
+                # Company-specific costs of revenue
+                'px:CostOfRevenueExcludingDepreciationandAmortization',
             ],
             'Duration'
         )

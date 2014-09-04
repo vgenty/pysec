@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+# TODO: do financial services companies (blackrock, AMG, etc.) have COGS at
+# all? Some of the checks seem to imply not -- they would work with 0
+# COGS. We're using _not_set and _is_set based on this assumption right now.
+
 import difflib
 import pprint
 
@@ -227,6 +231,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:FoodAndBeverageRevenue',
                 'us-gaap:RevenueMineralSales',
                 'us-gaap:AssetManagementFees',
+                'us-gaap:RevenuesExcludingInterestAndDividends',
                 # Company-specific revenues? FML
                 'fcx:RevenuesFCX',
                 # TODO: this one's not great
@@ -614,6 +619,18 @@ class FundamentantalAccountingConcepts(object):
 
     def impute(self, impute_pass):
 
+        def _not_set(field_name):
+            """
+            Setting a field to zero is valid, so we check for int zero
+            vs. float zero. Sounds like this sucks, so hopefully we can come up
+            with something better soon.
+            """
+            val = self.xbrl.fields[field_name]
+            return val == 0 and isinstance(val, (int, long))
+
+        def _is_set(field_name):
+            return not _not_set(field_name)
+
         # BS Adjustments
         # if total assets is missing, try using current assets
         if (self.xbrl.fields['Assets'] == 0
@@ -803,7 +820,7 @@ class FundamentantalAccountingConcepts(object):
         # Impute: GrossProfit
         if (self.xbrl.fields['GrossProfit'] == 0 and
                 self.xbrl.fields['Revenues'] != 0 and
-                self.xbrl.fields['CostOfRevenue'] != 0):
+                _is_set('CostOfRevenue')):
             self.xbrl.fields['GrossProfit'] = (
                 self.xbrl.fields['Revenues'] -
                 self.xbrl.fields['CostOfRevenue'])
@@ -811,13 +828,13 @@ class FundamentantalAccountingConcepts(object):
         # Impute: Revenues
         if (self.xbrl.fields['GrossProfit'] != 0 and
                 self.xbrl.fields['Revenues'] == 0 and
-                self.xbrl.fields['CostOfRevenue'] != 0):
+                _is_set('CostOfRevenue')):
             self.xbrl.fields['Revenues'] = (self.xbrl.fields['GrossProfit'] +
                                             self.xbrl.fields['CostOfRevenue'])
         # Impute: CostOfRevenue
         if (self.xbrl.fields['GrossProfit'] != 0 and
                 self.xbrl.fields['Revenues'] != 0 and
-                self.xbrl.fields['CostOfRevenue'] == 0):
+                _not_set('CostOfRevenue')):
             self.xbrl.fields['CostOfRevenue'] = (
                 self.xbrl.fields['GrossProfit'] + self.xbrl.fields['Revenues'])
 
@@ -826,7 +843,7 @@ class FundamentantalAccountingConcepts(object):
         # single-step)
         if (self.xbrl.fields['GrossProfit'] == 0
                 and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.fields['CostOfRevenue'] != 0
+                and _is_set('CostOfRevenue')
                 and self.xbrl.fields['OperatingExpenses'] != 0):
             self.xbrl.fields['CostsAndExpenses'] = (
                 self.xbrl.fields['CostOfRevenue'] +
@@ -836,7 +853,7 @@ class FundamentantalAccountingConcepts(object):
         # and operating expenses
         if (self.xbrl.fields['CostsAndExpenses'] == 0
                 and self.xbrl.fields['OperatingExpenses'] != 0
-                and self.xbrl.fields['CostOfRevenue'] != 0):
+                and _is_set('CostOfRevenue')):
             self.xbrl.fields['CostsAndExpenses'] = (
                 self.xbrl.fields['CostOfRevenue'] +
                 self.xbrl.fields['OperatingExpenses'])
@@ -857,12 +874,13 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues
-        if (self.xbrl.fields['CostOfRevenue'] != 0 and
+        if (_is_set('CostOfRevenue') and
                 self.xbrl.fields['CostsAndExpenses'] != 0 and
                 self.xbrl.fields['OperatingExpenses'] == 0):
             self.xbrl.fields['OperatingExpenses'] = (
                 self.xbrl.fields['CostsAndExpenses'] -
                 self.xbrl.fields['CostOfRevenue'])
+            self.xbrl.fields['Changed'] = 'HAAAAAACK'
 
         # Impute: CostOfRevenues single-step method
         if (self.xbrl.fields['Revenues'] != 0 and
@@ -877,7 +895,7 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['OperatingExpenses'])
 
         # MARC: last-ditch CostOfRevenue
-        if (self.xbrl.fields['CostOfRevenue'] == 0 and
+        if (_not_set('CostOfRevenue') and
                 self.xbrl.fields['CostsAndExpenses'] != 0):
             self.xbrl.fields['CostOfRevenue'] = (
                 self.xbrl.fields['CostsAndExpenses'] -

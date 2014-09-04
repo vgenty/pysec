@@ -212,14 +212,17 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:RevenuesNetOfInterestExpense',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:HealthCareOrganizationRevenue',
+                'us-gaap:HealthCareOrganizationPatientServiceRevenue',
                 'us-gaap:InterestAndDividendIncomeOperating',
                 'us-gaap:RealEstateRevenueNet',
                 'us-gaap:RevenueMineralSales',
+                'us-gaap:ElectricUtilityRevenue',
                 'us-gaap:OilAndGasRevenue',
                 'us-gaap:FinancialServicesRevenue',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:FoodAndBeverageRevenue',
                 'us-gaap:RevenueMineralSales',
+                'us-gaap:AssetManagementFees',
                 # Company-specific revenues? FML
                 'fcx:RevenuesFCX',
             ],
@@ -235,7 +238,13 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CostOfGoodsAndServicesSold',
                 'us-gaap:CostOfPurchasedPower',
                 'us-gaap:CostOfGoldProductsAndServices',
+                'us-gaap:CostOfRealEstateRevenue',
+                'us-gaap:CostOfPurchasedOilAndGas',
+                'us-gaap:CostOfNaturalGasPurchases',
+                'us-gaap:CostOfGoodsAndServicesEnergyCommoditiesAndServices',
                 # Company-specific costs of revenue
+                'dd:CostOfGoodsSoldAndOtherOperatingCharges',
+                'omc:SalaryAndServiceCosts',
                 'px:CostOfRevenueExcludingDepreciationandAmortization',
             ],
             'Duration'
@@ -1010,7 +1019,7 @@ class FundamentantalAccountingConcepts(object):
         if lngBSCheck3:
             print "BS3: Assets(" , self.xbrl.fields['Assets'] , ") = CurrentAssets(" , self.xbrl.fields['CurrentAssets'] , ") , NoncurrentAssets(" , self.xbrl.fields['NoncurrentAssets'] , "): " , lngBSCheck3
         if lngBSCheck4:
-            print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ")= CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
+            print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ") = CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
         if lngBSCheck5:
             print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ") = Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
 
@@ -1093,7 +1102,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-        if len(failed_tests) >= 4:
-            raise ValueError('\n'.join(['Too many check failures:',
-                                        ', '.join(failed_tests)]))
+        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+        # if len(failed_tests) >= 4:
+        #     raise ValueError('\n'.join(['Too many check failures:',
+        #                                 ', '.join(failed_tests)]))

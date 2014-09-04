@@ -849,6 +849,13 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['CostsAndExpenses'] -
                 self.xbrl.fields['OperatingExpenses'])
 
+        # MARC: last-ditch CostOfRevenue
+        if (self.xbrl.fields['CostOfRevenue'] == 0 and
+                self.xbrl.fields['CostsAndExpenses'] != 0):
+            self.xbrl.fields['CostOfRevenue'] = (
+                self.xbrl.fields['CostsAndExpenses'] -
+                self.xbrl.fields['OperatingExpenses'])
+
         # Impute: IncomeBeforeEquityMethodInvestments
         if (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and
                 self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0):

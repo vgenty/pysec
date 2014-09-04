@@ -218,6 +218,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:RevenueMineralSales',
                 'us-gaap:ElectricUtilityRevenue',
                 'us-gaap:OilAndGasRevenue',
+                'us-gaap:RefiningAndMarketingRevenue',
                 'us-gaap:FinancialServicesRevenue',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:FoodAndBeverageRevenue',
@@ -241,6 +242,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CostOfRealEstateRevenue',
                 'us-gaap:CostOfPurchasedOilAndGas',
                 'us-gaap:CostOfNaturalGasPurchases',
+                'us-gaap:RefiningAndMarketingCosts',
                 'us-gaap:CostOfGoodsAndServicesEnergyCommoditiesAndServices',
                 # Company-specific costs of revenue
                 'dd:CostOfGoodsSoldAndOtherOperatingCharges',
@@ -462,6 +464,14 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:EarningsPerShareBasic',
                 'us-gaap:EarningsPerShareDiluted',
                 'us-gaap:EarningsPerShareBasicAndDiluted',
+            ],
+            'Duration'
+        )
+
+        # Dividends
+        self.xbrl.fields['DividendPerShare'] = self.first_valid_field(
+            [
+                'us-gaap:CommonStockDividendsPerShareDeclared',
             ],
             'Duration'
         )
@@ -1109,7 +1119,8 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-        # if len(failed_tests) >= 4:
-        #     raise ValueError('\n'.join(['Too many check failures:',
-        #                                 ', '.join(failed_tests)]))
+        if self.xbrl.fields['GrossProfit'] == 0:
+            failed_tests = [k for k, v in test_results.iteritems() if v != 0]
+            if len(failed_tests) >= 4:
+                raise ValueError('\n'.join(['Too many check failures:',
+                                            ', '.join(failed_tests)]))

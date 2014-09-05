@@ -35,3 +35,16 @@ class EdgarHTML(object):
         # EarningsPerShare
         self.fields['EarningsPerShare'] = self.find_value(
             r'Earnings per (common)? share')
+
+        match = re.search(r'([\d,]+)[ ]+shares of common stock',
+                          self.html, re.IGNORECASE)
+        if match:
+            self.fields['SharesOutstanding'] = match.group(1).replace(',', '')
+
+        match = re.search(r'CONFORMED PERIOD OF REPORT:\w+(\d)+', self.html)
+        if match:
+            date = match.group(1)
+            date = '{}/{}/{}'.format(int(date[4:6]), date[6:8], date[2:4])
+            self.fields['DocumentPeriodEndDate'] = date
+        else:
+            self.fields['DocumentPeriodEndDate'] = None

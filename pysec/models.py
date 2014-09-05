@@ -110,8 +110,9 @@ class Index(models.Model):
     @property
     def financial_fields(self):
         fields = None
-        if self.xbrl:
-            fields = self.xbrl.fields
+        x = self.xbrl
+        if x:
+            fields = x.fields
         if not fields:
             return None
             # TODO: html parsing not ready yet

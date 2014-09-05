@@ -192,6 +192,12 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CommonStockholdersEquity',
                 'us-gaap:MemberEquity',
                 'us-gaap:AssetsNet',
+                # Company-specific
+                ('bcr:StockholdersEquityIncludingPortionAttributable'
+                 'ToNoncontrollingInterest'),
+                'ed:CommonStockEquity',
+                'fmc:TotalFmcStockholdersEquity',
+                'ice:TotalStockholdersEquity',
             ],
             'Instant'
         )
@@ -536,10 +542,18 @@ class FundamentantalAccountingConcepts(object):
             'Instant'
         )
 
+        # Shares outstanding
         self.xbrl.fields['SharesOutstanding'] = self.first_valid_field(
             [
                 ('dei:EntityCommonStockSharesOutstanding', 'DEI'),
                 'us-gaap:CommonStockSharesOutstanding',
+            ],
+            'Instant'
+        )
+
+        self.xbrl.fields['IntangibleAssets'] = self.first_valid_field(
+            [
+                'us-gaap:IntangibleAssetsNetExcludingGoodwill',
             ],
             'Instant'
         )
@@ -672,8 +686,8 @@ class FundamentantalAccountingConcepts(object):
         # MARC - same, but in reverse
         if (self.xbrl.fields['CurrentAssets'] == 0 and
                 self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-                    (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
+                (self.xbrl.fields['Assets'] ==
+                 self.xbrl.fields['LiabilitiesAndEquity'])):
             self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
 
         # Added to fix Assets even more
@@ -738,6 +752,17 @@ class FundamentantalAccountingConcepts(object):
             and self.xbrl.fields['EquityAttributableToParent'] == 0):
             self.xbrl.fields['EquityAttributableToParent'] = (
                 self.xbrl.fields['Equity'])
+
+        # MARC - based this off of BS5 check
+        if (self.xbrl.fields['Equity'] == 0 and
+                _is_set('LiabilitiesAndEquity') and
+                _is_set('Liabilities')):
+            self.xbrl.fields['Equity'] = (
+                self.xbrl.fields['LiabilitiesAndEquity'] -
+                self.xbrl.fields['Liabilities'] -
+                self.xbrl.fields['CommitmentsAndContingencies'] -
+                self.xbrl.fields['TemporaryEquity']
+            )
 
         # if total liabilities is missing, figure it out based on liabilities
         # and equity
@@ -1168,6 +1193,8 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
+        if self.xbrl.fields['Equity'] == 0:
+            import ipdb; ipdb.set_trace()
         # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
         # if len(failed_tests) >= 4:
         #     print ('\n'.join(['Too many check failures:',

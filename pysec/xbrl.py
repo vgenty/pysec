@@ -198,12 +198,12 @@ class XBRL(object):
                     date = self.getNode("xbrli:period/xbrli:instant", j)
                     if date is not None:
                         if find_max:
-                            print 'Current max is {}'.format(max_date)
+                            # print 'Current max is {}'.format(max_date)
                             if date.text.strip() >= max_date:
                                 ret_context = ContextID
                                 max_date = date.text.strip()
-                                print 'New max date: {}'.format(max_date)
-                                print 'New context: {}'.format(ret_context)
+                                # print 'New max date: {}'.format(max_date)
+                                # print 'New context: {}'.format(ret_context)
                         else:
                             if date.text.strip() == EndDate:
                                 oNode4 = self.getNodeList(
@@ -217,12 +217,12 @@ class XBRL(object):
         # Uses the concept ASSETS to find the correct instance context
         # This finds the Context ID for that end date (has correct <instant>
         # date plus has no dimensions):
-        print 'Getting context for instants'
+        # print 'Getting context for instants'
         self.context_for_instants = get_instant_context(
             '//us-gaap:Assets | //us-gaap:AssetsCurrent |'
             '//us-gaap:LiabilitiesAndStockholdersEquity'
         )
-        print 'Getting context for DEI'
+        # print 'Getting context for DEI'
         self.context_for_dei = get_instant_context(
             '//dei:EntityCommonStockSharesOutstanding',
             find_max=True
@@ -232,7 +232,7 @@ class XBRL(object):
         # This may work incorrectly for fiscal year ends because the dates
         # cross calendar years
         # Get context ID of durations and the start date for the database table
-        print 'Getting context for duration'
+        # print 'Getting context for duration'
         oNodelist2 = self.getNodeList(
             '//us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease | '
             '//us-gaap:CashPeriodIncreaseDecrease | '
@@ -280,29 +280,29 @@ class XBRL(object):
                         # not YTD
                         StartDate = self.getNode(
                             'xbrli:period/xbrli:startDate', j).text.strip()
-                        print "Context start date: " + StartDate
-                        print "YTD start date: " + StartDateYTD
+                        # print "Context start date: " + StartDate
+                        # print "YTD start date: " + StartDateYTD
 
                         if StartDate < StartDateYTD:
                             # Start date is for quarter
-                            print ('Context start date is less than '
-                                   'current year to date, replace')
-                            print "Context start date (new min): " + StartDate
-                            print "Current min: " + StartDateYTD
+                            # print ('Context start date is less than '
+                            #        'current year to date, replace')
+                            # print "Context start date (new min): " + StartDate
+                            # print "Current min: " + StartDateYTD
 
                             StartDateYTD = StartDate
                         if StartDate > StartDateLatest:
                             # Start date is for year
                             StartDateLatest = StartDate
                             UseContext = j.get('id')
-                            print ('Context start date is greater than '
-                                   'current max, replace')
-                            print 'New latest start date:', StartDateLatest
+                        #     print ('Context start date is greater than '
+                        #            'current max, replace')
+                        #     print 'New latest start date:', StartDateLatest
 
-                        print "Use context ID: " + UseContext
-                        print "Current min: " + StartDateYTD
-                        print 'Current max:', StartDateLatest
-                        print " "
+                        # print "Use context ID: " + UseContext
+                        # print "Current min: " + StartDateYTD
+                        # print 'Current max:', StartDateLatest
+                        # print " "
 
         # Balance sheet date of current period
         self.fields['BalanceSheetDate'] = EndDate

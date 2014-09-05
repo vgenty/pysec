@@ -73,13 +73,11 @@ class XBRL(object):
 
         factValue = None
 
-        if ConceptPeriodType == "Instant":
-            ContextReference = self.context_for_instants
-        elif ConceptPeriodType == "Duration":
-            ContextReference = self.context_for_durations
-        else:
-            # An error occured
-            return "CONTEXT ERROR"
+        ContextReference = {
+            'Instant': self.context_for_instants,
+            'Duration': self.context_for_durations,
+            'DEI': self.context_for_dei
+        }[ConceptPeriodType]
 
         if not ContextReference:
             return None
@@ -175,45 +173,66 @@ class XBRL(object):
         # date (for balance sheet):
         UseContext = "ERROR"
 
+        def get_instant_context(nodelist_spec, find_max=False):
+            """
+            Concepts like Assets are as of quarter end, while concepts like
+            shares outstanding seem to be at filing time. Let's get a different
+            context for each. Either use EndDate, or the latest we can find if
+            find_max=True.
+            """
+            ret_context = None
+            max_date = '0000-00-00'
+
+            oNodelist2 = self.getNodeList(nodelist_spec)
+            # Nodelist of all the facts which are us-gaap:Assets
+            for i in oNodelist2:
+
+                ContextID = i.get('contextRef')
+
+                # Nodelist of all the contexts of the facts in nodelist_spec
+                oNodelist3 = self.getNodeList(
+                    "//xbrli:context[@id='" + ContextID + "']")
+                for j in oNodelist3:
+
+                    # Nodes with the right period - EndDate or max
+                    date = self.getNode("xbrli:period/xbrli:instant", j)
+                    if date is not None:
+                        if find_max:
+                            print 'Current max is {}'.format(max_date)
+                            if date.text.strip() >= max_date:
+                                ret_context = ContextID
+                                max_date = date.text.strip()
+                                print 'New max date: {}'.format(max_date)
+                                print 'New context: {}'.format(ret_context)
+                        else:
+                            if date.text.strip() == EndDate:
+                                oNode4 = self.getNodeList(
+                                    'xbrli:entity/xbrli:segment/xbrldi:'
+                                    'explicitMember', j)
+
+                                if not len(oNode4):
+                                    ret_context = ContextID
+            return ret_context
+
         # Uses the concept ASSETS to find the correct instance context
         # This finds the Context ID for that end date (has correct <instant>
         # date plus has no dimensions):
-        oNodelist2 = self.getNodeList(
+        print 'Getting context for instants'
+        self.context_for_instants = get_instant_context(
             '//us-gaap:Assets | //us-gaap:AssetsCurrent |'
-            '//us-gaap:LiabilitiesAndStockholdersEquity')
-        # Nodelist of all the facts which are us-gaap:Assets
-        for i in oNodelist2:
-
-            ContextID = i.get('contextRef')
-            # ContextPeriod = self.getNode("//xbrli:context[@id='" + ContextID +
-            #      "']/xbrli:period/xbrli:instant").text.strip()
-            # print 'ContextPeriod:', ContextPeriod
-
-            # Nodelist of all the contexts of the fact us-gaap:Assets
-            oNodelist3 = self.getNodeList(
-                "//xbrli:context[@id='" + ContextID + "']")
-            for j in oNodelist3:
-
-                # Nodes with the right period
-                if (self.getNode("xbrli:period/xbrli:instant", j) is not None
-                        and self.getNode(
-                            "xbrli:period/xbrli:instant", j).text.strip() ==
-                        EndDate):
-
-                    oNode4 = self.getNodeList(
-                        "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
-
-                    if not len(oNode4):
-                        UseContext = ContextID
-                        # print UseContext
-
-        ContextForInstants = UseContext
-        self.context_for_instants = ContextForInstants
+            '//us-gaap:LiabilitiesAndStockholdersEquity'
+        )
+        print 'Getting context for DEI'
+        self.context_for_dei = get_instant_context(
+            '//dei:EntityCommonStockSharesOutstanding',
+            find_max=True
+        )
 
         # This finds the duration context
         # This may work incorrectly for fiscal year ends because the dates
         # cross calendar years
         # Get context ID of durations and the start date for the database table
+        print 'Getting context for duration'
         oNodelist2 = self.getNodeList(
             '//us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease | '
             '//us-gaap:CashPeriodIncreaseDecrease | '
@@ -261,46 +280,45 @@ class XBRL(object):
                         # not YTD
                         StartDate = self.getNode(
                             'xbrli:period/xbrli:startDate', j).text.strip()
-                        # print "Context start date: " + StartDate
-                        # print "YTD start date: " + StartDateYTD
+                        print "Context start date: " + StartDate
+                        print "YTD start date: " + StartDateYTD
 
                         if StartDate < StartDateYTD:
                             # Start date is for quarter
-                            # print ('Context start date is less than '
-                            #        'current year to date, replace')
-                            # print "Context start date (new min): " + StartDate
-                            # print "Current min: " + StartDateYTD
+                            print ('Context start date is less than '
+                                   'current year to date, replace')
+                            print "Context start date (new min): " + StartDate
+                            print "Current min: " + StartDateYTD
 
                             StartDateYTD = StartDate
                         if StartDate > StartDateLatest:
                             # Start date is for year
                             StartDateLatest = StartDate
                             UseContext = j.get('id')
-                        #     print ('Context start date is greater than '
-                        #            'current max, replace')
-                        #     print 'New latest start date:', StartDateLatest
+                            print ('Context start date is greater than '
+                                   'current max, replace')
+                            print 'New latest start date:', StartDateLatest
 
-                        # print "Use context ID: " + UseContext
-                        # print "Current min: " + StartDateYTD
-                        # print 'Current max:', StartDateLatest
-                        # print " "
+                        print "Use context ID: " + UseContext
+                        print "Current min: " + StartDateYTD
+                        print 'Current max:', StartDateLatest
+                        print " "
 
         # Balance sheet date of current period
         self.fields['BalanceSheetDate'] = EndDate
 
         # MsgBox "Instant context is: " + ContextForInstants
-        if ContextForInstants == "ERROR":
+        if not self.context_for_instants:
             # MsgBox "Looking for alternative instance context"
 
-            ContextForInstants = self.LookForAlternativeInstanceContext()
-            self.context_for_instants = ContextForInstants
+            self.context_for_instants = (
+                self.LookForAlternativeInstanceContext())
 
         # Income statement date for current fiscal year, year to date
         self.fields['IncomeStatementPeriodYTD'] = StartDateYTD
 
-        ContextForDurations = UseContext
-        self.context_for_durations = ContextForDurations
-        return ContextForDurations != 'ERROR'
+        self.context_for_durations = UseContext
+        return self.context_for_durations != 'ERROR'
 
     def LookForAlternativeInstanceContext(self):
         # This deals with the situation where no instance context has no
@@ -318,6 +336,6 @@ class XBRL(object):
             # Found possible contexts
             something = self.getNode(
                 "//us-gaap:Assets[@contextRef='" + oNode_Alt.get("id") + "']")
-            if something:
+            if something is not None:
                 #MsgBox "Use this context: " + oNode_Alt.selectSingleNode("@id").text
                 return oNode_Alt.get("id")

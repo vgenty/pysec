@@ -30,7 +30,12 @@ class FundamentantalAccountingConcepts(object):
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
         for fieldname in fieldnames:
-            val = self.xbrl.GetFactValue(fieldname, concept_period_type)
+            use_concept = concept_period_type
+            # HACK: if fieldname is a tuple, split it to get the concept period
+            # type.
+            if isinstance(fieldname, tuple):
+                fieldname, use_concept = fieldname
+            val = self.xbrl.GetFactValue(fieldname, use_concept)
             if val != None:
                 break
         if val == None:
@@ -527,6 +532,14 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:AccountsReceivableNet',
                 'us-gaap:AccountsReceivableNetCurrent',
                 'us-gaap:AccountsNotesAndLoansReceivableNetCurrent',
+            ],
+            'Instant'
+        )
+
+        self.xbrl.fields['SharesOutstanding'] = self.first_valid_field(
+            [
+                ('dei:EntityCommonStockSharesOutstanding', 'DEI'),
+                'us-gaap:CommonStockSharesOutstanding',
             ],
             'Instant'
         )

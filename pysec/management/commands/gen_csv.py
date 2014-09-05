@@ -37,7 +37,7 @@ def create_pkl():
     for ii in (Index
                .objects
                .filter(form__in=['10-Q', '10-K'],
-                       cik__in=sym_to_ciks.values())
+                       cik__in=[320193])  # sym_to_ciks.values())
                .order_by('quarter', 'name')
                # .order_by('?')
     ):

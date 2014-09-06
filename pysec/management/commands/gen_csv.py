@@ -22,6 +22,7 @@ EXCLUDE_FIELDS = {
     'DocumentFiscalPeriodFocus',
     'DocumentFiscalYearFocus',
     'DocumentType',
+    'EmptyFieldNames',
     'EntityCentralIndexKey',
     'EntityFilerCategory',
     'EntityRegistrantName',
@@ -39,8 +40,8 @@ def create_pkl():
                .filter(form__in=['10-Q', '10-K'],
                        cik__in=sym_to_ciks.values())
                        # cik__in=[320193])  # sym_to_ciks.values())
-               # .order_by('quarter', 'name')
-               .order_by('?')
+               .order_by('quarter', 'name')
+               # .order_by('?')
     ):
         print ii.name, ii.quarter, ii.cik, ii.local_dir
         ff = ii.financial_fields
@@ -71,9 +72,13 @@ class Command(NoArgsCommand):
 
         # Find all fields mentioned in any form for this symbol
         fields = set()
+        empty_fields = defaultdict(int)
+
         for sym in forms:
             print sym
             for form in forms[sym]:
+                for fieldname in form['EmptyFieldNames']:
+                    empty_fields[fieldname] += 1
                 print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 
@@ -85,3 +90,8 @@ class Command(NoArgsCommand):
                 csv.writeheader()
                 csv.writerows(sorted(forms[sym],
                                      key=lambda x: x['DocumentPeriodEndDate']))
+        for k, v in sorted(empty_fields.items(), key=lambda x: x[1],
+                           reverse=True):
+            print '{}: {}'.format(k, v)
+        print
+        print 'Total empty fields: {}'.format(sum(empty_fields.values()))

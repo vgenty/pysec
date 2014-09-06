@@ -249,10 +249,6 @@ class XBRL(object):
 
             ContextID = i.get('contextRef')
 
-            # ContextPeriod = self.getNode(
-            #     "//xbrli:context[@id='" + ContextID + "']/xbrli:period/xbrli:endDate")
-            # print ContextPeriod
-
             # Nodelist of all the contexts of the facts referenced above
             oNodelist3 = self.getNodeList(
                 "//xbrli:context[@id='" + ContextID + "']")

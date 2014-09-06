@@ -307,6 +307,9 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:OperatingExpenses',
                 'us-gaap:OperatingCostsAndExpenses',
+                'us-gaap:OtherCostAndExpenseOperating',
+                'us-gaap:GeneralAndAdministrativeExpense',
+                'us-gaap:SellingGeneralAndAdministrativeExpense',
                 'us-gaap:OtherSellingGeneralAndAdministrativeExpense',
             ],
             'Duration'
@@ -1173,7 +1176,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        # if self.xbrl.fields['Equity'] == 0:
+        # if self.xbrl.fields['OperatingExpenses'] == 0:
         #     import ipdb; ipdb.set_trace()
         # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
         # if len(failed_tests) >= 4:

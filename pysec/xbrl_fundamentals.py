@@ -126,7 +126,12 @@ class FundamentantalAccountingConcepts(object):
 
         # Liabilities
         self.xbrl.fields['Liabilities'] = self.first_valid_field(
-            ["us-gaap:Liabilities"], 'Instant')
+            [
+                'us-gaap:Liabilities',
+                'us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent',
+            ],
+            'Instant'
+        )
 
         # CurrentLiabilities
         self.xbrl.fields['CurrentLiabilities'] = self.first_valid_field(
@@ -211,11 +216,13 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = 0
 
         # EquityAttributableToParent
-        self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:StockholdersEquity", "Instant")
-        if self.xbrl.fields['EquityAttributableToParent'] == None:
-            self.xbrl.fields['EquityAttributableToParent'] = self.xbrl.GetFactValue("us-gaap:LiabilitiesAndPartnersCapital", "Instant")
-            if self.xbrl.fields['EquityAttributableToParent'] == None:
-                self.xbrl.fields['EquityAttributableToParent'] = 0
+        self.xbrl.fields['EquityAttributableToParent'] = self.first_valid_field(
+            [
+                'us-gaap:StockholdersEquity',
+                'us-gaap:LiabilitiesAndPartnersCapital',
+            ],
+            'Instant'
+        )
 
         # Income statement
 
@@ -226,6 +233,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:SalesRevenueNet',
                 'us-gaap:SalesRevenueGoodsNet',
                 'us-gaap:SalesRevenueServicesNet',
+                'us-gaap:SalesRevenueEnergyServices',
                 'us-gaap:RevenuesNetOfInterestExpense',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
                 'us-gaap:HealthCareOrganizationRevenue',
@@ -1042,34 +1050,6 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['NetCashFlowsInvesting'] +
                 self.xbrl.fields['NetCashFlowsFinancing'])
 
-        # Key ratios
-        # TODO: these should be moved to R
-        try:
-            self.xbrl.fields['ROE'] = (self.xbrl.fields['NetIncomeLoss'] /
-                                       self.xbrl.fields['Equity'])
-        except:
-            pass
-
-        try:
-            self.xbrl.fields['ROA'] = (self.xbrl.fields['NetIncomeLoss'] /
-                                       self.xbrl.fields['Assets'])
-        except:
-            pass
-
-        try:
-            self.xbrl.fields['ROS'] = (self.xbrl.fields['NetIncomeLoss'] /
-                                       self.xbrl.fields['Revenues'])
-        except:
-            pass
-
-        try:
-            # http://www.investopedia.com/terms/s/sustainablegrowthrate.asp
-            self.xbrl.fields['SGR'] = (
-                self.xbrl.fields['ROS'] *
-                (1 + ((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))) / ((1 / (self.xbrl.fields['Revenues'] / self.xbrl.fields['Assets'])) - (((self.xbrl.fields['NetIncomeLoss'] / self.xbrl.fields['Revenues']) * (1 + (((self.xbrl.fields['Assets'] - self.xbrl.fields['Equity']) / self.xbrl.fields['Equity']))))))
-        except:
-            pass
-
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
                        (self.xbrl.fields['EquityAttributableToParent'] +
@@ -1193,8 +1173,8 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        if self.xbrl.fields['Equity'] == 0:
-            import ipdb; ipdb.set_trace()
+        # if self.xbrl.fields['Equity'] == 0:
+        #     import ipdb; ipdb.set_trace()
         # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
         # if len(failed_tests) >= 4:
         #     print ('\n'.join(['Too many check failures:',

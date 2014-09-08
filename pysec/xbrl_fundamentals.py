@@ -129,6 +129,11 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:Liabilities',
                 'us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent',
+                # TODO: this obviously includes noncurrent liabilities - get
+                # those out of here --
+                # 1004434/0001004434-14-000015/amg-20140630.xml
+                ('us-gaap:AccountsPayableAndAccruedLiabilities'
+                 'CurrentAndNoncurrent'),
             ],
             'Instant'
         )
@@ -250,6 +255,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:FoodAndBeverageRevenue',
                 'us-gaap:RevenueMineralSales',
                 'us-gaap:AssetManagementFees',
+                'us-gaap:AssetManagementFees1',   # F you, AMG
                 'us-gaap:RevenuesExcludingInterestAndDividends',
                 # Company-specific revenues? FML
                 'fcx:RevenuesFCX',

@@ -29,6 +29,18 @@ class XBRL(object):
             self.FundamentantalAccountingConcepts = (
                 FundamentantalAccountingConcepts(self))
 
+    def not_set(self, field_name):
+        """
+        Setting a field to zero is valid, so we check for int zero
+        vs. float zero. Sounds like this sucks, so hopefully we can come up
+        with something better soon.
+        """
+        val = self.fields[field_name]
+        return val == 0 and isinstance(val, (int, long))
+
+    def is_set(self, field_name):
+        return not self.not_set(field_name)
+
     def loadYear(self, yearminus=0):
         got_context = False
         # Try the end period the report tells us

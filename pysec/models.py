@@ -129,9 +129,8 @@ class Index(models.Model):
         x = xbrl.XBRL(filepath)
         # TODO: this belongs in xbrl
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
-        x.fields['EmptyFieldNames'] = [k for k, v in x.fields.iteritems()
-                                       if v == 0 and
-                                       isinstance(v, (int, long))]
+        x.fields['EmptyFieldNames'] = [k for k in x.fields.iterkeys()
+                                       if x.not_set(k)]
         return x
 
     @property

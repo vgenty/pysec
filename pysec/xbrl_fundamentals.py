@@ -30,18 +30,6 @@ class FundamentantalAccountingConcepts(object):
         print '{} impute {}'.format(impute_passes,
                                     'pass' if impute_passes == 1 else 'passes')
 
-    def not_set(self, field_name):
-        """
-        Setting a field to zero is valid, so we check for int zero
-        vs. float zero. Sounds like this sucks, so hopefully we can come up
-        with something better soon.
-        """
-        val = self.xbrl.fields[field_name]
-        return val == 0 and isinstance(val, (int, long))
-
-    def is_set(self, field_name):
-        return not self.not_set(field_name)
-
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
         for fieldname in fieldnames:
@@ -583,7 +571,7 @@ class FundamentantalAccountingConcepts(object):
         )
         # MARC: If we don't have net accounts receivable, try for gross, and
         # subtract doubtful accounts
-        if self.not_set('AccountsReceivable'):
+        if self.xbrl.not_set('AccountsReceivable'):
             self.xbrl.fields['AccountsReceivable'] = (
                 self.first_valid_field(
                     [
@@ -602,7 +590,7 @@ class FundamentantalAccountingConcepts(object):
 
         # MARC: Even more accounts receivable attempts. Added together, this
         # time
-        if self.not_set('AccountsReceivable'):
+        if self.xbrl.not_set('AccountsReceivable'):
             self.xbrl.fields['AccountsReceivable'] = (
                 self.first_valid_field(
                     [
@@ -820,8 +808,8 @@ class FundamentantalAccountingConcepts(object):
 
         # MARC - based this off of BS5 check
         if (self.xbrl.fields['Equity'] == 0 and
-                self.is_set('LiabilitiesAndEquity') and
-                self.is_set('Liabilities')):
+                self.xbrl.is_set('LiabilitiesAndEquity') and
+                self.xbrl.is_set('Liabilities')):
             self.xbrl.fields['Equity'] = (
                 self.xbrl.fields['LiabilitiesAndEquity'] -
                 self.xbrl.fields['Liabilities'] -
@@ -932,7 +920,7 @@ class FundamentantalAccountingConcepts(object):
         # Impute: GrossProfit
         if (self.xbrl.fields['GrossProfit'] == 0 and
                 self.xbrl.fields['Revenues'] != 0 and
-                self.is_set('CostOfRevenue')):
+                self.xbrl.is_set('CostOfRevenue')):
             self.xbrl.fields['GrossProfit'] = (
                 self.xbrl.fields['Revenues'] -
                 self.xbrl.fields['CostOfRevenue'])
@@ -940,13 +928,13 @@ class FundamentantalAccountingConcepts(object):
         # Impute: Revenues
         if (self.xbrl.fields['GrossProfit'] != 0 and
                 self.xbrl.fields['Revenues'] == 0 and
-                self.is_set('CostOfRevenue')):
+                self.xbrl.is_set('CostOfRevenue')):
             self.xbrl.fields['Revenues'] = (self.xbrl.fields['GrossProfit'] +
                                             self.xbrl.fields['CostOfRevenue'])
         # Impute: CostOfRevenue
         if (self.xbrl.fields['GrossProfit'] != 0 and
                 self.xbrl.fields['Revenues'] != 0 and
-                self.not_set('CostOfRevenue')):
+                self.xbrl.not_set('CostOfRevenue')):
             self.xbrl.fields['CostOfRevenue'] = (
                 self.xbrl.fields['GrossProfit'] + self.xbrl.fields['Revenues'])
 
@@ -955,7 +943,7 @@ class FundamentantalAccountingConcepts(object):
         # single-step)
         if (self.xbrl.fields['GrossProfit'] == 0
                 and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.is_set('CostOfRevenue')
+                and self.xbrl.is_set('CostOfRevenue')
                 and self.xbrl.fields['OperatingExpenses'] != 0):
             self.xbrl.fields['CostsAndExpenses'] = (
                 self.xbrl.fields['CostOfRevenue'] +
@@ -965,7 +953,7 @@ class FundamentantalAccountingConcepts(object):
         # and operating expenses
         if (self.xbrl.fields['CostsAndExpenses'] == 0
                 and self.xbrl.fields['OperatingExpenses'] != 0
-                and self.is_set('CostOfRevenue')):
+                and self.xbrl.is_set('CostOfRevenue')):
             self.xbrl.fields['CostsAndExpenses'] = (
                 self.xbrl.fields['CostOfRevenue'] +
                 self.xbrl.fields['OperatingExpenses'])
@@ -986,7 +974,7 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues
-        if (self.is_set('CostOfRevenue') and
+        if (self.xbrl.is_set('CostOfRevenue') and
                 self.xbrl.fields['CostsAndExpenses'] != 0 and
                 self.xbrl.fields['OperatingExpenses'] == 0):
             self.xbrl.fields['OperatingExpenses'] = (
@@ -1007,7 +995,7 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['OperatingExpenses'])
 
         # MARC: last-ditch CostOfRevenue
-        if (self.not_set('CostOfRevenue') and
+        if (self.xbrl.not_set('CostOfRevenue') and
                 self.xbrl.fields['CostsAndExpenses'] != 0):
             self.xbrl.fields['CostOfRevenue'] = (
                 self.xbrl.fields['CostsAndExpenses'] -

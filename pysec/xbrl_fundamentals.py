@@ -370,6 +370,7 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['InterestAndDebtExpense'] = self.first_valid_field(
             [
                 'us-gaap:InterestAndDebtExpense',
+                'us-gaap:InterestExpense',
             ],
             'Duration',
         )
@@ -557,6 +558,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:AvailableForSaleSecuritiesCurrent',
                 ('us-gaap:AvailableForSaleSecuritiesAndHeldTo'
                  'MaturitySecurities'),
+                'us-gaap:MarketableSecuritiesCurrent',
             ],
             'Instant'
         )
@@ -570,8 +572,8 @@ class FundamentantalAccountingConcepts(object):
             ],
             'Instant'
         )
-        # If we don't have net accounts receivable, try for gross, and subtract
-        # doubtful accounts
+        # MARC: If we don't have net accounts receivable, try for gross, and
+        # subtract doubtful accounts
         if self.not_set('AccountsReceivable'):
             self.xbrl.fields['AccountsReceivable'] = (
                 self.first_valid_field(
@@ -588,9 +590,6 @@ class FundamentantalAccountingConcepts(object):
                     'Instant'
                 )
             )
-
-        # TODO: if we only got gross accounts receivable, subtract
-        # us-gaap:AllowanceForDoubtfulAccountsReceivableCurrent
 
         # Shares outstanding
         self.xbrl.fields['SharesOutstanding'] = self.first_valid_field(
@@ -717,8 +716,8 @@ class FundamentantalAccountingConcepts(object):
         # Added to fix Assets
         if (self.xbrl.fields['Assets'] == 0 and
                 self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-                    (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
+                (self.xbrl.fields['CurrentAssets'] ==
+                 self.xbrl.fields['LiabilitiesAndEquity'])):
             self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
 
         # MARC - same, but in reverse
@@ -1211,8 +1210,8 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        # if self.xbrl.fields['OperatingExpenses'] == 0:
-        #     import ipdb; ipdb.set_trace()
+        if self.xbrl.fields['AccountsReceivable'] == 0:
+            import ipdb; ipdb.set_trace()
         # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
         # if len(failed_tests) >= 4:
         #     print ('\n'.join(['Too many check failures:',

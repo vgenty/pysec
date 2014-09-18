@@ -1,7 +1,10 @@
-from pysec.models import *
+import os
+import urllib
+
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
-import urllib, os, os.path
+
+from pysec.models import Index
 from zipfile import ZipFile
 
 from sym_to_ciks import sym_to_ciks
@@ -9,21 +12,26 @@ from sym_to_ciks import sym_to_ciks
 CIKS = sym_to_ciks.values()
 
 DATA_DIR = settings.DATA_DIR
-def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
-# Gets the list of filings and download locations for the given year and quarter
-def get_filing_list(year,qtr):
-    url='ftp://ftp.sec.gov/edgar/full-index/%d/QTR%d/company.zip' % (year,qtr)
-    quarter = "%s%s" % (year,qtr)
+
+def removeNonAscii(s):
+    return "".join(i for i in s if ord(i) < 128)
+
+
+# Gets the list of filings and download locations for the given year and
+# quarter
+def get_filing_list(year, qtr):
+    url = 'ftp://ftp.sec.gov/edgar/full-index/%d/QTR%d/company.zip' % (year, qtr)
+    quarter = "%s%s" % (year, qtr)
 
     print url
 
     # Download the data and save to a file
-    fn = '%s/company_%d_%d.zip' % (DATA_DIR, year,qtr)
+    fn = '%s/company_%d_%d.zip' % (DATA_DIR, year, qtr)
 
     if not os.path.exists(fn):
         compressed_data = urllib.urlopen(url).read()
-        fileout = file(fn, 'w')
+        fileout = open(fn, 'w')
         fileout.write(compressed_data)
         fileout.close()
 
@@ -62,7 +70,7 @@ class Command(NoArgsCommand):
     help = "Download new files representing one month of 990s, ignoring months we already have. Each quarter contains hundreds of thousands of filings; will take a while to run. "
 
 
-    def handle_noargs(self, **options):
+    def handle_noargs(self, **_options):
 
         print "LIMITING TO S&P 500 CIKS"
 

@@ -4,6 +4,9 @@ from __future__ import unicode_literals
 # all? Some of the checks seem to imply not -- they would work with 0
 # COGS. We're using _not_set and _is_set based on this assumption right now.
 
+# http://xbrl.squarespace.com/journal/2013/4/4/fundamental-accounting-relations.html
+# seems useful
+
 import difflib
 import pprint
 
@@ -250,6 +253,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:SalesRevenueNet',
                 'us-gaap:SalesRevenueGoodsNet',
                 'us-gaap:SalesRevenueServicesNet',
+                'us-gaap:SalesRevenueServicesGross ',
                 'us-gaap:SalesRevenueEnergyServices',
                 'us-gaap:RevenuesNetOfInterestExpense',
                 'us-gaap:RegulatedAndUnregulatedOperatingRevenue',
@@ -476,11 +480,13 @@ class FundamentantalAccountingConcepts(object):
         )
 
         # PreferredStockDividendsAndOtherAdjustments
-        self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = self.first_valid_field(
-            [
-                'us-gaap:PreferredStockDividendsAndOtherAdjustments',
-            ],
-            'Duration',
+        self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = (
+            self.first_valid_field(
+                [
+                    'us-gaap:PreferredStockDividendsAndOtherAdjustments',
+                ],
+                'Duration',
+            )
         )
 
         # NetIncomeAttributableToNoncontrollingInterest
@@ -569,6 +575,9 @@ class FundamentantalAccountingConcepts(object):
                 'Us-gaap:AccountsReceivableNet',
                 'us-gaap:AccountsReceivableNetCurrent',
                 'us-gaap:AccountsNotesAndLoansReceivableNetCurrent',
+                'us-gaap:ReceivablesNetCurrent',
+                'us-gaap:PremiumsAndOtherReceivablesNet',
+                'us-gaap:PremiumsReceivableAtCarryingValue',
             ],
             'Instant'
         )
@@ -586,6 +595,25 @@ class FundamentantalAccountingConcepts(object):
                     [
                         ('us-gaap:AllowanceForDoubtfulAccounts'
                          'ReceivableCurrent'),
+                    ],
+                    'Instant'
+                )
+            )
+
+        # MARC: Even more accounts receivable attempts. Added together, this
+        # time
+        if self.not_set('AccountsReceivable'):
+            self.xbrl.fields['AccountsReceivable'] = (
+                self.first_valid_field(
+                    [
+                        'us-gaap:ReceivablesFromCustomers',
+                    ],
+                    'Instant'
+                ) +
+                self.first_valid_field(
+                    [
+                        ('us-gaap:ReceivablesFromBrokersDealers'
+                         'AndClearingOrganizations'),
                     ],
                     'Instant'
                 )
@@ -1210,8 +1238,8 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
 
-        if self.xbrl.fields['AccountsReceivable'] == 0:
-            import ipdb; ipdb.set_trace()
+        # if self.xbrl.fields['IntangibleAssets'] == 0:
+        #     import ipdb; ipdb.set_trace()
         # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
         # if len(failed_tests) >= 4:
         #     print ('\n'.join(['Too many check failures:',

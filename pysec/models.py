@@ -130,7 +130,8 @@ class Index(models.Model):
         # TODO: this belongs in xbrl
         x.fields['DocumentPeriodEndDate'] = x.fields['BalanceSheetDate']
         x.fields['EmptyFieldNames'] = [k for k, v in x.fields.iteritems()
-                                       if v == 0]
+                                       if v == 0 and
+                                       isinstance(v, (int, long))]
         return x
 
     @property

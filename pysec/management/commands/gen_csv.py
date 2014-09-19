@@ -26,6 +26,7 @@ EXCLUDE_FIELDS = {
     'EntityCentralIndexKey',
     'EntityFilerCategory',
     'EntityRegistrantName',
+    'FailedChecks',
     'FiscalYear',
     'IncomeStatementPeriodYTD',
     'TradingSymbol',
@@ -39,7 +40,7 @@ def create_pkl():
                .objects
                .filter(form__in=['10-Q', '10-K'],
                        cik__in=sym_to_ciks.values())
-                       # cik__in=[1168213])
+                       # cik__in=[1390777])
                .order_by('quarter', 'name')
                # .order_by('?')
     ):
@@ -73,12 +74,14 @@ class Command(NoArgsCommand):
         # Find all fields mentioned in any form for this symbol
         fields = set()
         empty_fields = defaultdict(int)
+        total_failed_checks = 0
 
         for sym in forms:
             print sym
             for form in forms[sym]:
                 for fieldname in form['EmptyFieldNames']:
                     empty_fields[fieldname] += 1
+                total_failed_checks += form['FailedChecks']
                 print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 
@@ -95,3 +98,4 @@ class Command(NoArgsCommand):
             print '{}: {}'.format(k, v)
         print
         print 'Total empty fields: {}'.format(sum(empty_fields.values()))
+        print 'Total failed checks: {}'.format(total_failed_checks)

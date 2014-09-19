@@ -987,14 +987,17 @@ class FundamentantalAccountingConcepts(object):
                       'NetCashFlowsInvesting',
                       'NetCashFlowsFinancing'))
         self._impute(('NetCashFlow'),
-                     ('NetCashFlowsOperating',
-                      'NetCashFlowsInvesting'))
-        self._impute(('NetCashFlow'),
-                     ('NetCashFlowsOperating',
+                     (('NetCashFlowsOperating', 'zerook'),
+                      'NetCashFlowsInvesting',
                       'NetCashFlowsFinancing'))
         self._impute(('NetCashFlow'),
-                     ('NetCashFlowsInvesting',
+                     ('NetCashFlowsOperating',
+                      ('NetCashFlowsInvesting', 'zerook'),
                       'NetCashFlowsFinancing'))
+        self._impute(('NetCashFlow'),
+                     ('NetCashFlowsOperating',
+                      'NetCashFlowsInvesting',
+                      ('NetCashFlowsFinancing', 'zerook')))
 
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
@@ -1118,10 +1121,11 @@ class FundamentantalAccountingConcepts(object):
         test_names = [n for n in locals() if n not in ['self', 'failed']]
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
+        failed_checks = [k for k, v in test_results.iteritems() if v != 0]
+        self.xbrl.fields['FailedChecks'] = len(failed_checks)
 
         # if self.xbrl.fields['IntangibleAssets'] == 0:
         #     import ipdb; ipdb.set_trace()
-        # failed_tests = [k for k, v in test_results.iteritems() if v != 0]
-        # if len(failed_tests) >= 4:
+        # if len(failed_checks) >= 4:
         #     print ('\n'.join(['Too many check failures:',
-        #                       ', '.join(failed_tests)]))
+        #                       ', '.join(failed_checks)]))

@@ -922,36 +922,16 @@ class FundamentantalAccountingConcepts(object):
         # Impute: CostsAndExpenses (would NEVER have costs and expenses if has
         # gross profit, gross profit is multi-step and costs and expenses is
         # single-step)
-        if (self.xbrl.fields['GrossProfit'] == 0
-                and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.is_set('CostOfRevenue')
-                and self.xbrl.fields['OperatingExpenses'] != 0):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['CostOfRevenue'] +
-                self.xbrl.fields['OperatingExpenses'])
-
-        # Impute: CostsAndExpenses based on existence of both costs of revenues
-        # and operating expenses
-        if (self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.fields['OperatingExpenses'] != 0
-                and self.xbrl.is_set('CostOfRevenue')):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['CostOfRevenue'] +
-                self.xbrl.fields['OperatingExpenses'])
+        self._impute(('CostsAndExpenses'),
+                     ('OperatingExpenses', 'CostOfRevenue'))
 
         # Impute: CostsAndExpenses
-        if (self.xbrl.fields['GrossProfit'] == 0
-                and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.fields['Revenues'] != 0
-                and self.xbrl.fields['OperatingIncomeLoss'] != 0
-                # MARC - this is sometimes entirely zero, let's see if it's bad
-                # to ignore it
-                # and self.xbrl.fields['OtherOperatingIncome'] != 0
-        ):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['Revenues'] -
-                self.xbrl.fields['OperatingIncomeLoss'] -
-                self.xbrl.fields['OtherOperatingIncome'])
+        if self.xbrl.fields['GrossProfit'] == 0:
+            self._impute(('Revenues'),
+                         ('CostsAndExpenses', 'OperatingIncomeLoss',
+                          'OtherOperatingIncome'))
+            self._impute(('Revenues'),
+                         ('CostsAndExpenses', 'OperatingIncomeLoss'))
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues
@@ -972,11 +952,11 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['OperatingExpenses'])
 
         # Impute: IncomeBeforeEquityMethodInvestments
-        if (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and
-                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0):
-            self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = (
-                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
-                self.xbrl.fields['IncomeFromEquityMethodInvestments'])
+        self._impute(('IncomeBeforeEquityMethodInvestments',
+                      'IncomeFromEquityMethodInvestments'),
+                     ('IncomeFromContinuingOperationsBeforeTax'))
+        self._impute(('IncomeBeforeEquityMethodInvestments'),
+                     ('IncomeFromContinuingOperationsBeforeTax'))
 
         # Impute: IncomeBeforeEquityMethodInvestments
         self._impute(('IncomeFromContinuingOperationsBeforeTax'),

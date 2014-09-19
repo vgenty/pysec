@@ -42,6 +42,10 @@ class FundamentantalAccountingConcepts(object):
         attempt to impute any missing values.
         """
 
+        def format_field(f):
+            return '{}({}){}'.format(
+                f, self.xbrl.fields[f], 'Z' if f in zero_ok_fields else '')
+
         if not isinstance(left_side, tuple):
             left_side = (left_side,)
         if not isinstance(right_side, tuple):
@@ -80,10 +84,8 @@ class FundamentantalAccountingConcepts(object):
             value = left_side_sum - right_side_sum
         print '{}: Imputed {}: {}  from {} == {}'.format(
             self.impute_count, field, value,
-            '+'.join(
-                ['{}({})'.format(f, self.xbrl.fields[f]) for f in left_side]),
-            '+'.join(
-                ['{}({})'.format(f, self.xbrl.fields[f]) for f in right_side])
+            '+'.join([format_field(f) for f in left_side]),
+            '+'.join([format_field(f) for f in right_side])
         )
         self.xbrl.fields[field] = value
         # TODO: get rid of this
@@ -774,15 +776,9 @@ class FundamentantalAccountingConcepts(object):
         # BS Adjustments
         # if total assets is missing, try using current assets
         if ((self.xbrl.fields['Assets'] ==
-             self.xbrl.fields['LiabilitiesAndEquity']) and
-            (self.xbrl.fields['CurrentAssets'] ==
-             self.xbrl.fields['LiabilitiesAndEquity'])):
-            self._impute(('Assets'), ('CurrentAssets'))
-
-        # Added to fix Assets
-        if (self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-            (self.xbrl.fields['CurrentAssets'] ==
-             self.xbrl.fields['LiabilitiesAndEquity'])):
+             self.xbrl.fields['LiabilitiesAndEquity']) or
+                (self.xbrl.fields['CurrentAssets'] ==
+                 self.xbrl.fields['LiabilitiesAndEquity'])):
             self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets even more
@@ -799,8 +795,8 @@ class FundamentantalAccountingConcepts(object):
 
         self._impute(('Equity'),
                      ('EquityAttributableToParent',
-                      'EquityAttributableToNoncontrollingInterest'))
-        self._impute(('Equity'), ('EquityAttributableToParent'))
+                      ('EquityAttributableToNoncontrollingInterest',
+                       'zerook')))
 
         # MARC - based this off of BS5 check
         self._impute(('LiabilitiesAndEquity'),
@@ -824,7 +820,8 @@ class FundamentantalAccountingConcepts(object):
         # exist)
         self._impute(('NetIncomeAttributableToParent'),
                      ('NetIncomeAvailableToCommonStockholdersBasic',
-                      ('PreferredStockDividendsAndOtherAdjustments', 'zerook')))
+                      ('PreferredStockDividendsAndOtherAdjustments',
+                       'zerook')))
 
         # Impute NetIncomeLoss
         self._impute(('NetIncomeLoss'),
@@ -845,14 +842,13 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: comprehensive income
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:
-            self.xbrl.fields['ComprehensiveIncome'] = self.xbrl.fields['NetIncomeLoss']
+            self.xbrl.fields['ComprehensiveIncome'] = (
+                self.xbrl.fields['NetIncomeLoss'])
 
         # Impute: other comprehensive income
-        if (self.xbrl.fields['ComprehensiveIncome'] != 0 and
-                self.xbrl.fields['OtherComprehensiveIncome'] == 0):
-            self.xbrl.fields['OtherComprehensiveIncome'] = (
-                self.xbrl.fields['ComprehensiveIncome'] -
-                self.xbrl.fields['NetIncomeLoss'])
+        self._impute(('ComprehensiveIncome'),
+                     ('OtherComprehensiveIncome',
+                      ('NetIncomeLoss', 'zerook')))
 
         # Impute: comprehensive income attributable to parent if it does not
         # exist

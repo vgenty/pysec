@@ -6,12 +6,14 @@ import re
 class XBRL(object):
 
     def __init__(self, XBRLInstanceLocation):
-
         self.XBRLInstanceLocation = XBRLInstanceLocation
+        self.parse()
+
+    def parse(self):
         self.fields = {}
 
         parser = etree.XMLParser(huge_tree=True)
-        self.oInstance = etree.parse(XBRLInstanceLocation,
+        self.oInstance = etree.parse(self.XBRLInstanceLocation,
                                      parser=parser).getroot()
         self.ns = {}
         for k in self.oInstance.nsmap.keys():
@@ -28,6 +30,7 @@ class XBRL(object):
         if got_context:
             self.FundamentantalAccountingConcepts = (
                 FundamentantalAccountingConcepts(self))
+
 
     def not_set(self, field_name):
         """

@@ -42,15 +42,18 @@ class FundamentantalAccountingConcepts(object):
         attempt to impute any missing values.
         """
 
-        # TODO: allow specifying of values that are ok to be zero
-
         if not isinstance(left_side, tuple):
             left_side = (left_side,)
         if not isinstance(right_side, tuple):
             right_side = (right_side,)
 
+        zero_ok_fields = [f[0] for f in left_side + right_side
+                          if isinstance(f, tuple) and f[1] == 'zerook']
+        left_side = [f[0] if isinstance(f, tuple) else f for f in left_side]
+        right_side = [f[0] if isinstance(f, tuple) else f for f in right_side]
+
         unset_fields = [f for f in left_side + right_side
-                        if self.xbrl.not_set(f)]
+                        if self.xbrl.not_set(f) and f not in zero_ok_fields]
         if len(unset_fields) != 1:
             # Nothing to do, or we can't do it
             return
@@ -755,20 +758,11 @@ class FundamentantalAccountingConcepts(object):
 
         # BS Adjustments
         # if total assets is missing, try using current assets
-        if (self.xbrl.fields['Assets'] == 0
-                and (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])
-                and (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0
-                and (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])
-                and (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+        if ((self.xbrl.fields['Assets'] ==
+             self.xbrl.fields['LiabilitiesAndEquity']) and
+            (self.xbrl.fields['CurrentAssets'] ==
+             self.xbrl.fields['LiabilitiesAndEquity'])):
+            self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets
         if (self.xbrl.fields['Assets'] == 0 and
@@ -806,21 +800,16 @@ class FundamentantalAccountingConcepts(object):
 
         self._impute(('LiabilitiesAndEquity'), ('Assets'))
 
-        self._impute(('Equity'), ('EquityAttributableToParent',
-                                   'EquityAttributableToNoncontrollingInterest'
-                                   ))
+        self._impute(('Equity'),
+                     ('EquityAttributableToParent',
+                      'EquityAttributableToNoncontrollingInterest'))
         self._impute(('Equity'), ('EquityAttributableToParent'))
 
         # MARC - based this off of BS5 check
-        if (self.xbrl.fields['Equity'] == 0 and
-                self.xbrl.is_set('LiabilitiesAndEquity') and
-                self.xbrl.is_set('Liabilities')):
-            self.xbrl.fields['Equity'] = (
-                self.xbrl.fields['LiabilitiesAndEquity'] -
-                self.xbrl.fields['Liabilities'] -
-                self.xbrl.fields['CommitmentsAndContingencies'] -
-                self.xbrl.fields['TemporaryEquity']
-            )
+        self._impute(('LiabilitiesAndEquity'),
+                     ('Equity', 'Liabilities',
+                      ('CommitmentsAndContingencies', 'zerook'),
+                      ('TemporaryEquity', 'zerook')))
 
         # if total liabilities is missing, figure it out based on liabilities
         # and equity
@@ -841,10 +830,9 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['CurrentLiabilities'])
 
         # Added to fix liabilities based on current liabilities
-        self._impute(('Liabilities'), ('CurrentLiabilities',
-                                        'NoncurrentLiabilities'))
-        self._impute(('Liabilities'), ('CurrentLiabilities'))
-
+        self._impute(('Liabilities'),
+                     ('CurrentLiabilities',
+                      ('NoncurrentLiabilities', 'zerook')))
 
         ######### Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense

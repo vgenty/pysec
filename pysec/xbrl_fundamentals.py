@@ -811,10 +811,11 @@ class FundamentantalAccountingConcepts(object):
 
         ######### Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense
-        self.xbrl.fields[
-            'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
-                self.xbrl.fields['NonoperatingIncomeLoss'] +
-                self.xbrl.fields['InterestAndDebtExpense'])
+        if self.impute_count == 0:
+            self.xbrl.fields[
+                'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
+                    self.xbrl.fields['NonoperatingIncomeLoss'] +
+                    self.xbrl.fields['InterestAndDebtExpense'])
 
         # Impute: Net income available to common stockholders (if it does not
         # exist)
@@ -947,11 +948,12 @@ class FundamentantalAccountingConcepts(object):
                      (('NonoperatingIncomeLoss', 'zerook'),
                       'IncomeBeforeEquityMethodInvestments'))
 
-        self.xbrl.fields[
-            'NonoperatingIncomePlusInterestAndDebtExpense'
-            'PlusIncomeFromEquityMethodInvestments'] = (
-                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
-                self.xbrl.fields['OperatingIncomeLoss'])
+        if self.impute_count == 0:
+            self.xbrl.fields[
+                'NonoperatingIncomePlusInterestAndDebtExpense'
+                'PlusIncomeFromEquityMethodInvestments'] = (
+                    self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
+                    self.xbrl.fields['OperatingIncomeLoss'])
 
         # NonoperatingIncomeLossPlusInterestAndDebtExpense
         self._impute(('NonoperatingIncomeLossPlusInterestAndDebtExpense',

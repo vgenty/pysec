@@ -995,9 +995,6 @@ class FundamentantalAccountingConcepts(object):
         self._impute(('NetCashFlow'),
                      ('NetCashFlowsInvesting',
                       'NetCashFlowsFinancing'))
-        self._impute(('NetCashFlow'), ('NetCashFlowsOperating'))
-        self._impute(('NetCashFlow'), ('NetCashFlowsInvesting'))
-        self._impute(('NetCashFlow'), ('NetCashFlowsFinancing'))
 
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -

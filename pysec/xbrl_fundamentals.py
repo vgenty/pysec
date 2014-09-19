@@ -687,19 +687,14 @@ class FundamentantalAccountingConcepts(object):
         ### Cash flow statement
 
         # NetCashFlow
-        self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-            "us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease",
-            "Duration")
-        if self.xbrl.fields['NetCashFlow'] == None:
-            self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                "us-gaap:CashPeriodIncreaseDecrease",
-                "Duration")
-            if self.xbrl.fields['NetCashFlow'] == None:
-                self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                    "us-gaap:NetCashProvidedByUsedInContinuingOperations",
-                    "Duration")
-                if self.xbrl.fields['NetCashFlow'] == None:
-                    self.xbrl.fields['NetCashFlow'] = 0
+        self.xbrl.fields['NetCashFlow'] = self.first_valid_field(
+            [
+                'us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease',
+                'us-gaap:CashPeriodIncreaseDecrease',
+                'us-gaap:NetCashProvidedByUsedInContinuingOperations',
+            ],
+            'Duration'
+        )
 
         # NetCashFlowsOperating
         self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.GetFactValue(
@@ -782,8 +777,8 @@ class FundamentantalAccountingConcepts(object):
             self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets even more
-        if (self.xbrl.fields['NoncurrentAssets'] == 0
-                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
+        if (self.xbrl.not_set('NoncurrentAssets')
+                and self.xbrl.is_set('LiabilitiesAndEquity')
                 and (self.xbrl.fields['LiabilitiesAndEquity'] ==
                      self.xbrl.fields['Liabilities'] +
                      self.xbrl.fields['Equity'])):

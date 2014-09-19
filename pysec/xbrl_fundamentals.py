@@ -42,6 +42,8 @@ class FundamentantalAccountingConcepts(object):
         attempt to impute any missing values.
         """
 
+        # TODO: allow specifying of values that are ok to be zero
+
         if not isinstance(left_side, tuple):
             left_side = (left_side,)
         if not isinstance(right_side, tuple):

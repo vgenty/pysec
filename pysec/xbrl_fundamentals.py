@@ -853,18 +853,20 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['ComprehensiveIncome'])
 
         # Impute: IncomeFromContinuingOperations*Before*Tax
-        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] != 0 and self.xbrl.fields['IncomeFromEquityMethodInvestments'] != 0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeBeforeEquityMethodInvestments',
+                      'IncomeFromEquityMethodInvestments'))
 
         # Impute: IncomeFromContinuingOperations*Before*Tax2 (if income before
         # tax is missing)
-        if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] != 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeTaxExpenseBenefit']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeTaxExpenseBenefit')))
 
         # Impute: IncomeFromContinuingOperations*After*Tax
-        if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == 0 and \
-            (self.xbrl.fields['IncomeTaxExpenseBenefit'] !=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] == 0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeTaxExpenseBenefit', 'zerook')))
 
         # Impute: GrossProfit
         self._impute(('Revenues'), ('GrossProfit', 'CostOfRevenue'))
@@ -941,8 +943,10 @@ class FundamentantalAccountingConcepts(object):
         self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['OperatingIncomeLoss']
 
         # NonoperatingIncomeLossPlusInterestAndDebtExpense
-        if self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense'] == 0 and self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] != 0:
-            self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense'] = self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
+        self._impute(('NonoperatingIncomeLossPlusInterestAndDebtExpense',
+                      'IncomeFromEquityMethodInvestments'),
+                     ('NonoperatingIncomePlusInterestAndDebtExpense'
+                      'PlusIncomeFromEquityMethodInvestments'))
 
         # Impute: total net cash flows discontinued if not reported
         self._impute(('NetCashFlowsDiscontinued'),

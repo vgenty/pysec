@@ -54,9 +54,19 @@ class FundamentantalAccountingConcepts(object):
 
         unset_fields = [f for f in left_side + right_side
                         if self.xbrl.not_set(f) and f not in zero_ok_fields]
-        if len(unset_fields) != 1:
-            # Nothing to do, or we can't do it
+        if len(unset_fields) > 1:
+            # Too many unknowns
             return
+        if len(unset_fields) == 0:
+            # All fields are set except the ones allowed to be unset -- we can
+            # set it now
+            if (len(zero_ok_fields) == 1 and
+                    self.xbrl.not_set(zero_ok_fields[0])):
+                # We can set this now
+                unset_fields = [zero_ok_fields[0]]
+            else:
+                # Nothing to do
+                return
         # We know there's only one
         field = unset_fields[0]
 
@@ -65,12 +75,17 @@ class FundamentantalAccountingConcepts(object):
         right_side_sum = sum(self.xbrl.fields[f] for f in right_side
                              if self.xbrl.is_set(f))
         if field in left_side:
-            self.xbrl.fields[field] = right_side_sum - left_side_sum
+            value = right_side_sum - left_side_sum
         else:
-            self.xbrl.fields[field] = left_side_sum - right_side_sum
+            value = left_side_sum - right_side_sum
         print '{}: Imputed {}: {}  from {} == {}'.format(
-            self.impute_count, field, self.xbrl.fields[field],
-            '+'.join(left_side), '+'.join(right_side))
+            self.impute_count, field, value,
+            '+'.join(
+                ['{}({})'.format(f, self.xbrl.fields[f]) for f in left_side]),
+            '+'.join(
+                ['{}({})'.format(f, self.xbrl.fields[f]) for f in right_side])
+        )
+        self.xbrl.fields[field] = value
         # TODO: get rid of this
         self.xbrl.fields['Changed'] = self.xbrl.fields.get('Changed', 0) + 1
 

@@ -30,6 +30,67 @@ class FundamentantalAccountingConcepts(object):
         print '{} impute {}'.format(impute_passes,
                                     'pass' if impute_passes == 1 else 'passes')
 
+    def _sum(self, *fields):
+        return sum(self.xbrl.fields[f] for f in fields)
+
+    def _impute(self, left_side, right_side):
+        """
+        Given a set of variables that relate to each other such that
+
+        sum(left_side) == sum(right_side),
+
+        attempt to impute any missing values.
+        """
+
+        def format_field(f):
+            return '{}({}){}'.format(
+                f, self.xbrl.fields[f], 'Z' if f in zero_ok_fields else '')
+
+        if not isinstance(left_side, tuple):
+            left_side = (left_side,)
+        if not isinstance(right_side, tuple):
+            right_side = (right_side,)
+
+        zero_ok_fields = [f[0] for f in left_side + right_side
+                          if isinstance(f, tuple) and f[1] == 'zerook']
+        left_side = [f[0] if isinstance(f, tuple) else f for f in left_side]
+        right_side = [f[0] if isinstance(f, tuple) else f for f in right_side]
+
+        unset_fields = [f for f in left_side + right_side
+                        if self.xbrl.not_set(f) and f not in zero_ok_fields]
+        if len(unset_fields) > 1:
+            # Too many unknowns
+            return
+        if len(unset_fields) == 0:
+            # All fields are set except the ones allowed to be unset -- we can
+            # set it now
+            if (len(zero_ok_fields) == 1 and
+                    self.xbrl.not_set(zero_ok_fields[0])):
+                # We can set this now
+                unset_fields = [zero_ok_fields[0]]
+            else:
+                # Nothing to do
+                return
+        # We know there's only one
+        field = unset_fields[0]
+
+        left_side_sum = sum(self.xbrl.fields[f] for f in left_side
+                            if self.xbrl.is_set(f))
+        right_side_sum = sum(self.xbrl.fields[f] for f in right_side
+                             if self.xbrl.is_set(f))
+        if field in left_side:
+            value = right_side_sum - left_side_sum
+        else:
+            value = left_side_sum - right_side_sum
+        print '{}: Imputed {}: {}  from {} == {}'.format(
+            self.impute_count, field, value,
+            '+'.join([format_field(f) for f in left_side]),
+            '+'.join([format_field(f) for f in right_side])
+        )
+        self.xbrl.fields[field] = value
+        # TODO: get rid of this
+        self.xbrl.fields['Changed'] = self.xbrl.fields.get('Changed', 0) + 1
+
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
         for fieldname in fieldnames:
@@ -51,15 +112,15 @@ class FundamentantalAccountingConcepts(object):
         of passes after which we converged.
         """
         old_fields = {}
-        count = 0
+        self.impute_count = 0
         while old_fields != self.xbrl.fields:
             old_fields = self.xbrl.fields.copy()
-            self.impute(count)
-            count += 1
-            if count >= 10:
+            self.impute()
+            self.impute_count += 1
+            if self.impute_count >= 10:
                 print dict_diff(old_fields, self.xbrl.fields)
                 raise ValueError('Failed to converge after 10 iterations')
-        return count - 1
+        return self.impute_count - 1
 
     def print_info_block(self):
         print
@@ -423,10 +484,10 @@ class FundamentantalAccountingConcepts(object):
                 if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
                     self.xbrl.fields['IncomeFromDiscontinuedOperations'] = 0
 
-        # ExtraordaryItemsGainLoss
-        self.xbrl.fields['ExtraordaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
-        if self.xbrl.fields['ExtraordaryItemsGainLoss'] == None:
-            self.xbrl.fields['ExtraordaryItemsGainLoss'] = 0
+        # ExtraordinaryItemsGainLoss
+        self.xbrl.fields['ExtraordinaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
+        if self.xbrl.fields['ExtraordinaryItemsGainLoss'] == None:
+            self.xbrl.fields['ExtraordinaryItemsGainLoss'] = 0
 
         # NetIncomeLoss
         self.xbrl.fields['NetIncomeLoss'] = self.first_valid_field(
@@ -626,19 +687,14 @@ class FundamentantalAccountingConcepts(object):
         ### Cash flow statement
 
         # NetCashFlow
-        self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-            "us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease",
-            "Duration")
-        if self.xbrl.fields['NetCashFlow'] == None:
-            self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                "us-gaap:CashPeriodIncreaseDecrease",
-                "Duration")
-            if self.xbrl.fields['NetCashFlow'] == None:
-                self.xbrl.fields['NetCashFlow'] = self.xbrl.GetFactValue(
-                    "us-gaap:NetCashProvidedByUsedInContinuingOperations",
-                    "Duration")
-                if self.xbrl.fields['NetCashFlow'] == None:
-                    self.xbrl.fields['NetCashFlow'] = 0
+        self.xbrl.fields['NetCashFlow'] = self.first_valid_field(
+            [
+                'us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease',
+                'us-gaap:CashPeriodIncreaseDecrease',
+                'us-gaap:NetCashProvidedByUsedInContinuingOperations',
+            ],
+            'Duration'
+        )
 
         # NetCashFlowsOperating
         self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.GetFactValue(
@@ -710,189 +766,84 @@ class FundamentantalAccountingConcepts(object):
             'Duration'
         )
 
-    def impute(self, impute_pass):
+    def impute(self):
 
         # BS Adjustments
         # if total assets is missing, try using current assets
-        if (self.xbrl.fields['Assets'] == 0
-                and (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])
-                and (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0
-                and (self.xbrl.fields['Assets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])
-                and (self.xbrl.fields['CurrentAssets'] ==
-                     self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
-
-        # Added to fix Assets
-        if (self.xbrl.fields['Assets'] == 0 and
-                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
+        if ((self.xbrl.fields['Assets'] ==
+             self.xbrl.fields['LiabilitiesAndEquity']) or
                 (self.xbrl.fields['CurrentAssets'] ==
                  self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0 and
-                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-                (self.xbrl.fields['Assets'] ==
-                 self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+            self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets even more
-        if (self.xbrl.fields['Assets'] == 0
-                and self.xbrl.fields['NoncurrentAssets'] == 0
-                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
+        if (self.xbrl.not_set('NoncurrentAssets')
+                and self.xbrl.is_set('LiabilitiesAndEquity')
                 and (self.xbrl.fields['LiabilitiesAndEquity'] ==
                      self.xbrl.fields['Liabilities'] +
                      self.xbrl.fields['Equity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
+            self._impute(('Assets'), ('CurrentAssets'))
 
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0
-                and self.xbrl.fields['NoncurrentAssets'] == 0
-                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
-                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
-                     self.xbrl.fields['Liabilities'] +
-                     self.xbrl.fields['Equity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+        self._impute(('Assets'), ('CurrentAssets', 'NoncurrentAssets'))
 
-        if (self.xbrl.fields['NoncurrentAssets'] == 0 and
-                self.xbrl.fields['Assets'] != 0 and
-                self.xbrl.fields['CurrentAssets'] != 0):
-            self.xbrl.fields['NoncurrentAssets'] = (
-                self.xbrl.fields['Assets'] -
-                self.xbrl.fields['CurrentAssets'])
+        self._impute(('LiabilitiesAndEquity'), ('Assets'))
 
-        if (self.xbrl.fields['LiabilitiesAndEquity'] == 0
-                and self.xbrl.fields['Assets'] != 0):
-            self.xbrl.fields['LiabilitiesAndEquity'] = (
-                self.xbrl.fields['Assets'])
-
-        # Impute: Equity based on parent and noncontrolling interest being
-        # present
-        if (self.xbrl.fields['Equity'] == 0 and
-                self.xbrl.fields[
-                    'EquityAttributableToNoncontrollingInterest'] != 0 and
-                self.xbrl.fields['EquityAttributableToParent'] != 0):
-            self.xbrl.fields['Equity'] = (
-                self.xbrl.fields['EquityAttributableToParent'] +
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
-
-        if (self.xbrl.fields['Equity'] == 0 and
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0
-                and self.xbrl.fields['EquityAttributableToParent'] != 0):
-            self.xbrl.fields['Equity'] = (
-                self.xbrl.fields['EquityAttributableToParent'])
-
-        # Added: Impute Equity attributable to parent based on existence of
-        # equity and noncontrolling interest.
-        if (self.xbrl.fields['Equity'] != 0 and
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] != 0
-                and self.xbrl.fields['EquityAttributableToParent'] == 0):
-            self.xbrl.fields['EquityAttributableToParent'] = (
-                self.xbrl.fields['Equity'] -
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'])
-
-        # Added: Impute Equity attributable to parent based on existence of
-        # equity and noncontrolling interest.
-        if (self.xbrl.fields['Equity'] != 0 and
-            self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == 0
-            and self.xbrl.fields['EquityAttributableToParent'] == 0):
-            self.xbrl.fields['EquityAttributableToParent'] = (
-                self.xbrl.fields['Equity'])
+        self._impute(('Equity'),
+                     ('EquityAttributableToParent',
+                      ('EquityAttributableToNoncontrollingInterest',
+                       'zerook')))
 
         # MARC - based this off of BS5 check
-        if (self.xbrl.fields['Equity'] == 0 and
-                self.xbrl.is_set('LiabilitiesAndEquity') and
-                self.xbrl.is_set('Liabilities')):
-            self.xbrl.fields['Equity'] = (
-                self.xbrl.fields['LiabilitiesAndEquity'] -
-                self.xbrl.fields['Liabilities'] -
-                self.xbrl.fields['CommitmentsAndContingencies'] -
-                self.xbrl.fields['TemporaryEquity']
-            )
-
-        # if total liabilities is missing, figure it out based on liabilities
-        # and equity
-        if (self.xbrl.fields['Liabilities'] == 0 and
-                self.xbrl.fields['Equity'] != 0):
-            self.xbrl.fields['Liabilities'] = (
-                self.xbrl.fields['LiabilitiesAndEquity'] -
-                (self.xbrl.fields['CommitmentsAndContingencies'] +
-                 self.xbrl.fields['TemporaryEquity'] +
-                 self.xbrl.fields['Equity']))
-
-        # This seems incorrect because liabilities might not be reported
-        if (self.xbrl.fields['NoncurrentLiabilities'] == 0 and
-                self.xbrl.fields['Liabilities'] != 0 and
-                self.xbrl.fields['CurrentLiabilities'] != 0):
-            self.xbrl.fields['NoncurrentLiabilities'] = (
-                self.xbrl.fields['Liabilities'] -
-                self.xbrl.fields['CurrentLiabilities'])
+        self._impute(('LiabilitiesAndEquity'),
+                     ('Equity', 'Liabilities',
+                      ('CommitmentsAndContingencies', 'zerook'),
+                      ('TemporaryEquity', 'zerook')))
 
         # Added to fix liabilities based on current liabilities
-        if self.xbrl.fields['Liabilities'] == 0 and self.xbrl.fields['CurrentLiabilities'] != 0 and self.xbrl.fields['NoncurrentLiabilities'] == 0:
-            self.xbrl.fields['Liabilities'] = self.xbrl.fields['CurrentLiabilities']
+        self._impute(('Liabilities'),
+                     ('CurrentLiabilities',
+                      ('NoncurrentLiabilities', 'zerook')))
 
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentLiabilities'] == 0 and
-                self.xbrl.fields['Liabilities'] != 0 and
-                self.xbrl.fields['NoncurrentLiabilities'] == 0):
-            self.xbrl.fields['CurrentLiabilities'] = self.xbrl.fields['Liabilities']
-
-        #########'Adjustments to income statement information
+        ######### Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense
-        self.xbrl.fields[
-            'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
-                self.xbrl.fields['NonoperatingIncomeLoss'] +
-                self.xbrl.fields['InterestAndDebtExpense'])
+        if self.impute_count == 0:
+            self.xbrl.fields[
+                'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
+                    self.xbrl.fields['NonoperatingIncomeLoss'] +
+                    self.xbrl.fields['InterestAndDebtExpense'])
 
         # Impute: Net income available to common stockholders (if it does not
         # exist)
-        if self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] == 0 and self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent'] != 0:
-            self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] = self.xbrl.fields['NetIncomeAttributableToParent']
+        self._impute(('NetIncomeAttributableToParent'),
+                     ('NetIncomeAvailableToCommonStockholdersBasic',
+                      ('PreferredStockDividendsAndOtherAdjustments',
+                       'zerook')))
 
         # Impute NetIncomeLoss
-        if (self.xbrl.fields['NetIncomeLoss'] != 0
-                and self.xbrl.fields[
-                    'IncomeFromContinuingOperationsAfterTax'] == 0):
-            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = (
-                self.xbrl.fields['NetIncomeLoss'] -
-                self.xbrl.fields['IncomeFromDiscontinuedOperations'] -
-                self.xbrl.fields['ExtraordaryItemsGainLoss'])
+        self._impute(('NetIncomeLoss'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeFromDiscontinuedOperations', 'zerook'),
+                      ('ExtraordinaryItemsGainLoss', 'zerook')))
 
         # Impute: Net income attributable to parent if it does not exist
-        if (self.xbrl.fields['NetIncomeAttributableToParent'] == 0
-                and self.xbrl.fields[
-                    'NetIncomeAttributableToNoncontrollingInterest'] == 0
-                and self.xbrl.fields['NetIncomeLoss'] != 0):
-            self.xbrl.fields['NetIncomeAttributableToParent'] = (
-                self.xbrl.fields['NetIncomeLoss'])
+        self._impute(('NetIncomeLoss'),
+                     ('NetIncomeAttributableToParent',
+                      'NetIncomeAttributableToNoncontrollingInterest'))
 
         # Impute: PreferredStockDividendsAndOtherAdjustments
-        if (self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0
-                and self.xbrl.fields['NetIncomeAttributableToParent'] != 0
-                and self.xbrl.fields['NetIncomeAvailableTo'
-                                     'CommonStockholdersBasic'] != 0):
-            self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = (
-                self.xbrl.fields['NetIncomeAttributableToParent'] -
-                self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'])
+        self._impute(('NetIncomeAttributableToParent'),
+                     ('NetIncomeAvailableToCommonStockholdersBasic',
+                      'PreferredStockDividendsAndOtherAdjustments'))
 
         # Impute: comprehensive income
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:
-            self.xbrl.fields['ComprehensiveIncome'] = self.xbrl.fields['NetIncomeLoss']
+            self.xbrl.fields['ComprehensiveIncome'] = (
+                self.xbrl.fields['NetIncomeLoss'])
 
         # Impute: other comprehensive income
-        if (self.xbrl.fields['ComprehensiveIncome'] != 0 and
-                self.xbrl.fields['OtherComprehensiveIncome'] == 0):
-            self.xbrl.fields['OtherComprehensiveIncome'] = (
-                self.xbrl.fields['ComprehensiveIncome'] -
-                self.xbrl.fields['NetIncomeLoss'])
+        self._impute(('ComprehensiveIncome'),
+                     ('OtherComprehensiveIncome',
+                      ('NetIncomeLoss', 'zerook')))
 
         # Impute: comprehensive income attributable to parent if it does not
         # exist
@@ -904,83 +855,41 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['ComprehensiveIncome'])
 
         # Impute: IncomeFromContinuingOperations*Before*Tax
-        if self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] != 0 and self.xbrl.fields['IncomeFromEquityMethodInvestments'] != 0 and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeBeforeEquityMethodInvestments',
+                      'IncomeFromEquityMethodInvestments'))
 
         # Impute: IncomeFromContinuingOperations*Before*Tax2 (if income before
         # tax is missing)
-        if self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] == 0 and self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] != 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeTaxExpenseBenefit']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeTaxExpenseBenefit')))
 
         # Impute: IncomeFromContinuingOperations*After*Tax
-        if self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] == 0 and \
-            (self.xbrl.fields['IncomeTaxExpenseBenefit'] !=0 or self.xbrl.fields['IncomeTaxExpenseBenefit'] == 0) and self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0:
-            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeTaxExpenseBenefit', 'zerook')))
 
         # Impute: GrossProfit
-        if (self.xbrl.fields['GrossProfit'] == 0 and
-                self.xbrl.fields['Revenues'] != 0 and
-                self.xbrl.is_set('CostOfRevenue')):
-            self.xbrl.fields['GrossProfit'] = (
-                self.xbrl.fields['Revenues'] -
-                self.xbrl.fields['CostOfRevenue'])
-
-        # Impute: Revenues
-        if (self.xbrl.fields['GrossProfit'] != 0 and
-                self.xbrl.fields['Revenues'] == 0 and
-                self.xbrl.is_set('CostOfRevenue')):
-            self.xbrl.fields['Revenues'] = (self.xbrl.fields['GrossProfit'] +
-                                            self.xbrl.fields['CostOfRevenue'])
-        # Impute: CostOfRevenue
-        if (self.xbrl.fields['GrossProfit'] != 0 and
-                self.xbrl.fields['Revenues'] != 0 and
-                self.xbrl.not_set('CostOfRevenue')):
-            self.xbrl.fields['CostOfRevenue'] = (
-                self.xbrl.fields['GrossProfit'] + self.xbrl.fields['Revenues'])
+        self._impute(('Revenues'), ('GrossProfit', 'CostOfRevenue'))
 
         # Impute: CostsAndExpenses (would NEVER have costs and expenses if has
         # gross profit, gross profit is multi-step and costs and expenses is
         # single-step)
-        if (self.xbrl.fields['GrossProfit'] == 0
-                and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.is_set('CostOfRevenue')
-                and self.xbrl.fields['OperatingExpenses'] != 0):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['CostOfRevenue'] +
-                self.xbrl.fields['OperatingExpenses'])
-
-        # Impute: CostsAndExpenses based on existence of both costs of revenues
-        # and operating expenses
-        if (self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.fields['OperatingExpenses'] != 0
-                and self.xbrl.is_set('CostOfRevenue')):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['CostOfRevenue'] +
-                self.xbrl.fields['OperatingExpenses'])
+        self._impute(('CostsAndExpenses'),
+                     ('OperatingExpenses', 'CostOfRevenue'))
 
         # Impute: CostsAndExpenses
-        if (self.xbrl.fields['GrossProfit'] == 0
-                and self.xbrl.fields['CostsAndExpenses'] == 0
-                and self.xbrl.fields['Revenues'] != 0
-                and self.xbrl.fields['OperatingIncomeLoss'] != 0
-                # MARC - this is sometimes entirely zero, let's see if it's bad
-                # to ignore it
-                # and self.xbrl.fields['OtherOperatingIncome'] != 0
-        ):
-            self.xbrl.fields['CostsAndExpenses'] = (
-                self.xbrl.fields['Revenues'] -
-                self.xbrl.fields['OperatingIncomeLoss'] -
-                self.xbrl.fields['OtherOperatingIncome'])
+        if self.xbrl.fields['GrossProfit'] == 0:
+            self._impute(('Revenues'),
+                         ('CostsAndExpenses', 'OperatingIncomeLoss',
+                          ('OtherOperatingIncome', 'zerook')))
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues
-        if (self.xbrl.is_set('CostOfRevenue') and
-                self.xbrl.fields['CostsAndExpenses'] != 0 and
-                self.xbrl.fields['OperatingExpenses'] == 0):
-            self.xbrl.fields['OperatingExpenses'] = (
-                self.xbrl.fields['CostsAndExpenses'] -
-                self.xbrl.fields['CostOfRevenue'])
-            self.xbrl.fields['Changed'] = 'HAAAAAACK'
+        self._impute(('CostsAndExpenses'),
+                     ('CostOfRevenue',
+                      ('OperatingExpenses', 'zerook')))
 
         # Impute: CostOfRevenues single-step method
         if (self.xbrl.fields['Revenues'] != 0 and
@@ -994,38 +903,22 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['CostsAndExpenses'] -
                 self.xbrl.fields['OperatingExpenses'])
 
-        # MARC: last-ditch CostOfRevenue
-        if (self.xbrl.not_set('CostOfRevenue') and
-                self.xbrl.fields['CostsAndExpenses'] != 0):
-            self.xbrl.fields['CostOfRevenue'] = (
-                self.xbrl.fields['CostsAndExpenses'] -
-                self.xbrl.fields['OperatingExpenses'])
+        # Impute: IncomeBeforeEquityMethodInvestments
+        self._impute(('IncomeBeforeEquityMethodInvestments',
+                      ('IncomeFromEquityMethodInvestments', 'zerook')),
+                     ('IncomeFromContinuingOperationsBeforeTax'))
 
         # Impute: IncomeBeforeEquityMethodInvestments
-        if (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and
-                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0):
-            self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = (
-                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
-                self.xbrl.fields['IncomeFromEquityMethodInvestments'])
-
-        # Impute: IncomeBeforeEquityMethodInvestments
-        if (self.xbrl.fields['OperatingIncomeLoss'] != 0
-                and self.xbrl.fields['NonoperatingIncomeLoss'] != 0
-                and self.xbrl.fields['InterestAndDebtExpense'] == 0
-                and self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] != 0):
-            self.xbrl.fields['InterestAndDebtExpense'] = (
-                self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] -
-                (self.xbrl.fields['OperatingIncomeLoss'] +
-                 self.xbrl.fields['NonoperatingIncomeLoss']))
+        self._impute(('IncomeFromContinuingOperationsBeforeTax'),
+                     ('IncomeBeforeEquityMethodInvestments',
+                      'IncomeFromEquityMethodInvestments'))
+        self._impute(('IncomeBeforeEquityMethodInvestments'),
+                     ('OperatingIncomeLoss', 'NonoperatingIncomeLoss',
+                      'InterestAndDebtExpense'))
 
         # Impute: OtherOperatingIncome
-        if (self.xbrl.fields['GrossProfit'] != 0 and
-                self.xbrl.fields['OperatingExpenses'] != 0
-                and self.xbrl.fields['OperatingIncomeLoss'] != 0):
-            self.xbrl.fields['OtherOperatingIncome'] = (
-                self.xbrl.fields['OperatingIncomeLoss'] -
-                (self.xbrl.fields['GrossProfit'] -
-                 self.xbrl.fields['OperatingExpenses']))
+        self._impute(('OtherOperatingIncome', 'GrossProfit'),
+                     ('OperatingIncomeLoss', 'OperatingExpenses'))
 
         # Move IncomeFromEquityMethodInvestments
         if (self.xbrl.fields['IncomeFromEquityMethodInvestments'] != 0
@@ -1036,7 +929,7 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
                 self.xbrl.fields['IncomeFromEquityMethodInvestments'])
             # HACK: only do this decrement(?!?) on the first impute pass
-            if impute_pass == 0:
+            if self.impute_count == 0:
                 self.xbrl.fields['OperatingIncomeLoss'] = (
                     self.xbrl.fields['OperatingIncomeLoss'] -
                     self.xbrl.fields['IncomeFromEquityMethodInvestments'])
@@ -1044,64 +937,67 @@ class FundamentantalAccountingConcepts(object):
         # DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this
         # imputing. if it is higher,: keep the test
         # Impute: OperatingIncomeLoss
-        if (self.xbrl.fields['OperatingIncomeLoss'] == 0
-                and self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] != 0):
-            self.xbrl.fields['OperatingIncomeLoss'] = (
-                self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] +
-                self.xbrl.fields['NonoperatingIncomeLoss'] -
-                self.xbrl.fields['InterestAndDebtExpense'])
+        self._impute(('OperatingIncomeLoss',
+                      ('InterestAndDebtExpense', 'zerook')),
+                     (('NonoperatingIncomeLoss', 'zerook'),
+                      'IncomeBeforeEquityMethodInvestments'))
 
-
-        self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['OperatingIncomeLoss']
+        if self.impute_count == 0:
+            self.xbrl.fields[
+                'NonoperatingIncomePlusInterestAndDebtExpense'
+                'PlusIncomeFromEquityMethodInvestments'] = (
+                    self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
+                    self.xbrl.fields['OperatingIncomeLoss'])
 
         # NonoperatingIncomeLossPlusInterestAndDebtExpense
-        if self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense'] == 0 and self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] != 0:
-            self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense'] = self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] - self.xbrl.fields['IncomeFromEquityMethodInvestments']
+        self._impute(('NonoperatingIncomeLossPlusInterestAndDebtExpense',
+                      'IncomeFromEquityMethodInvestments'),
+                     ('NonoperatingIncomePlusInterestAndDebtExpense'
+                      'PlusIncomeFromEquityMethodInvestments'))
 
         # Impute: total net cash flows discontinued if not reported
-        if self.xbrl.fields['NetCashFlowsDiscontinued'] == 0:
-            self.xbrl.fields['NetCashFlowsDiscontinued'] = (
-                self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] +
-                self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] +
-                self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
+        self._impute(('NetCashFlowsDiscontinued'),
+                     ('NetCashFlowsOperatingDiscontinued',
+                      'NetCashFlowsInvestingDiscontinued',
+                      'NetCashFlowsFinancingDiscontinued'))
 
         # Impute: cash flows from continuing
-        if (self.xbrl.fields['NetCashFlowsOperating'] != 0 and
-                self.xbrl.fields['NetCashFlowsOperatingContinuing'] == 0):
-            self.xbrl.fields['NetCashFlowsOperatingContinuing'] = (
-                self.xbrl.fields['NetCashFlowsOperating'] -
-                self.xbrl.fields['NetCashFlowsOperatingDiscontinued'])
-        if (self.xbrl.fields['NetCashFlowsInvesting'] != 0 and
-                self.xbrl.fields['NetCashFlowsInvestingContinuing'] == 0):
-            self.xbrl.fields['NetCashFlowsInvestingContinuing'] = (
-                self.xbrl.fields['NetCashFlowsInvesting'] -
-                self.xbrl.fields['NetCashFlowsInvestingDiscontinued'])
-        if (self.xbrl.fields['NetCashFlowsFinancing'] != 0 and
-                self.xbrl.fields['NetCashFlowsFinancingContinuing'] == 0):
-            self.xbrl.fields['NetCashFlowsFinancingContinuing'] = (
-                self.xbrl.fields['NetCashFlowsFinancing'] -
-                self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
+        self._impute(('NetCashFlowsOperating'),
+                     ('NetCashFlowsOperatingContinuing',
+                      ('NetCashFlowsOperatingDiscontinued', 'zerook')))
+        self._impute(('NetCashFlowsInvesting'),
+                     ('NetCashFlowsInvestingContinuing',
+                      ('NetCashFlowsInvestingDiscontinued', 'zerook')))
+        self._impute(('NetCashFlowsFinancing'),
+                     ('NetCashFlowsFinancingContinuing',
+                      ('NetCashFlowsFinancingDiscontinued', 'zerook')))
 
-
-        if self.xbrl.fields['NetCashFlowsOperating'] == 0 and self.xbrl.fields['NetCashFlowsOperatingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] == 0:
-            self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.fields['NetCashFlowsOperatingContinuing']
-        if self.xbrl.fields['NetCashFlowsInvesting'] == 0 and self.xbrl.fields['NetCashFlowsInvestingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == 0:
-            self.xbrl.fields['NetCashFlowsInvesting'] = self.xbrl.fields['NetCashFlowsInvestingContinuing']
-        if self.xbrl.fields['NetCashFlowsFinancing'] == 0 and self.xbrl.fields['NetCashFlowsFinancingContinuing'] != 0 and self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == 0:
-            self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.fields['NetCashFlowsFinancingContinuing']
-
-        self.xbrl.fields['NetCashFlowsContinuing'] = self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing']
+        self.xbrl.fields['NetCashFlowsContinuing'] = self._sum(
+            'NetCashFlowsOperatingContinuing',
+            'NetCashFlowsInvestingContinuing',
+            'NetCashFlowsFinancingContinuing'
+        )
 
         # Impute: if net cash flow is missing,: this tries to figure out the
-        # value by adding up the detail
-        if (self.xbrl.fields['NetCashFlow'] == 0 and
-                (self.xbrl.fields['NetCashFlowsOperating'] != 0 or
-                 self.xbrl.fields['NetCashFlowsInvesting'] != 0 or
-                 self.xbrl.fields['NetCashFlowsFinancing'] != 0)):
-            self.xbrl.fields['NetCashFlow'] = (
-                self.xbrl.fields['NetCashFlowsOperating'] +
-                self.xbrl.fields['NetCashFlowsInvesting'] +
-                self.xbrl.fields['NetCashFlowsFinancing'])
+        # value by adding up the detail. Any one detail being nonzero is enough
+        # at this point
+        # TODO: some kind of 'or' method for _impute would be great here
+        self._impute(('NetCashFlow'),
+                     ('NetCashFlowsOperating',
+                      'NetCashFlowsInvesting',
+                      'NetCashFlowsFinancing'))
+        self._impute(('NetCashFlow'),
+                     ('NetCashFlowsOperating',
+                      'NetCashFlowsInvesting'))
+        self._impute(('NetCashFlow'),
+                     ('NetCashFlowsOperating',
+                      'NetCashFlowsFinancing'))
+        self._impute(('NetCashFlow'),
+                     ('NetCashFlowsInvesting',
+                      'NetCashFlowsFinancing'))
+        self._impute(('NetCashFlow'), ('NetCashFlowsOperating'))
+        self._impute(('NetCashFlow'), ('NetCashFlowsInvesting'))
+        self._impute(('NetCashFlow'), ('NetCashFlowsFinancing'))
 
     def check(self):
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
@@ -1186,7 +1082,7 @@ class FundamentantalAccountingConcepts(object):
         lngIS3 = (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) - self.xbrl.fields['IncomeBeforeEquityMethodInvestments']
         lngIS4 = (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']) - self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']
         lngIS5 = (self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']) - self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']
-        lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
+        lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordinaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
         lngIS7 = (self.xbrl.fields['NetIncomeAttributableToParent'] + self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) - self.xbrl.fields['NetIncomeLoss']
         lngIS8 = (self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
         lngIS9 = ((self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] +
@@ -1210,7 +1106,7 @@ class FundamentantalAccountingConcepts(object):
         if lngIS5:
             print "IS5: IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") = IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") - IncomeTaxExpenseBenefit(" , self.xbrl.fields['IncomeTaxExpenseBenefit'] , "): " , lngIS5
         if lngIS6:
-            print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordaryItemsGainLoss(" , self.xbrl.fields['ExtraordaryItemsGainLoss'] , "): " , lngIS6
+            print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordinaryItemsGainLoss(" , self.xbrl.fields['ExtraordinaryItemsGainLoss'] , "): " , lngIS6
         if lngIS7:
             print "IS7: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = NetIncomeAttributableToParent(" , self.xbrl.fields['NetIncomeAttributableToParent'] , ") , NetIncomeAttributableToNoncontrollingInterest(" , self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] , "): " , lngIS7
         if lngIS8:

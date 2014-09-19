@@ -822,9 +822,9 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: Net income available to common stockholders (if it does not
         # exist)
-        if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0:
-            self._impute(('NetIncomeAvailableToCommonStockholdersBasic'),
-                         ('NetIncomeAttributableToParent'))
+        self._impute(('NetIncomeAttributableToParent'),
+                     ('NetIncomeAvailableToCommonStockholdersBasic',
+                      ('PreferredStockDividendsAndOtherAdjustments', 'zerook')))
 
         # Impute NetIncomeLoss
         self._impute(('NetIncomeLoss'),
@@ -839,13 +839,9 @@ class FundamentantalAccountingConcepts(object):
                        'zerook')))
 
         # Impute: PreferredStockDividendsAndOtherAdjustments
-        if (self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0
-                and self.xbrl.fields['NetIncomeAttributableToParent'] != 0
-                and self.xbrl.fields['NetIncomeAvailableTo'
-                                     'CommonStockholdersBasic'] != 0):
-            self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = (
-                self.xbrl.fields['NetIncomeAttributableToParent'] -
-                self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'])
+        self._impute(('NetIncomeAttributableToParent'),
+                     ('NetIncomeAvailableToCommonStockholdersBasic',
+                      'PreferredStockDividendsAndOtherAdjustments'))
 
         # Impute: comprehensive income
         if self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] == 0 and self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] == 0 and self.xbrl.fields['ComprehensiveIncome'] == 0 and self.xbrl.fields['OtherComprehensiveIncome'] == 0:

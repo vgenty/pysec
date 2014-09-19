@@ -940,7 +940,11 @@ class FundamentantalAccountingConcepts(object):
                      (('NonoperatingIncomeLoss', 'zerook'),
                       'IncomeBeforeEquityMethodInvestments'))
 
-        self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['OperatingIncomeLoss']
+        self.xbrl.fields[
+            'NonoperatingIncomePlusInterestAndDebtExpense'
+            'PlusIncomeFromEquityMethodInvestments'] = (
+                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
+                self.xbrl.fields['OperatingIncomeLoss'])
 
         # NonoperatingIncomeLossPlusInterestAndDebtExpense
         self._impute(('NonoperatingIncomeLossPlusInterestAndDebtExpense',

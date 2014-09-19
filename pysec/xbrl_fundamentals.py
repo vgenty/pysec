@@ -765,36 +765,18 @@ class FundamentantalAccountingConcepts(object):
             self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets
-        if (self.xbrl.fields['Assets'] == 0 and
-                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-                (self.xbrl.fields['CurrentAssets'] ==
-                 self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0 and
-                self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
-                (self.xbrl.fields['Assets'] ==
-                 self.xbrl.fields['LiabilitiesAndEquity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+        if (self.xbrl.fields['LiabilitiesAndEquity'] != 0 and
+            (self.xbrl.fields['CurrentAssets'] ==
+             self.xbrl.fields['LiabilitiesAndEquity'])):
+            self._impute(('Assets'), ('CurrentAssets'))
 
         # Added to fix Assets even more
-        if (self.xbrl.fields['Assets'] == 0
-                and self.xbrl.fields['NoncurrentAssets'] == 0
+        if (self.xbrl.fields['NoncurrentAssets'] == 0
                 and self.xbrl.fields['LiabilitiesAndEquity'] != 0
                 and (self.xbrl.fields['LiabilitiesAndEquity'] ==
                      self.xbrl.fields['Liabilities'] +
                      self.xbrl.fields['Equity'])):
-            self.xbrl.fields['Assets'] = self.xbrl.fields['CurrentAssets']
-
-        # MARC - same, but in reverse
-        if (self.xbrl.fields['CurrentAssets'] == 0
-                and self.xbrl.fields['NoncurrentAssets'] == 0
-                and self.xbrl.fields['LiabilitiesAndEquity'] != 0
-                and (self.xbrl.fields['LiabilitiesAndEquity'] ==
-                     self.xbrl.fields['Liabilities'] +
-                     self.xbrl.fields['Equity'])):
-            self.xbrl.fields['CurrentAssets'] = self.xbrl.fields['Assets']
+            self._impute(('Assets'), ('CurrentAssets'))
 
         self._impute(('Assets'), ('CurrentAssets', 'NoncurrentAssets'))
 
@@ -810,14 +792,6 @@ class FundamentantalAccountingConcepts(object):
                      ('Equity', 'Liabilities',
                       ('CommitmentsAndContingencies', 'zerook'),
                       ('TemporaryEquity', 'zerook')))
-
-        # This seems incorrect because liabilities might not be reported
-        if (self.xbrl.fields['NoncurrentLiabilities'] == 0 and
-                self.xbrl.fields['Liabilities'] != 0 and
-                self.xbrl.fields['CurrentLiabilities'] != 0):
-            self.xbrl.fields['NoncurrentLiabilities'] = (
-                self.xbrl.fields['Liabilities'] -
-                self.xbrl.fields['CurrentLiabilities'])
 
         # Added to fix liabilities based on current liabilities
         self._impute(('Liabilities'),

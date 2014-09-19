@@ -81,7 +81,8 @@ class Command(NoArgsCommand):
             for form in forms[sym]:
                 for fieldname in form['EmptyFieldNames']:
                     empty_fields[fieldname] += 1
-                total_failed_checks += form['FailedChecks']
+                # TODO: if this value isn't present, XBRLFundamentals failed.
+                total_failed_checks += form.get('FailedChecks', 0)
                 print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 

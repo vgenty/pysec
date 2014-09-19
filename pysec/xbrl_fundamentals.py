@@ -30,6 +30,35 @@ class FundamentantalAccountingConcepts(object):
         print '{} impute {}'.format(impute_passes,
                                     'pass' if impute_passes == 1 else 'passes')
 
+    def _imputer(self, left_side, right_side):
+        """
+        Given a set of variables that relate to each other such that
+
+        sum(left_side) == sum(right_side),
+
+        attempt to impute any missing values.
+        """
+
+        unset_fields = [f for f in left_side + right_side
+                        if self.xbrl.not_set(f)]
+        if len(unset_fields) == 0:
+            # Yay, we're done
+            return
+        if len(unset_fields) > 1:
+            # Too many unknowns
+            return
+        # We know there's only one
+        field = unset_fields[0]
+
+        left_side_sum = sum(self.xbrl.fields[f] for f in left_side
+                            if self.xbrl.is_set(f))
+        right_side_sum = sum(self.xbrl.fields[f] for f in right_side
+                             if self.xbrl.is_set(f))
+        if field in left_side:
+            self.xbrl.fields[field] = right_side_sum - left_side_sum
+        else:
+            self.xbrl.fields[field] = left_side_sum - right_side_sum
+
     def first_valid_field(self, fieldnames, concept_period_type='Duration'):
         val = 0
         for fieldname in fieldnames:

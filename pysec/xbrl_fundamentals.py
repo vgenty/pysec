@@ -484,10 +484,10 @@ class FundamentantalAccountingConcepts(object):
                 if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
                     self.xbrl.fields['IncomeFromDiscontinuedOperations'] = 0
 
-        # ExtraordaryItemsGainLoss
-        self.xbrl.fields['ExtraordaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
-        if self.xbrl.fields['ExtraordaryItemsGainLoss'] == None:
-            self.xbrl.fields['ExtraordaryItemsGainLoss'] = 0
+        # ExtraordinaryItemsGainLoss
+        self.xbrl.fields['ExtraordinaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")
+        if self.xbrl.fields['ExtraordinaryItemsGainLoss'] == None:
+            self.xbrl.fields['ExtraordinaryItemsGainLoss'] = 0
 
         # NetIncomeLoss
         self.xbrl.fields['NetIncomeLoss'] = self.first_valid_field(
@@ -828,7 +828,7 @@ class FundamentantalAccountingConcepts(object):
         self._impute(('NetIncomeLoss'),
                      ('IncomeFromContinuingOperationsAfterTax',
                       ('IncomeFromDiscontinuedOperations', 'zerook'),
-                      ('ExtraordaryItemsGainLoss', 'zerook')))
+                      ('ExtraordinaryItemsGainLoss', 'zerook')))
 
         # Impute: Net income attributable to parent if it does not exist
         self._impute(('NetIncomeLoss'),
@@ -1087,7 +1087,7 @@ class FundamentantalAccountingConcepts(object):
         lngIS3 = (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) - self.xbrl.fields['IncomeBeforeEquityMethodInvestments']
         lngIS4 = (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']) - self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']
         lngIS5 = (self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']) - self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']
-        lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
+        lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordinaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
         lngIS7 = (self.xbrl.fields['NetIncomeAttributableToParent'] + self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) - self.xbrl.fields['NetIncomeLoss']
         lngIS8 = (self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
         lngIS9 = ((self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] +
@@ -1111,7 +1111,7 @@ class FundamentantalAccountingConcepts(object):
         if lngIS5:
             print "IS5: IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") = IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") - IncomeTaxExpenseBenefit(" , self.xbrl.fields['IncomeTaxExpenseBenefit'] , "): " , lngIS5
         if lngIS6:
-            print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordaryItemsGainLoss(" , self.xbrl.fields['ExtraordaryItemsGainLoss'] , "): " , lngIS6
+            print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordinaryItemsGainLoss(" , self.xbrl.fields['ExtraordinaryItemsGainLoss'] , "): " , lngIS6
         if lngIS7:
             print "IS7: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = NetIncomeAttributableToParent(" , self.xbrl.fields['NetIncomeAttributableToParent'] , ") , NetIncomeAttributableToNoncontrollingInterest(" , self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] , "): " , lngIS7
         if lngIS8:

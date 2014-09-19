@@ -833,8 +833,7 @@ class FundamentantalAccountingConcepts(object):
         # Impute: Net income attributable to parent if it does not exist
         self._impute(('NetIncomeLoss'),
                      ('NetIncomeAttributableToParent',
-                      ('NetIncomeAttributableToNoncontrollingInterest',
-                       'zerook')))
+                      'NetIncomeAttributableToNoncontrollingInterest'))
 
         # Impute: PreferredStockDividendsAndOtherAdjustments
         self._impute(('NetIncomeAttributableToParent'),

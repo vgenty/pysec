@@ -931,9 +931,7 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: IncomeBeforeEquityMethodInvestments
         self._impute(('IncomeBeforeEquityMethodInvestments',
-                      'IncomeFromEquityMethodInvestments'),
-                     ('IncomeFromContinuingOperationsBeforeTax'))
-        self._impute(('IncomeBeforeEquityMethodInvestments'),
+                      ('IncomeFromEquityMethodInvestments', 'zerook')),
                      ('IncomeFromContinuingOperationsBeforeTax'))
 
         # Impute: IncomeBeforeEquityMethodInvestments
@@ -991,20 +989,13 @@ class FundamentantalAccountingConcepts(object):
         # Impute: cash flows from continuing
         self._impute(('NetCashFlowsOperating'),
                      ('NetCashFlowsOperatingContinuing',
-                      'NetCashFlowsOperatingDiscontinued'))
+                      ('NetCashFlowsOperatingDiscontinued', 'zerook')))
         self._impute(('NetCashFlowsInvesting'),
                      ('NetCashFlowsInvestingContinuing',
-                      'NetCashFlowsInvestingDiscontinued'))
+                      ('NetCashFlowsInvestingDiscontinued', 'zerook')))
         self._impute(('NetCashFlowsFinancing'),
                      ('NetCashFlowsFinancingContinuing',
-                      'NetCashFlowsFinancingDiscontinued'))
-        # Fallback
-        self._impute(('NetCashFlowsOperating'),
-                     ('NetCashFlowsOperatingContinuing'))
-        self._impute(('NetCashFlowsInvesting'),
-                     ('NetCashFlowsInvestingContinuing'))
-        self._impute(('NetCashFlowsFinancing'),
-                     ('NetCashFlowsFinancingContinuing'))
+                      ('NetCashFlowsFinancingDiscontinued', 'zerook')))
 
         self.xbrl.fields['NetCashFlowsContinuing'] = self._sum(
             'NetCashFlowsOperatingContinuing',

@@ -807,25 +807,21 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: Net income available to common stockholders (if it does not
         # exist)
-        if self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] == 0 and self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0 and self.xbrl.fields['NetIncomeAttributableToParent'] != 0:
-            self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] = self.xbrl.fields['NetIncomeAttributableToParent']
+        if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0:
+            self._impute(('NetIncomeAvailableToCommonStockholdersBasic'),
+                         ('NetIncomeAttributableToParent'))
 
         # Impute NetIncomeLoss
-        if (self.xbrl.fields['NetIncomeLoss'] != 0
-                and self.xbrl.fields[
-                    'IncomeFromContinuingOperationsAfterTax'] == 0):
-            self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = (
-                self.xbrl.fields['NetIncomeLoss'] -
-                self.xbrl.fields['IncomeFromDiscontinuedOperations'] -
-                self.xbrl.fields['ExtraordaryItemsGainLoss'])
+        self._impute(('NetIncomeLoss'),
+                     ('IncomeFromContinuingOperationsAfterTax',
+                      ('IncomeFromDiscontinuedOperations', 'zerook'),
+                      ('ExtraordaryItemsGainLoss', 'zerook')))
 
         # Impute: Net income attributable to parent if it does not exist
-        if (self.xbrl.fields['NetIncomeAttributableToParent'] == 0
-                and self.xbrl.fields[
-                    'NetIncomeAttributableToNoncontrollingInterest'] == 0
-                and self.xbrl.fields['NetIncomeLoss'] != 0):
-            self.xbrl.fields['NetIncomeAttributableToParent'] = (
-                self.xbrl.fields['NetIncomeLoss'])
+        self._impute(('NetIncomeLoss'),
+                     ('NetIncomeAttributableToParent',
+                      ('NetIncomeAttributableToNoncontrollingInterest',
+                       'zerook')))
 
         # Impute: PreferredStockDividendsAndOtherAdjustments
         if (self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] == 0

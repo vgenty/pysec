@@ -811,16 +811,6 @@ class FundamentantalAccountingConcepts(object):
                       ('CommitmentsAndContingencies', 'zerook'),
                       ('TemporaryEquity', 'zerook')))
 
-        # if total liabilities is missing, figure it out based on liabilities
-        # and equity
-        if (self.xbrl.fields['Liabilities'] == 0 and
-                self.xbrl.fields['Equity'] != 0):
-            self.xbrl.fields['Liabilities'] = (
-                self.xbrl.fields['LiabilitiesAndEquity'] -
-                (self.xbrl.fields['CommitmentsAndContingencies'] +
-                 self.xbrl.fields['TemporaryEquity'] +
-                 self.xbrl.fields['Equity']))
-
         # This seems incorrect because liabilities might not be reported
         if (self.xbrl.fields['NoncurrentLiabilities'] == 0 and
                 self.xbrl.fields['Liabilities'] != 0 and
@@ -919,15 +909,13 @@ class FundamentantalAccountingConcepts(object):
         if self.xbrl.fields['GrossProfit'] == 0:
             self._impute(('Revenues'),
                          ('CostsAndExpenses', 'OperatingIncomeLoss',
-                          'OtherOperatingIncome'))
-            self._impute(('Revenues'),
-                         ('CostsAndExpenses', 'OperatingIncomeLoss'))
+                          ('OtherOperatingIncome', 'zerook')))
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues
         self._impute(('CostsAndExpenses'),
-                     ('OperatingExpenses', 'CostOfRevenue'))
-        self._impute(('CostsAndExpenses'), ('CostOfRevenue'))
+                     ('CostOfRevenue',
+                      ('OperatingExpenses', 'zerook')))
 
         # Impute: CostOfRevenues single-step method
         if (self.xbrl.fields['Revenues'] != 0 and

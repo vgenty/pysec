@@ -933,16 +933,10 @@ class FundamentantalAccountingConcepts(object):
         # DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this
         # imputing. if it is higher,: keep the test
         # Impute: OperatingIncomeLoss
-        self._impute(('OperatingIncomeLoss', 'InterestAndDebtExpense'),
-                     ('NonoperatingIncomeLoss',
+        self._impute(('OperatingIncomeLoss',
+                      ('InterestAndDebtExpense', 'zerook')),
+                     (('NonoperatingIncomeLoss', 'zerook'),
                       'IncomeBeforeEquityMethodInvestments'))
-        self._impute(('OperatingIncomeLoss', 'InterestAndDebtExpense'),
-                     ('IncomeBeforeEquityMethodInvestments'))
-        self._impute(('OperatingIncomeLoss'),
-                     ('NonoperatingIncomeLoss',
-                      'IncomeBeforeEquityMethodInvestments'))
-        self._impute(('OperatingIncomeLoss'),
-                     ('NonoperatingIncomeLoss'))
 
         self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['OperatingIncomeLoss']
 

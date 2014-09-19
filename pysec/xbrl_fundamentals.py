@@ -63,7 +63,9 @@ class FundamentantalAccountingConcepts(object):
             self.xbrl.fields[field] = right_side_sum - left_side_sum
         else:
             self.xbrl.fields[field] = left_side_sum - right_side_sum
-        print 'Imputed {}: {}'.format(field, self.xbrl.fields[field])
+        print '{}: Imputed {}: {}  from {} == {}'.format(
+            self.impute_count, field, self.xbrl.fields[field],
+            '+'.join(left_side), '+'.join(right_side))
         # TODO: get rid of this
         self.xbrl.fields['Changed'] = self.xbrl.fields.get('Changed', 0) + 1
 
@@ -88,15 +90,15 @@ class FundamentantalAccountingConcepts(object):
         of passes after which we converged.
         """
         old_fields = {}
-        count = 0
+        self.impute_count = 0
         while old_fields != self.xbrl.fields:
             old_fields = self.xbrl.fields.copy()
-            self.impute(count)
-            count += 1
-            if count >= 10:
+            self.impute()
+            self.impute_count += 1
+            if self.impute_count >= 10:
                 print dict_diff(old_fields, self.xbrl.fields)
                 raise ValueError('Failed to converge after 10 iterations')
-        return count - 1
+        return self.impute_count - 1
 
     def print_info_block(self):
         print
@@ -747,7 +749,7 @@ class FundamentantalAccountingConcepts(object):
             'Duration'
         )
 
-    def impute(self, impute_pass):
+    def impute(self):
 
         # BS Adjustments
         # if total assets is missing, try using current assets
@@ -969,9 +971,12 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['CostsAndExpenses'] -
                 self.xbrl.fields['OperatingExpenses'])
 
-        self._impute(('CostsAndExpenses'),
-                     ('CostOfRevenue', 'OperatingExpenses'))
-        self._impute(('CostsAndExpenses'), ('CostOfRevenue'))
+        # Impute: IncomeBeforeEquityMethodInvestments
+        if (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] == 0 and
+                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] != 0):
+            self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] = (
+                self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
+                self.xbrl.fields['IncomeFromEquityMethodInvestments'])
 
         # Impute: IncomeBeforeEquityMethodInvestments
         self._impute(('IncomeFromContinuingOperationsBeforeTax'),
@@ -994,7 +999,7 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
                 self.xbrl.fields['IncomeFromEquityMethodInvestments'])
             # HACK: only do this decrement(?!?) on the first impute pass
-            if impute_pass == 0:
+            if self.impute_count == 0:
                 self.xbrl.fields['OperatingIncomeLoss'] = (
                     self.xbrl.fields['OperatingIncomeLoss'] -
                     self.xbrl.fields['IncomeFromEquityMethodInvestments'])
@@ -1005,6 +1010,13 @@ class FundamentantalAccountingConcepts(object):
         self._impute(('OperatingIncomeLoss', 'InterestAndDebtExpense'),
                      ('NonoperatingIncomeLoss',
                       'IncomeBeforeEquityMethodInvestments'))
+        self._impute(('OperatingIncomeLoss', 'InterestAndDebtExpense'),
+                     ('IncomeBeforeEquityMethodInvestments'))
+        self._impute(('OperatingIncomeLoss'),
+                     ('NonoperatingIncomeLoss',
+                      'IncomeBeforeEquityMethodInvestments'))
+        self._impute(('OperatingIncomeLoss'),
+                     ('NonoperatingIncomeLoss'))
 
         self.xbrl.fields['NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments'] = self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['OperatingIncomeLoss']
 

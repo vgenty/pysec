@@ -1143,7 +1143,7 @@ class FundamentantalAccountingConcepts(object):
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
         failed_checks = [k for k, v in test_results.iteritems() if v != 0]
-        self.xbrl.fields['FailedChecks'] = len(failed_checks)
+        self.xbrl.fields['FailedChecks'] = failed_checks
 
         # if self.xbrl.fields['NetCashFlow'] == 0:
         #     import ipdb; ipdb.set_trace()

@@ -74,7 +74,7 @@ class Command(NoArgsCommand):
         # Find all fields mentioned in any form for this symbol
         fields = set()
         empty_fields = defaultdict(int)
-        total_failed_checks = 0
+        failed_checks = defaultdict(int)
 
         for sym in forms:
             print sym
@@ -82,7 +82,8 @@ class Command(NoArgsCommand):
                 for fieldname in form['EmptyFieldNames']:
                     empty_fields[fieldname] += 1
                 # TODO: if this value isn't present, XBRLFundamentals failed.
-                total_failed_checks += form.get('FailedChecks', 0)
+                for checkname in form.get('FailedChecks', []):
+                    failed_checks[checkname] += 1
                 print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 
@@ -99,4 +100,8 @@ class Command(NoArgsCommand):
             print '{}: {}'.format(k, v)
         print
         print 'Total empty fields: {}'.format(sum(empty_fields.values()))
-        print 'Total failed checks: {}'.format(total_failed_checks)
+        print
+        for k, v in sorted(failed_checks.items(), key=lambda x: x[1],
+                           reverse=True):
+            print '{}: {}'.format(k, v)
+        print 'Total failed checks: {}'.format(sum(failed_checks.values()))

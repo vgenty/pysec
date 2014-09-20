@@ -1044,19 +1044,41 @@ class FundamentantalAccountingConcepts(object):
 
         #### Adjustments
 
-        lngCF1 = self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses'])
-        if lngCF1!=0 and (self.xbrl.fields['NetCashFlow'] - (self.xbrl.fields['NetCashFlowsOperating'] + self.xbrl.fields['NetCashFlowsInvesting'] + self.xbrl.fields['NetCashFlowsFinancing'] + self.xbrl.fields['ExchangeGainsLosses']) == (self.xbrl.fields['ExchangeGainsLosses'] * -1)):
+        lngCF1 = (self.xbrl.fields['NetCashFlow'] -
+                  (self.xbrl.fields['NetCashFlowsOperating'] +
+                   self.xbrl.fields['NetCashFlowsInvesting'] +
+                   self.xbrl.fields['NetCashFlowsFinancing'] +
+                   self.xbrl.fields['ExchangeGainsLosses']))
+        if (lngCF1 != 0 and
+            (self.xbrl.fields['NetCashFlow'] -
+             (self.xbrl.fields['NetCashFlowsOperating'] +
+              self.xbrl.fields['NetCashFlowsInvesting'] +
+              self.xbrl.fields['NetCashFlowsFinancing'] +
+              self.xbrl.fields['ExchangeGainsLosses']) ==
+            (self.xbrl.fields['ExchangeGainsLosses'] * -1))):
             lngCF1 = 888888
             # What is going on here is that 171 filers compute net cash flow
             # differently than everyone else. What I am doing is marking these
             # by setting the value of the test to a number 888888 which would
             # never occur naturally, so that I can differentiate this from
             # errors.
-        lngCF2 = self.xbrl.fields['NetCashFlowsContinuing'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingContinuing'])
-        lngCF3 = self.xbrl.fields['NetCashFlowsDiscontinued'] - (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
-        lngCF4 = self.xbrl.fields['NetCashFlowsOperating'] - (self.xbrl.fields['NetCashFlowsOperatingContinuing'] + self.xbrl.fields['NetCashFlowsOperatingDiscontinued'])
-        lngCF5 = self.xbrl.fields['NetCashFlowsInvesting'] - (self.xbrl.fields['NetCashFlowsInvestingContinuing'] + self.xbrl.fields['NetCashFlowsInvestingDiscontinued'])
-        lngCF6 = self.xbrl.fields['NetCashFlowsFinancing'] - (self.xbrl.fields['NetCashFlowsFinancingContinuing'] + self.xbrl.fields['NetCashFlowsFinancingDiscontinued'])
+        lngCF2 = (self.xbrl.fields['NetCashFlowsContinuing'] -
+                  (self.xbrl.fields['NetCashFlowsOperatingContinuing'] +
+                   self.xbrl.fields['NetCashFlowsInvestingContinuing'] +
+                   self.xbrl.fields['NetCashFlowsFinancingContinuing']))
+        lngCF3 = (self.xbrl.fields['NetCashFlowsDiscontinued'] -
+                  (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] +
+                   self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] +
+                   self.xbrl.fields['NetCashFlowsFinancingDiscontinued']))
+        lngCF4 = (self.xbrl.fields['NetCashFlowsOperating'] -
+                  (self.xbrl.fields['NetCashFlowsOperatingContinuing'] +
+                   self.xbrl.fields['NetCashFlowsOperatingDiscontinued']))
+        lngCF5 = (self.xbrl.fields['NetCashFlowsInvesting'] -
+                  (self.xbrl.fields['NetCashFlowsInvestingContinuing'] +
+                   self.xbrl.fields['NetCashFlowsInvestingDiscontinued']))
+        lngCF6 = (self.xbrl.fields['NetCashFlowsFinancing'] -
+                  (self.xbrl.fields['NetCashFlowsFinancingContinuing'] +
+                   self.xbrl.fields['NetCashFlowsFinancingDiscontinued']))
 
         if lngCF1:
             print "CF1: NetCashFlow(" , self.xbrl.fields['NetCashFlow'] , ") = (NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") , (NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") , (NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") , ExchangeGainsLosses(" , self.xbrl.fields['ExchangeGainsLosses'] , "): " , lngCF1
@@ -1123,7 +1145,7 @@ class FundamentantalAccountingConcepts(object):
         failed_checks = [k for k, v in test_results.iteritems() if v != 0]
         self.xbrl.fields['FailedChecks'] = len(failed_checks)
 
-        # if self.xbrl.fields['IntangibleAssets'] == 0:
+        # if self.xbrl.fields['NetCashFlow'] == 0:
         #     import ipdb; ipdb.set_trace()
         # if len(failed_checks) >= 4:
         #     print ('\n'.join(['Too many check failures:',

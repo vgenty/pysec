@@ -23,7 +23,7 @@ class XBRL(object):
         self.ns['xlmns'] = 'http://www.xbrl.org/2003/instance'
 
         self.context_for_instants = None
-        self.context_for_durations = None
+        self.contexts_for_durations = None
 
         self.GetBaseInformation()
         got_context = self.loadYear(0)
@@ -90,28 +90,31 @@ class XBRL(object):
 
         ContextReference = {
             'Instant': self.context_for_instants,
-            'Duration': self.context_for_durations,
+            'Duration': self.contexts_for_durations,
             'DEI': self.context_for_dei
         }[ConceptPeriodType]
 
         if not ContextReference:
             return None
 
-        oNode = self.getNode(
-            "//" + SeekConcept + "[@contextRef='" + ContextReference + "']")
-        if oNode is not None:
-            factValue = oNode.text
-            if 'nil' in oNode.keys() and oNode.get('nil') == 'true':
-                factValue = 0
-                # set the value to ZERO if it is nil
-            # if type(factValue)==str:
-            try:
-                factValue = float(factValue)
-            except:
-                # print 'couldnt convert %s=%s to float' %
-                # (SeekConcept, factValue)
-                factValue = None
+        if not isinstance(ContextReference, list):
+            ContextReference = [ContextReference]
+        for context_ref in ContextReference:
+            oNode = self.getNode(
+                "//" + SeekConcept + "[@contextRef='" + context_ref + "']")
+            if oNode is not None:
+                factValue = oNode.text
+                if 'nil' in oNode.keys() and oNode.get('nil') == 'true':
+                    factValue = 0
+                    # set the value to ZERO if it is nil
+                try:
+                    factValue = float(factValue)
+                except:
+                    # TODO: what exception?
+                    factValue = None
 
+            if factValue:
+                break
         return factValue
 
     def GetBaseInformation(self):
@@ -256,9 +259,9 @@ class XBRL(object):
             '//dei:DocumentPeriodEndDate')
 
         StartDate = "ERROR"
-        StartDateYTD = "2099-01-01"
+        StartDateYTD = "9999-01-01"
         StartDateLatest = '0000-01-01'
-        UseContext = "ERROR"
+        UseContexts = []
 
         for i in oNodelist2:
 
@@ -291,29 +294,32 @@ class XBRL(object):
                         # not YTD
                         StartDate = self.getNode(
                             'xbrli:period/xbrli:startDate', j).text.strip()
-                        # print "Context start date: " + StartDate
-                        # print "YTD start date: " + StartDateYTD
+                        print "Context start date: " + StartDate
+                        print "YTD start date: " + StartDateYTD
 
                         if StartDate < StartDateYTD:
                             # Start date is for quarter
-                            # print ('Context start date is less than '
-                            #        'current year to date, replace')
-                            # print "Context start date (new min): " + StartDate
-                            # print "Current min: " + StartDateYTD
+                            print ('Context start date is less than '
+                                   'current year to date, replace')
+                            print "Context start date (new min): " + StartDate
+                            print "Current min: " + StartDateYTD
 
                             StartDateYTD = StartDate
+                            UseContext = j.get('id')
+                            UseContexts.append((UseContext, StartDate))
                         if StartDate > StartDateLatest:
                             # Start date is for year
                             StartDateLatest = StartDate
                             UseContext = j.get('id')
-                        #     print ('Context start date is greater than '
-                        #            'current max, replace')
-                        #     print 'New latest start date:', StartDateLatest
+                            UseContexts.append((UseContext, StartDate))
+                            print ('Context start date is greater than '
+                                   'current max, replace')
+                            print 'New latest start date:', StartDateLatest
 
-                        # print "Use context ID: " + UseContext
-                        # print "Current min: " + StartDateYTD
-                        # print 'Current max:', StartDateLatest
-                        # print " "
+                        print "Use context ID: " + UseContext
+                        print "Current min: " + StartDateYTD
+                        print 'Current max:', StartDateLatest
+                        print " "
 
         # Balance sheet date of current period
         self.fields['BalanceSheetDate'] = EndDate
@@ -328,8 +334,9 @@ class XBRL(object):
         # Income statement date for current fiscal year, year to date
         self.fields['IncomeStatementPeriodYTD'] = StartDateYTD
 
-        self.context_for_durations = UseContext
-        return self.context_for_durations != 'ERROR'
+        self.contexts_for_durations = [c[0] for c in sorted(
+            UseContexts, key=lambda x: x[1], reverse=True)]
+        return self.contexts_for_durations != []
 
     def LookForAlternativeInstanceContext(self):
         # This deals with the situation where no instance context has no

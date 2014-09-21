@@ -91,7 +91,8 @@ class FundamentantalAccountingConcepts(object):
         # TODO: get rid of this
         self.xbrl.fields['Changed'] = self.xbrl.fields.get('Changed', 0) + 1
 
-    def first_valid_field(self, fieldnames, concept_period_type='Duration'):
+    def first_valid_field(self, fieldnames, concept_period_type='Duration',
+                          search_all_contexts=False):
         val = 0
         for fieldname in fieldnames:
             use_concept = concept_period_type
@@ -99,7 +100,8 @@ class FundamentantalAccountingConcepts(object):
             # type.
             if isinstance(fieldname, tuple):
                 fieldname, use_concept = fieldname
-            val = self.xbrl.GetFactValue(fieldname, use_concept)
+            val = self.xbrl.GetFactValue(fieldname, use_concept,
+                                         search_all_contexts)
             if val != None:
                 break
         if val == None:
@@ -693,66 +695,43 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:CashPeriodIncreaseDecrease',
                 'us-gaap:NetCashProvidedByUsedInContinuingOperations',
             ],
-            'Duration'
+            'Duration',
+            search_all_contexts=True
         )
 
-        # NetCashFlowsOperating
-        self.xbrl.fields['NetCashFlowsOperating'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInOperatingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsOperating'] == None:
-            self.xbrl.fields['NetCashFlowsOperating'] = 0
-
-        # NetCashFlowsInvesting
-        self.xbrl.fields['NetCashFlowsInvesting'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInInvestingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsInvesting'] == None:
-            self.xbrl.fields['NetCashFlowsInvesting'] = 0
-
-        # NetCashFlowsFinancing
-        self.xbrl.fields['NetCashFlowsFinancing'] = self.xbrl.GetFactValue(
-            "us-gaap:NetCashProvidedByUsedInFinancingActivities",
-            "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancing'] == None:
-            self.xbrl.fields['NetCashFlowsFinancing'] = 0
-
-        # NetCashFlowsOperatingContinuing
-        self.xbrl.fields[
-            'NetCashFlowsOperatingContinuing'] = self.xbrl.GetFactValue(
-                "us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsOperatingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsOperatingContinuing'] = 0
-
-        # NetCashFlowsInvestingContinuing
-        self.xbrl.fields['NetCashFlowsInvestingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInInvestingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsInvestingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsInvestingContinuing'] = 0
-
-        # NetCashFlowsFinancingContinuing
-        self.xbrl.fields['NetCashFlowsFinancingContinuing'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInFinancingActivitiesContinuingOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancingContinuing'] == None:
-            self.xbrl.fields['NetCashFlowsFinancingContinuing'] = 0
-
-        # NetCashFlowsOperatingDiscontinued
-        self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] ==None:
-            self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] = 0
-
-        # NetCashFlowsInvestingDiscontinued
-        self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] = 0
-
-        # NetCashFlowsFinancingDiscontinued
-        self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = self.xbrl.GetFactValue("us-gaap:CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] = 0
-
         # NetCashFlowsDiscontinued
-        self.xbrl.fields['NetCashFlowsDiscontinued'] = self.xbrl.GetFactValue("us-gaap:NetCashProvidedByUsedInDiscontinuedOperations", "Duration")
-        if self.xbrl.fields['NetCashFlowsDiscontinued'] == None:
-            self.xbrl.fields['NetCashFlowsDiscontinued'] = 0
+        self.xbrl.fields['NetCashFlowsDiscontinued'] = self.first_valid_field(
+            [
+                'us-gaap:NetCashProvidedByUsedInDiscontinuedOperations',
+            ],
+            'Duration',
+            search_all_contexts=True
+        )
+
+        # NetCashFlowsOperating/Investing/Financing{Continuing/Discontinued}
+        for flow_type in ['Operating', 'Investing', 'Financing']:
+            self.xbrl.fields['NetCashFlows{}'.format(flow_type)] = (
+                self.first_valid_field(
+                    [
+                        'us-gaap:NetCashProvidedByUsedIn{}Activities'.format(
+                            flow_type),
+                    ],
+                    'Duration',
+                    search_all_contexts=True
+                )
+            )
+            # NetCashFlowsXXX{Continuing/Discontinued}
+            for st in ['Continuing', 'Discontinued']:
+                self.xbrl.fields['NetCashFlows{}{}'.format(flow_type, st)] = (
+                    self.first_valid_field(
+                        [
+                            ('us-gaap:NetCashProvidedByUsedIn{}Activities'
+                             '{}Operations'.format(flow_type, st)),
+                        ],
+                        'Duration',
+                        search_all_contexts=True
+                    )
+                )
 
         # ExchangeGainsLosses
         self.xbrl.fields['ExchangeGainsLosses'] = self.first_valid_field(

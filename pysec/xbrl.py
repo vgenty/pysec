@@ -84,7 +84,8 @@ class XBRL(object):
             return oNodelist[0]
         return None
 
-    def GetFactValue(self, SeekConcept, ConceptPeriodType):
+    def GetFactValue(self, SeekConcept, ConceptPeriodType,
+                     search_all_contexts=False):
 
         factValue = None
 
@@ -100,7 +101,9 @@ class XBRL(object):
         if not isinstance(ContextReference, list):
             ContextReference = [ContextReference]
         # Limit to first contextreference found for old-style behavior
-        for context_ref in ContextReference[:1]:
+        use_contexts = (ContextReference if search_all_contexts
+                        else ContextReference[:1])
+        for context_ref in use_contexts:
             oNode = self.getNode(
                 "//" + SeekConcept + "[@contextRef='" + context_ref + "']")
             if oNode is not None:
@@ -116,6 +119,9 @@ class XBRL(object):
 
             if factValue:
                 break
+        if factValue and context_ref != ContextReference[0]:
+            print 'found {} at {}, not {}'.format(
+                SeekConcept, context_ref, ContextReference[0])
         return factValue
 
     def GetBaseInformation(self):

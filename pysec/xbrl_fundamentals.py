@@ -1013,14 +1013,13 @@ class FundamentantalAccountingConcepts(object):
                 'Liabilities == CurrentLiabilities + NoncurrentLiabilities'
             )
 
-        lngBSCheck5 = (self.xbrl.fields['LiabilitiesAndEquity'] -
-                       (self.xbrl.fields['Liabilities'] +
-                        self.xbrl.fields['CommitmentsAndContingencies'] +
-                        self.xbrl.fields['TemporaryEquity'] +
-                        self.xbrl.fields['Equity']))
-
-        if lngBSCheck5:
-            print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ") = Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
+        _check_expr(
+            'BS5',
+            'LiabilitiesAndEquity == Liabilities'
+            '+ CommitmentsAndContingencies'
+            '+ TemporaryEquity'
+            '+ Equity'
+        )
 
         #### Adjustments
 
@@ -1075,11 +1074,11 @@ class FundamentantalAccountingConcepts(object):
 
         _check_expr('IS1',
                     'GrossProfit == Revenues - CostOfRevenue')
-        lngIS2 = ((self.xbrl.fields['GrossProfit'] -
-                   self.xbrl.fields['OperatingExpenses'] +
-                   self.xbrl.fields['OtherOperatingIncome']) -
-                  self.xbrl.fields['OperatingIncomeLoss'])
-        _check_expr('lngIS2_5',
+        _check_expr(
+            'IS2',
+            'OperatingIncomeLoss == '
+            'GrossProfit - OperatingExpenses + OtherOperatingIncome')
+        _check_expr('IS2_5',
                     'NonoperatingIncomeLossPlusInterestAndDebtExpense == '
                     'NonoperatingIncomeLoss + InterestAndDebtExpense')
         _check_expr('lngIS3',
@@ -1118,8 +1117,6 @@ class FundamentantalAccountingConcepts(object):
         def make_field_args(*args):
             return {k: self.format_field(k) for k in args}
 
-        if lngIS2:
-            print "IS2: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = GrossProfit(" , self.xbrl.fields['GrossProfit'] , ") - OperatingExpenses(" , self.xbrl.fields['OperatingExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS2
         if lngIS4:
             print "IS4: IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") = IncomeBeforeEquityMethodInvestments(" , self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] , ") , IncomeFromEquityMethodInvestments(" , self.xbrl.fields['IncomeFromEquityMethodInvestments'] , "): " , lngIS4
 

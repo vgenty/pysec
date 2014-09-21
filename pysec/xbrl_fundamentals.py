@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 # http://xbrl.squarespace.com/journal/2013/4/4/fundamental-accounting-relations.html
 # seems useful
 
-import ast
 import difflib
 import pprint
 

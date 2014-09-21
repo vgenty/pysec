@@ -1079,12 +1079,25 @@ class FundamentantalAccountingConcepts(object):
                    self.xbrl.fields['OperatingExpenses'] +
                    self.xbrl.fields['OtherOperatingIncome']) -
                   self.xbrl.fields['OperatingIncomeLoss'])
-        lngIS3 = (self.xbrl.fields['OperatingIncomeLoss'] + self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) - self.xbrl.fields['IncomeBeforeEquityMethodInvestments']
-        lngIS4 = (self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] + self.xbrl.fields['IncomeFromEquityMethodInvestments']) - self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax']
-        lngIS5 = (self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] - self.xbrl.fields['IncomeTaxExpenseBenefit']) - self.xbrl.fields['IncomeFromContinuingOperationsAfterTax']
-        lngIS6 = (self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] + self.xbrl.fields['IncomeFromDiscontinuedOperations'] + self.xbrl.fields['ExtraordinaryItemsGainLoss']) - self.xbrl.fields['NetIncomeLoss']
-        lngIS7 = (self.xbrl.fields['NetIncomeAttributableToParent'] + self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) - self.xbrl.fields['NetIncomeLoss']
-        lngIS8 = (self.xbrl.fields['NetIncomeAttributableToParent'] - self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) - self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic']
+        lngIS3 = ((self.xbrl.fields['OperatingIncomeLoss'] +
+                   self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) -
+                  self.xbrl.fields['IncomeBeforeEquityMethodInvestments'])
+        lngIS4 = ((self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] +
+                   self.xbrl.fields['IncomeFromEquityMethodInvestments']) -
+                  self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'])
+        lngIS5 = ((self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
+                   self.xbrl.fields['IncomeTaxExpenseBenefit']) -
+                  self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'])
+        lngIS6 = ((self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] +
+                   self.xbrl.fields['IncomeFromDiscontinuedOperations'] +
+                   self.xbrl.fields['ExtraordinaryItemsGainLoss']) -
+                  self.xbrl.fields['NetIncomeLoss'])
+        lngIS7 = ((self.xbrl.fields['NetIncomeAttributableToParent'] +
+                   self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) -
+                  self.xbrl.fields['NetIncomeLoss'])
+        lngIS8 = ((self.xbrl.fields['NetIncomeAttributableToParent'] -
+                   self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) -
+                  self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'])
         lngIS9 = ((self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] +
                    self.xbrl.fields['ComprehensiveIncomeAttributable'
                                     'ToNoncontrollingInterest']) -
@@ -1092,7 +1105,10 @@ class FundamentantalAccountingConcepts(object):
         lngIS10 = ((self.xbrl.fields['NetIncomeLoss'] +
                     self.xbrl.fields['OtherComprehensiveIncome']) -
                    self.xbrl.fields['ComprehensiveIncome'])
-        lngIS11 = self.xbrl.fields['OperatingIncomeLoss'] - (self.xbrl.fields['Revenues'] - self.xbrl.fields['CostsAndExpenses'] + self.xbrl.fields['OtherOperatingIncome'])
+        lngIS11 = (self.xbrl.fields['OperatingIncomeLoss'] -
+                   (self.xbrl.fields['Revenues'] -
+                    self.xbrl.fields['CostsAndExpenses'] +
+                    self.xbrl.fields['OtherOperatingIncome']))
 
         if lngIS1:
             print "IS1: GrossProfit(" , self.xbrl.fields['GrossProfit'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostOfRevenue(" , self.xbrl.fields['CostOfRevenue'] , "): " , lngIS1

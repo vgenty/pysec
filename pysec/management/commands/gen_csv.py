@@ -66,19 +66,19 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **_kwargs):
         try:
-            forms = load_pkl()
+            sym_to_forms = load_pkl()
         except IOError:
             create_pkl()
-            forms = load_pkl()
+            sym_to_forms = load_pkl()
 
         # Find all fields mentioned in any form for this symbol
         fields = set()
         empty_fields = defaultdict(int)
         failed_checks = defaultdict(int)
 
-        for sym in forms:
+        for sym in sym_to_forms:
             print sym
-            for form in forms[sym]:
+            for form in sym_to_forms[sym]:
                 for fieldname in form['EmptyFieldNames']:
                     empty_fields[fieldname] += 1
                 # TODO: if this value isn't present, XBRLFundamentals failed.
@@ -92,15 +92,23 @@ class Command(NoArgsCommand):
                 csv = DictWriter(f, sorted(list(fields)),
                                  extrasaction='ignore')
                 csv.writeheader()
-                csv.writerows(sorted(forms[sym],
+                csv.writerows(sorted(sym_to_forms[sym],
                                      key=lambda x: x['DocumentPeriodEndDate']))
+
+        num_forms = sum(len(v) for v in sym_to_forms.values())
         for k, v in sorted(empty_fields.items(), key=lambda x: x[1],
                            reverse=True):
             print '{}: {}'.format(k, v)
         print
-        print 'Total empty fields: {}'.format(sum(empty_fields.values()))
+        print 'Total empty fields: {}, {:.02f} per form'.format(
+            sum(empty_fields.values()),
+            sum(empty_fields.values()) / float(num_forms))
         print
         for k, v in sorted(failed_checks.items(), key=lambda x: x[1],
                            reverse=True):
             print '{}: {}'.format(k, v)
-        print 'Total failed checks: {}'.format(sum(failed_checks.values()))
+        print 'Total failed checks: {}, {:.02f} per form'.format(
+            sum(failed_checks.values()),
+            sum(failed_checks.values()) / float(num_forms))
+        print
+        print 'Total forms: {}'.format(num_forms)

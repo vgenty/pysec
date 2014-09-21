@@ -1023,19 +1023,22 @@ class FundamentantalAccountingConcepts(object):
 
         #### Adjustments
 
-        lngCF1 = (self.xbrl.fields['NetCashFlow'] -
-                  (self.xbrl.fields['NetCashFlowsOperating'] +
-                   self.xbrl.fields['NetCashFlowsInvesting'] +
-                   self.xbrl.fields['NetCashFlowsFinancing'] +
-                   self.xbrl.fields['ExchangeGainsLosses']))
-        if (lngCF1 != 0 and
-            (self.xbrl.fields['NetCashFlow'] -
-             (self.xbrl.fields['NetCashFlowsOperating'] +
-              self.xbrl.fields['NetCashFlowsInvesting'] +
-              self.xbrl.fields['NetCashFlowsFinancing'] +
-              self.xbrl.fields['ExchangeGainsLosses']) ==
-            (self.xbrl.fields['ExchangeGainsLosses'] * -1))):
-            lngCF1 = 888888
+        _check_expr(
+            'CF1',
+            'NetCashFlow == '
+            'NetCashFlowsOperating '
+            '+ NetCashFlowsInvesting '
+            '+ NetCashFlowsFinancing '
+            '+ ExchangeGainsLosses'
+        )
+        if (checks['CF1'] != 0 and
+                (self.xbrl.fields['NetCashFlow'] -
+                 (self.xbrl.fields['NetCashFlowsOperating'] +
+                  self.xbrl.fields['NetCashFlowsInvesting'] +
+                  self.xbrl.fields['NetCashFlowsFinancing'] +
+                  self.xbrl.fields['ExchangeGainsLosses']) ==
+                (self.xbrl.fields['ExchangeGainsLosses'] * -1))):
+            checks['CF1'] = 888888
             # What is going on here is that 171 filers compute net cash flow
             # differently than everyone else. What I am doing is marking these
             # by setting the value of the test to a number 888888 which would
@@ -1059,8 +1062,6 @@ class FundamentantalAccountingConcepts(object):
                   (self.xbrl.fields['NetCashFlowsFinancingContinuing'] +
                    self.xbrl.fields['NetCashFlowsFinancingDiscontinued']))
 
-        if lngCF1:
-            print "CF1: NetCashFlow(" , self.xbrl.fields['NetCashFlow'] , ") = (NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") , (NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") , (NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") , ExchangeGainsLosses(" , self.xbrl.fields['ExchangeGainsLosses'] , "): " , lngCF1
         if lngCF2:
             print "CF2: NetCashFlowsContinuing(" , self.xbrl.fields['NetCashFlowsContinuing'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , "): " , lngCF2
         if lngCF3:
@@ -1085,55 +1086,50 @@ class FundamentantalAccountingConcepts(object):
                     'IncomeBeforeEquityMethodInvestments == '
                     'OperatingIncomeLoss + '
                     'NonoperatingIncomeLossPlusInterestAndDebtExpense')
-        lngIS4 = ((self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] +
-                   self.xbrl.fields['IncomeFromEquityMethodInvestments']) -
-                  self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'])
-        lngIS5 = ((self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] -
-                   self.xbrl.fields['IncomeTaxExpenseBenefit']) -
-                  self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'])
-        lngIS6 = ((self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] +
-                   self.xbrl.fields['IncomeFromDiscontinuedOperations'] +
-                   self.xbrl.fields['ExtraordinaryItemsGainLoss']) -
-                  self.xbrl.fields['NetIncomeLoss'])
-        lngIS7 = ((self.xbrl.fields['NetIncomeAttributableToParent'] +
-                   self.xbrl.fields['NetIncomeAttributableTo'
-                                    'NoncontrollingInterest']) -
-                  self.xbrl.fields['NetIncomeLoss'])
-        lngIS8 = ((self.xbrl.fields['NetIncomeAttributableToParent'] -
-                   self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) -
-                  self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'])
-        lngIS9 = ((self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] +
-                   self.xbrl.fields['ComprehensiveIncomeAttributable'
-                                    'ToNoncontrollingInterest']) -
-                  self.xbrl.fields['ComprehensiveIncome'])
-        lngIS10 = ((self.xbrl.fields['NetIncomeLoss'] +
-                    self.xbrl.fields['OtherComprehensiveIncome']) -
-                   self.xbrl.fields['ComprehensiveIncome'])
-        lngIS11 = (self.xbrl.fields['OperatingIncomeLoss'] -
-                   (self.xbrl.fields['Revenues'] -
-                    self.xbrl.fields['CostsAndExpenses'] +
-                    self.xbrl.fields['OtherOperatingIncome']))
-
-        def make_field_args(*args):
-            return {k: self.format_field(k) for k in args}
-
-        if lngIS4:
-            print "IS4: IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") = IncomeBeforeEquityMethodInvestments(" , self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] , ") , IncomeFromEquityMethodInvestments(" , self.xbrl.fields['IncomeFromEquityMethodInvestments'] , "): " , lngIS4
-
-        if lngIS5:
-            print "IS5: IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") = IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") - IncomeTaxExpenseBenefit(" , self.xbrl.fields['IncomeTaxExpenseBenefit'] , "): " , lngIS5
-        if lngIS6:
-            print "IS6: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = IncomeFromContinuingOperationsAfterTax(" , self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] , ") , IncomeFromDiscontinuedOperations(" , self.xbrl.fields['IncomeFromDiscontinuedOperations'] , ") , ExtraordinaryItemsGainLoss(" , self.xbrl.fields['ExtraordinaryItemsGainLoss'] , "): " , lngIS6
-        if lngIS7:
-            print "IS7: NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") = NetIncomeAttributableToParent(" , self.xbrl.fields['NetIncomeAttributableToParent'] , ") , NetIncomeAttributableToNoncontrollingInterest(" , self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] , "): " , lngIS7
-        if lngIS8:
-            print "IS8: NetIncomeAvailableToCommonStockholdersBasic(" , self.xbrl.fields['NetIncomeAvailableToCommonStockholdersBasic'] , ") = NetIncomeAttributableToParent(" , self.xbrl.fields['NetIncomeAttributableToParent'] , ") - PreferredStockDividendsAndOtherAdjustments(" , self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] , "): " , lngIS8
-        if lngIS9:
-            print "IS9: ComprehensiveIncome(" , self.xbrl.fields['ComprehensiveIncome'] , ") = ComprehensiveIncomeAttributableToParent(" , self.xbrl.fields['ComprehensiveIncomeAttributableToParent'] , ") , ComprehensiveIncomeAttributableToNoncontrollingInterest(" , self.xbrl.fields['ComprehensiveIncomeAttributableToNoncontrollingInterest'] , "): " , lngIS9
-        if lngIS10:
-            print "IS10: ComprehensiveIncome(" , self.xbrl.fields['ComprehensiveIncome'] , ") = NetIncomeLoss(" , self.xbrl.fields['NetIncomeLoss'] , ") , OtherComprehensiveIncome(" , self.xbrl.fields['OtherComprehensiveIncome'] , "): " , lngIS10
-        if lngIS11:
-            print "IS11: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostsAndExpenses(" , self.xbrl.fields['CostsAndExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS11
+        _check_expr(
+            'IS4',
+            'IncomeFromContinuingOperationsBeforeTax == '
+            'IncomeBeforeEquityMethodInvestments '
+            '+ IncomeFromEquityMethodInvestments'
+        )
+        _check_expr(
+            'IS5',
+            'IncomeFromContinuingOperationsAfterTax == '
+            'IncomeFromContinuingOperationsBeforeTax - IncomeTaxExpenseBenefit'
+        )
+        _check_expr(
+            'IS6',
+            'NetIncomeLoss == IncomeFromContinuingOperationsAfterTax '
+            '+ IncomeFromDiscontinuedOperations + ExtraordinaryItemsGainLoss'
+        )
+        _check_expr(
+            'IS7',
+            'NetIncomeLoss == '
+            'NetIncomeAttributableToParent'
+            '+ NetIncomeAttributableToNoncontrollingInterest'
+        )
+        _check_expr(
+            'IS8',
+            'NetIncomeAvailableToCommonStockholdersBasic == '
+            'NetIncomeAttributableToParent'
+            '- PreferredStockDividendsAndOtherAdjustments'
+        )
+        _check_expr(
+            'IS9',
+            'ComprehensiveIncome == '
+            'ComprehensiveIncomeAttributableToParent '
+            '+ ComprehensiveIncomeAttributableToNoncontrollingInterest'
+        )
+        _check_expr(
+            'IS10',
+            'ComprehensiveIncome == NetIncomeLoss + OtherComprehensiveIncome'
+        )
+        _check_expr(
+            'IS11',
+            'OperatingIncomeLoss == Revenues '
+            '- CostsAndExpenses '
+            '- OtherOperatingIncome'
+        )
 
         # Old style
         test_names = [n for n in locals() if n not in ['self', 'failed']]

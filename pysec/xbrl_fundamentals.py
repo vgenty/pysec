@@ -985,12 +985,12 @@ class FundamentantalAccountingConcepts(object):
                 print '{}: {},  {}'.format(name, solvr.rendered, solvr.diff)
             checks[name] = solvr.diff
 
-        lngBSCheck1 = (self.xbrl.fields['Equity'] -
-                       (self.xbrl.fields['EquityAttributableToParent'] +
-                        self.xbrl.fields['EquityAttributableTo'
-                                         'NoncontrollingInterest']))
-        lngBSCheck2 = (self.xbrl.fields['Assets'] -
-                       self.xbrl.fields['LiabilitiesAndEquity'])
+        _check_expr(
+            'BS1',
+            'Equity == EquityAttributableToParent + '
+            'EquityAttributableToNoncontrollingInterest'
+        )
+        _check_expr('BS2', 'Assets == LiabilitiesAndEquity')
 
         if (self.xbrl.fields['CurrentAssets'] == 0
                 and self.xbrl.fields['NoncurrentAssets'] == 0 and
@@ -999,17 +999,19 @@ class FundamentantalAccountingConcepts(object):
             # if current assets/liabilities are zero and noncurrent
             # assets/liabilities;: don't do this test because the balance sheet
             # is not classified
-            lngBSCheck3 = 0
-            lngBSCheck4 = 0
+            _check_expr('BS3', '0 == 0')
+            _check_expr('BS4', '0 == 0')
 
         else:
             # balance sheet IS classified
-            lngBSCheck3 = (self.xbrl.fields['Assets'] -
-                           (self.xbrl.fields['CurrentAssets'] +
-                            self.xbrl.fields['NoncurrentAssets']))
-            lngBSCheck4 = (self.xbrl.fields['Liabilities'] -
-                           (self.xbrl.fields['CurrentLiabilities'] +
-                            self.xbrl.fields['NoncurrentLiabilities']))
+            _check_expr(
+                'BS3',
+                'Assets == CurrentAssets + NoncurrentAssets'
+            )
+            _check_expr(
+                'BS4',
+                'Liabilities == CurrentLiabilities + NoncurrentLiabilities'
+            )
 
         lngBSCheck5 = (self.xbrl.fields['LiabilitiesAndEquity'] -
                        (self.xbrl.fields['Liabilities'] +
@@ -1017,14 +1019,6 @@ class FundamentantalAccountingConcepts(object):
                         self.xbrl.fields['TemporaryEquity'] +
                         self.xbrl.fields['Equity']))
 
-        if lngBSCheck1:
-            print "BS1: Equity(" , self.xbrl.fields['Equity'] , ") = EquityAttributableToParent(" , self.xbrl.fields['EquityAttributableToParent'] , ") , EquityAttributableToNoncontrollingInterest(" , self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] , "): " , lngBSCheck1
-        if lngBSCheck2:
-            print "BS2: Assets(" , self.xbrl.fields['Assets'] , ") = LiabilitiesAndEquity(" , self.xbrl.fields['LiabilitiesAndEquity'] , "): " , lngBSCheck2
-        if lngBSCheck3:
-            print "BS3: Assets(" , self.xbrl.fields['Assets'] , ") = CurrentAssets(" , self.xbrl.fields['CurrentAssets'] , ") , NoncurrentAssets(" , self.xbrl.fields['NoncurrentAssets'] , "): " , lngBSCheck3
-        if lngBSCheck4:
-            print "BS4: Liabilities(" , self.xbrl.fields['Liabilities'] , ") = CurrentLiabilities(" , self.xbrl.fields['CurrentLiabilities'] , ") , NoncurrentLiabilities(" , self.xbrl.fields['NoncurrentLiabilities'] , "): " , lngBSCheck4
         if lngBSCheck5:
             print "BS5: Liabilities and Equity(" , self.xbrl.fields['LiabilitiesAndEquity'] , ") = Liabilities(" , self.xbrl.fields['Liabilities'] , ") , CommitmentsAndContingencies(" , self.xbrl.fields['CommitmentsAndContingencies'] , "), TemporaryEquity(" , self.xbrl.fields['TemporaryEquity'] , "), Equity(" , self.xbrl.fields['Equity'] , "): " , lngBSCheck5
 
@@ -1157,7 +1151,6 @@ class FundamentantalAccountingConcepts(object):
         failed_checks = [k for k, v in test_results.iteritems() if v != 0]
         self.xbrl.fields['FailedChecks'] = failed_checks
 
-        import ipdb; ipdb.set_trace()
         print self.xbrl.fields['FailedChecks']
         # if lngIS3:
         #     import ipdb; ipdb.set_trace()

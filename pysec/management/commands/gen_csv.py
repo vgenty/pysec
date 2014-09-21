@@ -84,7 +84,6 @@ class Command(NoArgsCommand):
                 # TODO: if this value isn't present, XBRLFundamentals failed.
                 for checkname in form.get('FailedChecks', []):
                     failed_checks[checkname] += 1
-                print form['DocumentPeriodEndDate']
                 fields |= set(form.keys())
 
             fields -= EXCLUDE_FIELDS

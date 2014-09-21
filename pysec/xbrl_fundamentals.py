@@ -7,8 +7,11 @@ from __future__ import unicode_literals
 # http://xbrl.squarespace.com/journal/2013/4/4/fundamental-accounting-relations.html
 # seems useful
 
+import ast
 import difflib
 import pprint
+
+from expr_parse import ExprSolver
 
 
 def dict_diff(d1, d2):
@@ -33,6 +36,10 @@ class FundamentantalAccountingConcepts(object):
     def _sum(self, *fields):
         return sum(self.xbrl.fields[f] for f in fields)
 
+    def format_field(self, f, zero_ok=False):
+        return '{}({}){}'.format(
+            f, self.xbrl.fields[f], 'Z' if zero_ok else '')
+
     def _impute(self, left_side, right_side):
         """
         Given a set of variables that relate to each other such that
@@ -41,10 +48,6 @@ class FundamentantalAccountingConcepts(object):
 
         attempt to impute any missing values.
         """
-
-        def format_field(f):
-            return '{}({}){}'.format(
-                f, self.xbrl.fields[f], 'Z' if f in zero_ok_fields else '')
 
         if not isinstance(left_side, tuple):
             left_side = (left_side,)
@@ -84,8 +87,10 @@ class FundamentantalAccountingConcepts(object):
             value = left_side_sum - right_side_sum
         print '{}: Imputed {}: {}  from {} == {}'.format(
             self.impute_count, field, value,
-            '+'.join([format_field(f) for f in left_side]),
-            '+'.join([format_field(f) for f in right_side])
+            '+'.join([self.format_field(f, f in zero_ok_fields)
+                      for f in left_side]),
+            '+'.join([self.format_field(f, f in zero_ok_fields)
+                      for f in right_side])
         )
         self.xbrl.fields[field] = value
         # TODO: get rid of this
@@ -890,9 +895,9 @@ class FundamentantalAccountingConcepts(object):
         self._impute(('IncomeFromContinuingOperationsBeforeTax'),
                      ('IncomeBeforeEquityMethodInvestments',
                       'IncomeFromEquityMethodInvestments'))
-        self._impute(('IncomeBeforeEquityMethodInvestments'),
-                     ('OperatingIncomeLoss', 'NonoperatingIncomeLoss',
-                      'InterestAndDebtExpense'))
+        self._impute(('IncomeBeforeEquityMethodInvestments',
+                      'InterestAndDebtExpense'),
+                     ('OperatingIncomeLoss', 'NonoperatingIncomeLoss'))
 
         # Impute: OtherOperatingIncome
         self._impute(('OtherOperatingIncome', 'GrossProfit'),
@@ -911,14 +916,6 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['OperatingIncomeLoss'] = (
                     self.xbrl.fields['OperatingIncomeLoss'] -
                     self.xbrl.fields['IncomeFromEquityMethodInvestments'])
-
-        # DANGEROUS!!  May need to turn off. IS3 had 2085 PASSES WITHOUT this
-        # imputing. if it is higher,: keep the test
-        # Impute: OperatingIncomeLoss
-        self._impute(('OperatingIncomeLoss',
-                      ('InterestAndDebtExpense', 'zerook')),
-                     (('NonoperatingIncomeLoss', 'zerook'),
-                      'IncomeBeforeEquityMethodInvestments'))
 
         if self.impute_count == 0:
             self.xbrl.fields[
@@ -978,6 +975,16 @@ class FundamentantalAccountingConcepts(object):
                       ('NetCashFlowsFinancing', 'zerook')))
 
     def check(self):
+
+        checks = {}
+
+        def _check_expr(name, expr):
+            solvr = ExprSolver(expr, lookup_context=self.xbrl.fields)
+            solvr.verify()
+            if solvr.diff:
+                print '{}: {},  {}'.format(name, solvr.rendered, solvr.diff)
+            checks[name] = solvr.diff
+
         lngBSCheck1 = (self.xbrl.fields['Equity'] -
                        (self.xbrl.fields['EquityAttributableToParent'] +
                         self.xbrl.fields['EquityAttributableTo'
@@ -1072,16 +1079,19 @@ class FundamentantalAccountingConcepts(object):
         if lngCF6:
             print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
 
-        lngIS1 = ((self.xbrl.fields['Revenues'] -
-                   self.xbrl.fields['CostOfRevenue']) -
-                  self.xbrl.fields['GrossProfit'])
+        _check_expr('IS1',
+                    'GrossProfit == Revenues - CostOfRevenue')
         lngIS2 = ((self.xbrl.fields['GrossProfit'] -
                    self.xbrl.fields['OperatingExpenses'] +
                    self.xbrl.fields['OtherOperatingIncome']) -
                   self.xbrl.fields['OperatingIncomeLoss'])
-        lngIS3 = ((self.xbrl.fields['OperatingIncomeLoss'] +
-                   self.xbrl.fields['NonoperatingIncomeLossPlusInterestAndDebtExpense']) -
-                  self.xbrl.fields['IncomeBeforeEquityMethodInvestments'])
+        _check_expr('lngIS2_5',
+                    'NonoperatingIncomeLossPlusInterestAndDebtExpense == '
+                    'NonoperatingIncomeLoss + InterestAndDebtExpense')
+        _check_expr('lngIS3',
+                    'IncomeBeforeEquityMethodInvestments == '
+                    'OperatingIncomeLoss + '
+                    'NonoperatingIncomeLossPlusInterestAndDebtExpense')
         lngIS4 = ((self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] +
                    self.xbrl.fields['IncomeFromEquityMethodInvestments']) -
                   self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'])
@@ -1093,7 +1103,8 @@ class FundamentantalAccountingConcepts(object):
                    self.xbrl.fields['ExtraordinaryItemsGainLoss']) -
                   self.xbrl.fields['NetIncomeLoss'])
         lngIS7 = ((self.xbrl.fields['NetIncomeAttributableToParent'] +
-                   self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest']) -
+                   self.xbrl.fields['NetIncomeAttributableTo'
+                                    'NoncontrollingInterest']) -
                   self.xbrl.fields['NetIncomeLoss'])
         lngIS8 = ((self.xbrl.fields['NetIncomeAttributableToParent'] -
                    self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']) -
@@ -1110,12 +1121,11 @@ class FundamentantalAccountingConcepts(object):
                     self.xbrl.fields['CostsAndExpenses'] +
                     self.xbrl.fields['OtherOperatingIncome']))
 
-        if lngIS1:
-            print "IS1: GrossProfit(" , self.xbrl.fields['GrossProfit'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostOfRevenue(" , self.xbrl.fields['CostOfRevenue'] , "): " , lngIS1
+        def make_field_args(*args):
+            return {k: self.format_field(k) for k in args}
+
         if lngIS2:
             print "IS2: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = GrossProfit(" , self.xbrl.fields['GrossProfit'] , ") - OperatingExpenses(" , self.xbrl.fields['OperatingExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS2
-        if lngIS3:
-            print "IS3: IncomeBeforeEquityMethodInvestments(" , self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] , ") = OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") - NonoperatingIncomeLoss(" , self.xbrl.fields['NonoperatingIncomeLoss'] , "), InterestAndDebtExpense(" , self.xbrl.fields['InterestAndDebtExpense'] , "): " , lngIS3
         if lngIS4:
             print "IS4: IncomeFromContinuingOperationsBeforeTax(" , self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] , ") = IncomeBeforeEquityMethodInvestments(" , self.xbrl.fields['IncomeBeforeEquityMethodInvestments'] , ") , IncomeFromEquityMethodInvestments(" , self.xbrl.fields['IncomeFromEquityMethodInvestments'] , "): " , lngIS4
 
@@ -1134,12 +1144,23 @@ class FundamentantalAccountingConcepts(object):
         if lngIS11:
             print "IS11: OperatingIncomeLoss(" , self.xbrl.fields['OperatingIncomeLoss'] , ") = Revenues(" , self.xbrl.fields['Revenues'] , ") - CostsAndExpenses(" , self.xbrl.fields['CostsAndExpenses'] , ") , OtherOperatingIncome(" , self.xbrl.fields['OtherOperatingIncome'] , "): " , lngIS11
 
+        # Old style
         test_names = [n for n in locals() if n not in ['self', 'failed']]
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
         failed_checks = [k for k, v in test_results.iteritems() if v != 0]
         self.xbrl.fields['FailedChecks'] = failed_checks
 
+        # New style
+        test_names, test_values = zip(*checks.items())
+        test_results = {k: v for k, v in zip(test_names, test_values)}
+        failed_checks = [k for k, v in test_results.iteritems() if v != 0]
+        self.xbrl.fields['FailedChecks'] = failed_checks
+
+        import ipdb; ipdb.set_trace()
+        print self.xbrl.fields['FailedChecks']
+        # if lngIS3:
+        #     import ipdb; ipdb.set_trace()
         # if self.xbrl.fields['NetCashFlow'] == 0:
         #     import ipdb; ipdb.set_trace()
         # if len(failed_checks) >= 4:

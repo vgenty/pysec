@@ -1125,8 +1125,8 @@ class FundamentantalAccountingConcepts(object):
         _check_expr(
             'IS11',
             'OperatingIncomeLoss == Revenues '
+            '+ OtherOperatingIncome'
             '- CostsAndExpenses '
-            '- OtherOperatingIncome'
         )
         # Old style
         test_names = [n for n in locals() if n not in ['self', 'failed',

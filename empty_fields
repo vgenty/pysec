@@ -7,21 +7,22 @@ MarketableSecurities: 6764
 ExchangeGainsLosses: 6721
 DividendPerShare: 5374
 IntangibleAssets: 4479
-NonoperatingIncomeLoss: 2577
-InterestAndDebtExpense: 2577
+NonoperatingIncomeLoss: 3644
+InterestAndDebtExpense: 2690
+OtherOperatingIncome: 2175
+OperatingIncomeLoss: 2159
 AccountsReceivable: 1309
+CostsAndExpenses: 1148
+CostOfRevenue: 1148
+GrossProfit: 1145
+OperatingExpenses: 849
 NetIncomeAvailableToCommonStockholdersBasic: 511
 PreferredStockDividendsAndOtherAdjustments: 511
 NetIncomeAttributableToParent: 511
 NetIncomeAttributableToNoncontrollingInterest: 510
 EarningsPerShare: 440
-CostsAndExpenses: 167
-OtherOperatingIncome: 167
-CostOfRevenue: 167
-GrossProfit: 162
-OperatingExpenses: 162
-Revenues: 159
-ComprehensiveIncomeAttributableToParent: 135
+Revenues: 161
+ComprehensiveIncomeAttributableToParent: 140
 NetCashFlowsFinancingDiscontinued: 95
 NetCashFlowsOperating: 95
 NetCashFlow: 95
@@ -34,17 +35,16 @@ NetCashFlowsOperatingContinuing: 95
 NetCashFlowsOperatingDiscontinued: 95
 NetCashFlowsFinancing: 95
 NetCashFlowsFinancingContinuing: 95
-ComprehensiveIncome: 83
-OtherComprehensiveIncome: 83
+ComprehensiveIncome: 88
+OtherComprehensiveIncome: 88
+NetIncomeLoss: 79
+IncomeBeforeEquityMethodInvestments: 79
+IncomeFromContinuingOperationsBeforeTax: 79
+IncomeFromContinuingOperationsAfterTax: 79
 NonoperatingIncomeLossPlusInterestAndDebtExpense: 74
 NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments: 74
-OperatingIncomeLoss: 74
-NetIncomeLoss: 74
-IncomeBeforeEquityMethodInvestments: 74
-IncomeFromContinuingOperationsBeforeTax: 74
-IncomeFromContinuingOperationsAfterTax: 74
-IncomeFromEquityMethodInvestments: 73
 IncomeTaxExpenseBenefit: 73
+IncomeFromEquityMethodInvestments: 73
 Cash: 46
 SharesOutstanding: 4
 NoncurrentLiabilities: 3
@@ -58,26 +58,27 @@ CurrentAssets: 2
 NoncurrentAssets: 2
 LiabilitiesAndEquity: 2
 
-Total empty fields: 76305, 8.18 per form
+Total empty fields: 85247, 9.14 per form
 
-lngIS3: 5261
-lngCF1: 3557
-lngIS11: 2697
-lngIS5: 1111
-lngIS2: 1096
-lngBSCheck5: 1002
-lngIS4: 985
-lngIS7: 964
-lngIS9: 603
-lngIS10: 355
-lngIS1: 343
-lngBSCheck3: 339
-lngBSCheck4: 290
+IS3: 6496
+IS2_5: 5627
+IS11: 4390
+CF1: 3557
+IS2: 2356
+IS1: 1319
+IS5: 1116
+BS5: 1002
+IS4: 990
+IS7: 959
+IS9: 603
+IS10: 355
+BS3: 339
+BS4: 290
 lngCF3: 239
-lngBSCheck1: 188
-lngIS8: 49
-lngIS6: 9
+BS1: 188
+IS8: 49
+IS6: 10
 lngCF6: 1
-Total failed checks: 19089, 2.05 per form
+Total failed checks: 29886, 3.21 per form
 
 Total forms: 9324

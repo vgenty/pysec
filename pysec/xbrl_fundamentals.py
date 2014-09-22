@@ -974,7 +974,6 @@ class FundamentantalAccountingConcepts(object):
                       ('NetCashFlowsFinancing', 'zerook')))
 
     def check(self):
-
         checks = {}
 
         def _check_expr(name, expr):
@@ -1129,23 +1128,20 @@ class FundamentantalAccountingConcepts(object):
             '- CostsAndExpenses '
             '- OtherOperatingIncome'
         )
-
         # Old style
-        test_names = [n for n in locals() if n not in ['self', 'failed']]
+        test_names = [n for n in locals() if n not in ['self', 'failed',
+                                                       '_check_expr', 'checks']]
         test_values = [locals()[n] for n in test_names]
         test_results = {k: v for k, v in zip(test_names, test_values)}
         failed_checks = [k for k, v in test_results.iteritems() if v != 0]
-        self.xbrl.fields['FailedChecks'] = failed_checks
 
         # New style
-        test_names, test_values = zip(*checks.items())
-        test_results = {k: v for k, v in zip(test_names, test_values)}
-        failed_checks = [k for k, v in test_results.iteritems() if v != 0]
+        for k, v in checks.iteritems():
+            if v != 0:
+                failed_checks.append(k)
+
         self.xbrl.fields['FailedChecks'] = failed_checks
 
-        print self.xbrl.fields['FailedChecks']
-        # if lngIS3:
-        #     import ipdb; ipdb.set_trace()
         # if self.xbrl.fields['NetCashFlow'] == 0:
         #     import ipdb; ipdb.set_trace()
         # if len(failed_checks) >= 4:

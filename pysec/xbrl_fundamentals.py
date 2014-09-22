@@ -1080,7 +1080,7 @@ class FundamentantalAccountingConcepts(object):
         _check_expr('IS2_5',
                     'NonoperatingIncomeLossPlusInterestAndDebtExpense == '
                     'NonoperatingIncomeLoss + InterestAndDebtExpense')
-        _check_expr('lngIS3',
+        _check_expr('IS3',
                     'IncomeBeforeEquityMethodInvestments == '
                     'OperatingIncomeLoss + '
                     'NonoperatingIncomeLossPlusInterestAndDebtExpense')

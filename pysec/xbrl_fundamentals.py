@@ -789,7 +789,8 @@ class FundamentantalAccountingConcepts(object):
 
         ######### Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense
-        if self.impute_count == 0:
+        field_name = 'NonoperatingIncomeLossPlusInterestAndDebtExpense'
+        if field_name not in self.xbrl.fields or self.xbrl.not_set(field_name):
             self.xbrl.fields[
                 'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
                     self.xbrl.fields['NonoperatingIncomeLoss'] +

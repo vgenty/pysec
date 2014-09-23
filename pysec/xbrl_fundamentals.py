@@ -170,25 +170,17 @@ class FundamentantalAccountingConcepts(object):
             ['us-gaap:AssetsCurrent'], 'Instant')
 
         # Noncurrent Assets
-        self.xbrl.fields['NoncurrentAssets'] = self.xbrl.GetFactValue(
-            "us-gaap:AssetsNoncurrent", "Instant")
-        if self.xbrl.fields['NoncurrentAssets'] == None:
-            if (self.xbrl.fields['Assets'] and
-                    self.xbrl.fields['CurrentAssets']):
-                self.xbrl.fields['NoncurrentAssets'] = (
-                    self.xbrl.fields['Assets'] -
-                    self.xbrl.fields['CurrentAssets'])
-            else:
-                self.xbrl.fields['NoncurrentAssets'] = 0
+        self.xbrl.fields['NoncurrentAssets'] = self.first_valid_field(
+            ['us-gaap:AssetsNoncurrent'], 'Instant')
 
         # LiabilitiesAndEquity
-        self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue(
-            "us-gaap:LiabilitiesAndStockholdersEquity", "Instant")
-        if self.xbrl.fields['LiabilitiesAndEquity'] == None:
-            self.xbrl.fields['LiabilitiesAndEquity'] = self.xbrl.GetFactValue(
-                "us-gaap:LiabilitiesAndPartnersCapital", "Instant")
-            if self.xbrl.fields['LiabilitiesAndEquity'] == None:
-                self.xbrl.fields['LiabilitiesAndEquity'] = 0
+        self.xbrl.fields['LiabilitiesAndEquity'] = self.first_valid_field(
+            [
+                'us-gaap:LiabilitiesAndStockholdersEquity',
+                'us-gaap:LiabilitiesAndPartnersCapital',
+            ],
+            'Instant'
+        )
 
         # Liabilities
         self.xbrl.fields['Liabilities'] = self.first_valid_field(
@@ -261,7 +253,6 @@ class FundamentantalAccountingConcepts(object):
             [
                 ('us-gaap:StockholdersEquityIncludingPortion'
                  'AttributableToNoncontrollingInterest'),
-                'us-gaap:StockholdersEquity',
                 ('us-gaap:PartnersCapitalIncludingPortion'
                  'AttributableToNoncontrollingInterest'),
                 'us-gaap:PartnersCapital',
@@ -279,12 +270,16 @@ class FundamentantalAccountingConcepts(object):
         )
 
         # EquityAttributableToNoncontrollingInterest
-        self.xbrl.fields[
-            'EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:MinorityInterest", "Instant")
-        if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
-            self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:PartnersCapitalAttributableToNoncontrollingInterest", "Instant")
-            if self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] == None:
-                self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = 0
+        self.xbrl.fields['EquityAttributableToNoncontrollingInterest'] = (
+            self.first_valid_field(
+                [
+                    'us-gaap:MinorityInterest',
+                    ('us-gaap:PartnersCapitalAttributableTo'
+                     'NoncontrollingInterest'),
+                ],
+                'Instant'
+            )
+        )
 
         # EquityAttributableToParent
         self.xbrl.fields['EquityAttributableToParent'] = self.first_valid_field(
@@ -1145,7 +1140,7 @@ class FundamentantalAccountingConcepts(object):
 
         self.xbrl.fields['FailedChecks'] = failed_checks
 
-        # if checks['IS3']:
+        # if checks['IS2_5']:
         #     import ipdb; ipdb.set_trace()
         # if len(failed_checks) >= 4:
         #     print ('\n'.join(['Too many check failures:',

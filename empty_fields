@@ -65,9 +65,9 @@ IS3: 3542
 IS11: 3379
 IS2: 1621
 IS5: 1116
-BS5: 1002
 IS4: 990
 IS7: 959
+BS5: 957
 IS1: 651
 IS9: 603
 IS10: 355
@@ -75,10 +75,10 @@ BS3: 339
 BS4: 290
 CF3: 239
 CF1: 200
-BS1: 188
+BS1: 104
 IS8: 49
 IS6: 10
 CF6: 1
-Total failed checks: 21187, 2.27 per form
+Total failed checks: 21058, 2.26 per form
 
 Total forms: 9324

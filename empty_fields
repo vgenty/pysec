@@ -4,23 +4,22 @@ TemporaryEquity: 8681
 ComprehensiveIncomeAttributableToNoncontrollingInterest: 6944
 IncomeFromDiscontinuedOperations: 6879
 MarketableSecurities: 6764
-ExchangeGainsLosses: 6721
 DividendPerShare: 5374
 IntangibleAssets: 4479
-NonoperatingIncomeLoss: 3644
-InterestAndDebtExpense: 2690
-OtherOperatingIncome: 2175
-OperatingIncomeLoss: 2159
+NonoperatingIncomeLoss: 2577
+InterestAndDebtExpense: 2577
 AccountsReceivable: 1309
-CostsAndExpenses: 1148
-CostOfRevenue: 1148
-GrossProfit: 1145
-OperatingExpenses: 849
+OtherOperatingIncome: 998
+OperatingIncomeLoss: 979
 NetIncomeAvailableToCommonStockholdersBasic: 511
 PreferredStockDividendsAndOtherAdjustments: 511
 NetIncomeAttributableToParent: 511
 NetIncomeAttributableToNoncontrollingInterest: 510
+CostsAndExpenses: 480
+CostOfRevenue: 480
+GrossProfit: 477
 EarningsPerShare: 440
+OperatingExpenses: 410
 Revenues: 161
 ComprehensiveIncomeAttributableToParent: 140
 NetCashFlowsFinancingDiscontinued: 95
@@ -29,6 +28,7 @@ NetCashFlow: 95
 NetCashFlowsInvestingContinuing: 95
 NetCashFlowsInvestingDiscontinued: 95
 NetCashFlowsContinuing: 95
+ExchangeGainsLosses: 95
 NetCashFlowsDiscontinued: 95
 NetCashFlowsInvesting: 95
 NetCashFlowsOperatingContinuing: 95
@@ -58,27 +58,27 @@ CurrentAssets: 2
 NoncurrentAssets: 2
 LiabilitiesAndEquity: 2
 
-Total empty fields: 85247, 9.14 per form
+Total empty fields: 72641, 7.79 per form
 
-IS3: 6496
-IS2_5: 5627
-IS11: 4390
-CF1: 3557
-IS2: 2356
-IS1: 1319
+IS2_5: 5653
+IS3: 3542
+IS11: 3379
+IS2: 1621
 IS5: 1116
 BS5: 1002
 IS4: 990
 IS7: 959
+IS1: 651
 IS9: 603
 IS10: 355
 BS3: 339
 BS4: 290
 lngCF3: 239
+CF1: 200
 BS1: 188
 IS8: 49
 IS6: 10
 lngCF6: 1
-Total failed checks: 29886, 3.21 per form
+Total failed checks: 21187, 2.27 per form
 
 Total forms: 9324

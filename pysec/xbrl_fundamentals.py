@@ -790,11 +790,10 @@ class FundamentantalAccountingConcepts(object):
         ######### Adjustments to income statement information
         # Impute: NonoperatingIncomeLossPlusInterestAndDebtExpense
         field_name = 'NonoperatingIncomeLossPlusInterestAndDebtExpense'
-        if field_name not in self.xbrl.fields or self.xbrl.not_set(field_name):
-            self.xbrl.fields[
-                'NonoperatingIncomeLossPlusInterestAndDebtExpense'] = (
-                    self.xbrl.fields['NonoperatingIncomeLoss'] +
-                    self.xbrl.fields['InterestAndDebtExpense'])
+        if field_name not in self.xbrl.fields:
+            self.xbrl.fields[field_name] = 0   # TODO: default value const
+        self._impute(('NonoperatingIncomeLossPlusInterestAndDebtExpense'),
+                     ('NonoperatingIncomeLoss', 'InterestAndDebtExpense'))
 
         # Impute: Net income available to common stockholders (if it does not
         # exist)
@@ -960,7 +959,8 @@ class FundamentantalAccountingConcepts(object):
         self._impute(('NetCashFlow'),
                      ('NetCashFlowsOperating',
                       'NetCashFlowsInvesting',
-                      'NetCashFlowsFinancing'))
+                      'NetCashFlowsFinancing',
+                      ('ExchangeGainsLosses', 'zerook')))
         self._impute(('NetCashFlow'),
                      (('NetCashFlowsOperating', 'zerook'),
                       'NetCashFlowsInvesting',
@@ -1143,7 +1143,7 @@ class FundamentantalAccountingConcepts(object):
 
         self.xbrl.fields['FailedChecks'] = failed_checks
 
-        # if self.xbrl.fields['NetCashFlow'] == 0:
+        # if checks['IS3']:
         #     import ipdb; ipdb.set_trace()
         # if len(failed_checks) >= 4:
         #     print ('\n'.join(['Too many check failures:',

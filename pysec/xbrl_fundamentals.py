@@ -666,6 +666,8 @@ class FundamentantalAccountingConcepts(object):
             )
 
         # Shares outstanding
+        # TODO: sometimes still given in multiples of 1,000,000 (or
+        # something) -- GT has this problem
         self.xbrl.fields['SharesOutstanding'] = self.first_valid_field(
             [
                 ('dei:EntityCommonStockSharesOutstanding', 'DEI'),
@@ -1006,9 +1008,9 @@ class FundamentantalAccountingConcepts(object):
 
         _check_expr(
             'BS5',
-            'LiabilitiesAndEquity == Liabilities'
-            '+ CommitmentsAndContingencies'
-            '+ TemporaryEquity'
+            'LiabilitiesAndEquity == Liabilities '
+            '+ CommitmentsAndContingencies '
+            '+ TemporaryEquity '
             '+ Equity'
         )
 
@@ -1045,8 +1047,8 @@ class FundamentantalAccountingConcepts(object):
         _check_expr(
             'CF3',
             'NetCashFlowsDiscontinued == '
-            'NetCashFlowsOperatingDiscontinued'
-            '+ NetCashFlowsInvestingDiscontinued'
+            'NetCashFlowsOperatingDiscontinued '
+            '+ NetCashFlowsInvestingDiscontinued '
             '+ NetCashFlowsFinancingDiscontinued'
         )
         _check_expr(
@@ -1101,13 +1103,13 @@ class FundamentantalAccountingConcepts(object):
         _check_expr(
             'IS7',
             'NetIncomeLoss == '
-            'NetIncomeAttributableToParent'
+            'NetIncomeAttributableToParent '
             '+ NetIncomeAttributableToNoncontrollingInterest'
         )
         _check_expr(
             'IS8',
             'NetIncomeAvailableToCommonStockholdersBasic == '
-            'NetIncomeAttributableToParent'
+            'NetIncomeAttributableToParent '
             '- PreferredStockDividendsAndOtherAdjustments'
         )
         _check_expr(
@@ -1123,20 +1125,11 @@ class FundamentantalAccountingConcepts(object):
         _check_expr(
             'IS11',
             'OperatingIncomeLoss == Revenues '
-            '+ OtherOperatingIncome'
+            '+ OtherOperatingIncome '
             '- CostsAndExpenses '
         )
-        # Old style
-        test_names = [n for n in locals() if n not in ['self', 'failed',
-                                                       '_check_expr', 'checks']]
-        test_values = [locals()[n] for n in test_names]
-        test_results = {k: v for k, v in zip(test_names, test_values)}
-        failed_checks = [k for k, v in test_results.iteritems() if v != 0]
-
         # New style
-        for k, v in checks.iteritems():
-            if v != 0:
-                failed_checks.append(k)
+        failed_checks = [k for k, v in checks.iteritems() if v != 0]
 
         self.xbrl.fields['FailedChecks'] = failed_checks
 

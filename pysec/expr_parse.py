@@ -50,6 +50,8 @@ class ExprSolver(object):
         self.diff = None
 
     def _render(self, expr):
+        # TODO: doesn't handle 'sym1+sym2', even though ast does. Should just
+        # use ast
         tokens = expr.split()
         rendered = []
         for tt in tokens:

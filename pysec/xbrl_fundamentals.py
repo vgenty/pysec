@@ -162,16 +162,12 @@ class FundamentantalAccountingConcepts(object):
 
     def non_imputed(self):
         # Assets
-        self.xbrl.fields['Assets'] = self.xbrl.GetFactValue(
-            "us-gaap:Assets", "Instant")
-        if self.xbrl.fields['Assets'] == None:
-            self.xbrl.fields['Assets'] = 0
+        self.xbrl.fields['Assets'] = self.first_valid_field(
+            ['us-gaap:Assets'], 'Instant')
 
         # Current Assets
-        self.xbrl.fields['CurrentAssets'] = self.xbrl.GetFactValue(
-            "us-gaap:AssetsCurrent", "Instant")
-        if self.xbrl.fields['CurrentAssets'] == None:
-            self.xbrl.fields['CurrentAssets'] = 0
+        self.xbrl.fields['CurrentAssets'] = self.first_valid_field(
+            ['us-gaap:AssetsCurrent'], 'Instant')
 
         # Noncurrent Assets
         self.xbrl.fields['NoncurrentAssets'] = self.xbrl.GetFactValue(
@@ -984,6 +980,7 @@ class FundamentantalAccountingConcepts(object):
                 print '{}: {},  {}'.format(name, solvr.rendered, solvr.diff)
             checks[name] = solvr.diff
 
+        # Balance sheet
         _check_expr(
             'BS1',
             'Equity == EquityAttributableToParent + '
@@ -1043,35 +1040,40 @@ class FundamentantalAccountingConcepts(object):
             # by setting the value of the test to a number 888888 which would
             # never occur naturally, so that I can differentiate this from
             # errors.
-        lngCF2 = (self.xbrl.fields['NetCashFlowsContinuing'] -
-                  (self.xbrl.fields['NetCashFlowsOperatingContinuing'] +
-                   self.xbrl.fields['NetCashFlowsInvestingContinuing'] +
-                   self.xbrl.fields['NetCashFlowsFinancingContinuing']))
-        lngCF3 = (self.xbrl.fields['NetCashFlowsDiscontinued'] -
-                  (self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] +
-                   self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] +
-                   self.xbrl.fields['NetCashFlowsFinancingDiscontinued']))
-        lngCF4 = (self.xbrl.fields['NetCashFlowsOperating'] -
-                  (self.xbrl.fields['NetCashFlowsOperatingContinuing'] +
-                   self.xbrl.fields['NetCashFlowsOperatingDiscontinued']))
-        lngCF5 = (self.xbrl.fields['NetCashFlowsInvesting'] -
-                  (self.xbrl.fields['NetCashFlowsInvestingContinuing'] +
-                   self.xbrl.fields['NetCashFlowsInvestingDiscontinued']))
-        lngCF6 = (self.xbrl.fields['NetCashFlowsFinancing'] -
-                  (self.xbrl.fields['NetCashFlowsFinancingContinuing'] +
-                   self.xbrl.fields['NetCashFlowsFinancingDiscontinued']))
+        _check_expr(
+            'CF2',
+            'NetCashFlowsContinuing == '
+            'NetCashFlowsOperatingContinuing '
+            '+ NetCashFlowsInvestingContinuing '
+            '+ NetCashFlowsFinancingContinuing '
+        )
+        _check_expr(
+            'CF3',
+            'NetCashFlowsDiscontinued == '
+            'NetCashFlowsOperatingDiscontinued'
+            '+ NetCashFlowsInvestingDiscontinued'
+            '+ NetCashFlowsFinancingDiscontinued'
+        )
+        _check_expr(
+            'CF4',
+            'NetCashFlowsOperating == '
+            'NetCashFlowsOperatingContinuing '
+            '+ NetCashFlowsOperatingDiscontinued'
+        )
+        _check_expr(
+            'CF5',
+            'NetCashFlowsInvesting == '
+            'NetCashFlowsInvestingContinuing '
+            '+ NetCashFlowsInvestingDiscontinued'
+        )
+        _check_expr(
+            'CF6',
+            'NetCashFlowsFinancing == '
+            'NetCashFlowsFinancingContinuing '
+            '+ NetCashFlowsFinancingDiscontinued'
+        )
 
-        if lngCF2:
-            print "CF2: NetCashFlowsContinuing(" , self.xbrl.fields['NetCashFlowsContinuing'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , "): " , lngCF2
-        if lngCF3:
-            print "CF3: NetCashFlowsDiscontinued(" , self.xbrl.fields['NetCashFlowsDiscontinued'] , ") = NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF3
-        if lngCF4:
-            print "CF4: NetCashFlowsOperating(" , self.xbrl.fields['NetCashFlowsOperating'] , ") = NetCashFlowsOperatingContinuing(" , self.xbrl.fields['NetCashFlowsOperatingContinuing'] , ") , NetCashFlowsOperatingDiscontinued(" , self.xbrl.fields['NetCashFlowsOperatingDiscontinued'] , "): " , lngCF4
-        if lngCF5:
-            print "CF5: NetCashFlowsInvesting(" , self.xbrl.fields['NetCashFlowsInvesting'] , ") = NetCashFlowsInvestingContinuing(" , self.xbrl.fields['NetCashFlowsInvestingContinuing'] , ") , NetCashFlowsInvestingDiscontinued(" , self.xbrl.fields['NetCashFlowsInvestingDiscontinued'] , "): " , lngCF5
-        if lngCF6:
-            print "CF6: NetCashFlowsFinancing(" , self.xbrl.fields['NetCashFlowsFinancing'] , ") = NetCashFlowsFinancingContinuing(" , self.xbrl.fields['NetCashFlowsFinancingContinuing'] , ") , NetCashFlowsFinancingDiscontinued(" , self.xbrl.fields['NetCashFlowsFinancingDiscontinued'] , "): " , lngCF6
-
+        # Income statement
         _check_expr('IS1',
                     'GrossProfit == Revenues - CostOfRevenue')
         _check_expr(

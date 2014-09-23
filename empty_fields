@@ -73,12 +73,12 @@ IS9: 603
 IS10: 355
 BS3: 339
 BS4: 290
-lngCF3: 239
+CF3: 239
 CF1: 200
 BS1: 188
 IS8: 49
 IS6: 10
-lngCF6: 1
+CF6: 1
 Total failed checks: 21187, 2.27 per form
 
 Total forms: 9324

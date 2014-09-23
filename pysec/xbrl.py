@@ -105,7 +105,8 @@ class XBRL(object):
                         else ContextReference[:1])
         for context_ref in use_contexts:
             oNode = self.getNode(
-                "//" + SeekConcept + "[@contextRef='" + context_ref + "']")
+                "//{SeekConcept}[@contextRef='{context_ref}']".format(
+                    SeekConcept=SeekConcept, context_ref=context_ref))
             if oNode is not None:
                 factValue = oNode.text
                 if 'nil' in oNode.keys() and oNode.get('nil') == 'true':

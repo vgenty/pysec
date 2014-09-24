@@ -856,9 +856,8 @@ class FundamentantalAccountingConcepts(object):
 
         # Impute: CostsAndExpenses
         if self.xbrl.fields['GrossProfit'] == 0:
-            self._impute(('Revenues'),
-                         ('CostsAndExpenses', 'OperatingIncomeLoss',
-                          ('OtherOperatingIncome', 'zerook')))
+            self._impute(('CostsAndExpenses', 'OperatingIncomeLoss'),
+                         ('Revenues', ('OtherOperatingIncome', 'zerook')))
 
         # Impute: OperatingExpenses based on existence of costs and expenses
         # and cost of revenues

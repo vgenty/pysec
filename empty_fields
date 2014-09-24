@@ -62,13 +62,13 @@ Total empty fields: 72457, 7.77 per form
 
 IS2_5: 5653
 IS3: 3542
-IS11: 3379
-IS2: 1621
+IS11: 3339
+IS2: 1618
 IS5: 1116
 IS4: 990
 IS7: 959
 BS5: 957
-IS1: 651
+IS1: 606
 IS9: 603
 IS10: 355
 BS3: 339
@@ -79,6 +79,6 @@ BS1: 104
 IS8: 49
 IS6: 10
 CF6: 1
-Total failed checks: 21058, 2.26 per form
+Total failed checks: 20970, 2.25 per form
 
 Total forms: 9324

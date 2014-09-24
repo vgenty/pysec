@@ -126,56 +126,12 @@ class XBRL(object):
 
     def GetBaseInformation(self):
 
-        # Registered Name
-        oNode = self.getNode("//dei:EntityRegistrantName[@contextRef]")
-        if oNode is not None:
-            self.fields['EntityRegistrantName'] = oNode.text
-        else:
-            self.fields['EntityRegistrantName'] = "Registered name not found"
-
-        # Fiscal year
-        oNode = self.getNode("//dei:CurrentFiscalYearEndDate[@contextRef]")
-        if oNode is not None:
-            self.fields['FiscalYear'] = oNode.text
-        else:
-            self.fields['FiscalYear'] = "Fiscal year not found"
-
-        # EntityCentralIndexKey
-        oNode = self.getNode("//dei:EntityCentralIndexKey[@contextRef]")
-        if oNode is not None:
-            self.fields['EntityCentralIndexKey'] = oNode.text
-        else:
-            self.fields['EntityCentralIndexKey'] = "CIK not found"
-
-        # EntityFilerCategory
-        oNode = self.getNode("//dei:EntityFilerCategory[@contextRef]")
-        if oNode is not None:
-            self.fields['EntityFilerCategory'] = oNode.text
-        else:
-            self.fields['EntityFilerCategory'] = "Filer category not found"
-
         # TradingSymbol
         oNode = self.getNode("//dei:TradingSymbol[@contextRef]")
         if oNode is not None:
             self.fields['TradingSymbol'] = oNode.text
         else:
             self.fields['TradingSymbol'] = "Not provided"
-
-        # DocumentFiscalYearFocus
-        oNode = self.getNode("//dei:DocumentFiscalYearFocus[@contextRef]")
-        if oNode is not None:
-            self.fields['DocumentFiscalYearFocus'] = oNode.text
-        else:
-            self.fields['DocumentFiscalYearFocus'] = (
-                "Fiscal year focus not found")
-
-        # DocumentFiscalPeriodFocus
-        oNode = self.getNode("//dei:DocumentFiscalPeriodFocus[@contextRef]")
-        if oNode is not None:
-            self.fields['DocumentFiscalPeriodFocus'] = oNode.text
-        else:
-            self.fields['DocumentFiscalPeriodFocus'] = (
-                "Fiscal period focus not found")
 
         # DocumentType
         oNode = self.getNode("//dei:DocumentType[@contextRef]")

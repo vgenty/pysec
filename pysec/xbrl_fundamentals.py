@@ -818,7 +818,7 @@ class FundamentantalAccountingConcepts(object):
         # Impute: other comprehensive income
         self._impute(('ComprehensiveIncome'),
                      ('OtherComprehensiveIncome',
-                      ('NetIncomeLoss', 'zerook')))
+                      'NetIncomeLoss'))
 
         # Impute: comprehensive income attributable to parent if it does not
         # exist

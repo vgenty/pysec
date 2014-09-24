@@ -618,7 +618,7 @@ class FundamentantalAccountingConcepts(object):
         # Accounts receivable
         self.xbrl.fields['AccountsReceivable'] = self.first_valid_field(
             [
-                'Us-gaap:AccountsReceivableNet',
+                'us-gaap:AccountsReceivableNet',
                 'us-gaap:AccountsReceivableNetCurrent',
                 'us-gaap:AccountsNotesAndLoansReceivableNetCurrent',
                 'us-gaap:ReceivablesNetCurrent',

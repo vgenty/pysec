@@ -8,7 +8,7 @@ DividendPerShare: 5374
 IntangibleAssets: 4479
 NonoperatingIncomeLoss: 2577
 InterestAndDebtExpense: 2577
-AccountsReceivable: 1309
+AccountsReceivable: 1125
 OtherOperatingIncome: 998
 OperatingIncomeLoss: 979
 NetIncomeAvailableToCommonStockholdersBasic: 511
@@ -58,7 +58,7 @@ CurrentAssets: 2
 NoncurrentAssets: 2
 LiabilitiesAndEquity: 2
 
-Total empty fields: 72641, 7.79 per form
+Total empty fields: 72457, 7.77 per form
 
 IS2_5: 5653
 IS3: 3542

@@ -31,7 +31,6 @@ class XBRL(object):
             self.FundamentantalAccountingConcepts = (
                 FundamentantalAccountingConcepts(self))
 
-
     def not_set(self, field_name):
         """
         Setting a field to zero is valid, so we check for int zero
@@ -120,9 +119,9 @@ class XBRL(object):
 
             if factValue:
                 break
-        if factValue and context_ref != ContextReference[0]:
-            print 'found {} at {}, not {}'.format(
-                SeekConcept, context_ref, ContextReference[0])
+        # if factValue and context_ref != ContextReference[0]:
+        #     print 'found {} at {}, not {}'.format(
+        #         SeekConcept, context_ref, ContextReference[0])
         return factValue
 
     def GetBaseInformation(self):
@@ -234,7 +233,7 @@ class XBRL(object):
                             if date.text.strip() == EndDate:
                                 oNode4 = self.getNodeList(
                                     'xbrli:entity/xbrli:segment/xbrldi:'
-                                    'explicitMember', j)
+                                    'explicitMember', root=j)
 
                                 if not len(oNode4):
                                     ret_context = ContextID
@@ -286,7 +285,8 @@ class XBRL(object):
                         EndDate):
 
                     oNode4 = self.getNodeList(
-                        "xbrli:entity/xbrli:segment/xbrldi:explicitMember", j)
+                        "xbrli:entity/xbrli:segment/xbrldi:explicitMember",
+                        root=j)
 
                     if not len(oNode4):
                         # Making sure there are no dimensions. Is this the

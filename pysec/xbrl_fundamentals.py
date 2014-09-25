@@ -388,7 +388,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:CostsAndExpenses',
             ],
-            'Duration',
+            'Duration'
         )
 
         # OtherOperatingIncome
@@ -396,7 +396,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:OtherOperatingIncome',
             ],
-            'Duration',
+            'Duration'
         )
 
         # OperatingIncomeLoss
@@ -404,7 +404,7 @@ class FundamentantalAccountingConcepts(object):
             [
                 'us-gaap:OperatingIncomeLoss',
             ],
-            'Duration',
+            'Duration'
         )
 
         # NonoperatingIncomeLoss
@@ -413,7 +413,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:NonoperatingIncomeExpense',
                 'us-gaap:RestructuringSettlementAndImpairmentProvisions',
             ],
-            'Duration',
+            'Duration'
         )
 
         # InterestAndDebtExpense
@@ -422,7 +422,7 @@ class FundamentantalAccountingConcepts(object):
                 'us-gaap:InterestAndDebtExpense',
                 'us-gaap:InterestExpense',
             ],
-            'Duration',
+            'Duration'
         )
 
         # IncomeBeforeEquityMethodInvestments
@@ -433,9 +433,8 @@ class FundamentantalAccountingConcepts(object):
                      'BeforeIncomeTaxesMinorityInterestAndIncomeLoss'
                      'FromEquityMethodInvestments'),
                 ],
-                'Duration',
-            )
-        )
+                'Duration'
+            ))
 
         # IncomeFromEquityMethodInvestments
         self.xbrl.fields['IncomeFromEquityMethodInvestments'] = (
@@ -443,9 +442,8 @@ class FundamentantalAccountingConcepts(object):
                 [
                     'us-gaap:IncomeLossFromEquityMethodInvestments',
                 ],
-                'Duration',
-            )
-        )
+                'Duration'
+            ))
 
         # IncomeFromContinuingOperationsBeforeTax
         self.xbrl.fields['IncomeFromContinuingOperationsBeforeTax'] = self.first_valid_field(
@@ -454,7 +452,7 @@ class FundamentantalAccountingConcepts(object):
                  'IncomeTaxesMinorityInterestAndIncomeLossFrom'
                  'EquityMethodInvestments'),
             ],
-            'Duration',
+            'Duration'
         )
 
         # IncomeTaxExpenseBenefit
@@ -471,18 +469,21 @@ class FundamentantalAccountingConcepts(object):
                     ('us-gaap:IncomeLossBeforeExtraordinaryItemsAnd'
                      'CumulativeEffectOfChangeInAccountingPrinciple'),
                 ],
-                'Duration',
-            )
-        )
+                'Duration'
+            ))
 
         # IncomeFromDiscontinuedOperations
-        self.xbrl.fields['IncomeFromDiscontinuedOperations'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromDiscontinuedOperationsNetOfTax", "Duration")
-        if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
-            self.xbrl.fields['IncomeFromDiscontinuedOperations'] = self.xbrl.GetFactValue("us-gaap:DiscontinuedOperationGainLossOnDisposalOfDiscontinuedOperationNetOfTax", "Duration")
-            if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
-                self.xbrl.fields['IncomeFromDiscontinuedOperations'] = self.xbrl.GetFactValue("us-gaap:IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToReportingEntity", "Duration")
-                if self.xbrl.fields['IncomeFromDiscontinuedOperations'] == None:
-                    self.xbrl.fields['IncomeFromDiscontinuedOperations'] = 0
+        self.xbrl.fields['IncomeFromDiscontinuedOperations'] = (
+            self.first_valid_field(
+                [
+                    'us-gaap:IncomeLossFromDiscontinuedOperationsNetOfTax',
+                    ('us-gaap:DiscontinuedOperationGainLossOnDisposalOf'
+                     'DiscontinuedOperationNetOfTax'),
+                    ('us-gaap:IncomeLossFromDiscontinuedOperations'
+                     'NetOfTaxAttributableToReportingEntity'),
+                ],
+                'Duration'
+            ))
 
         # ExtraordinaryItemsGainLoss
         self.xbrl.fields['ExtraordinaryItemsGainLoss'] = self.xbrl.GetFactValue("us-gaap:ExtraordinaryItemNetOfTax", "Duration")

@@ -465,11 +465,14 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['IncomeTaxExpenseBenefit'] = 0
 
         # IncomeFromContinuingOperationsAfterTax
-        self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = self.first_valid_field(
-            [
-                'us-gaap:IncomeLossBeforeExtraordinaryItemsAndCumulativeEffectOfChangeInAccountingPrinciple',
-            ],
-            'Duration',
+        self.xbrl.fields['IncomeFromContinuingOperationsAfterTax'] = (
+            self.first_valid_field(
+                [
+                    ('us-gaap:IncomeLossBeforeExtraordinaryItemsAnd'
+                     'CumulativeEffectOfChangeInAccountingPrinciple'),
+                ],
+                'Duration',
+            )
         )
 
         # IncomeFromDiscontinuedOperations

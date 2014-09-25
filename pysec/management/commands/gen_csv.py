@@ -15,6 +15,7 @@ PICKLE_FILE = 'forms.pkl'
 
 # Fields we don't need in our CSVs
 EXCLUDE_FIELDS = {
+    # Non-numeric
     'BalanceSheetDate',
     'Changed',
     'ContextForDurations',
@@ -24,6 +25,20 @@ EXCLUDE_FIELDS = {
     'FailedChecks',
     'IncomeStatementPeriodYTD',
     'TradingSymbol',
+
+    # Numeric but not interesting
+    'ComprehensiveIncomeAttributableToNoncontrollingInterest',
+    'ComprehensiveIncomeAttributableToParent',
+    'ExchangeGainsLosses',
+    'ExtraordinaryItemsGainLoss',
+    'IncomeFromDiscontinuedOperations',
+    'IncomeTaxExpenseBenefit',
+    'NetCashFlowsDiscontinued',
+    'NetCashFlowsFinancingDiscontinued',
+    'NetCashFlowsInvestingDiscontinued',
+    'NetCashFlowsOperatingDiscontinued',
+    'OtherComprehensiveIncome',
+    'OtherOperatingIncome',
 }
 
 

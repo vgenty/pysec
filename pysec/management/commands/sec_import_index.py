@@ -75,7 +75,7 @@ class Command(NoArgsCommand):
         print "LIMITING TO S&P 500 CIKS"
 
         for year in range(2014, 2015):
-            for qtr in range(1, 5):
+            for qtr in range(3, 5):
                 quarter = "%s%s" % (year, qtr)
                 Index.objects.filter(quarter=quarter).delete()
                 objs = get_filing_list(year, qtr)

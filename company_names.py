@@ -116,4 +116,9 @@ def find_ciks():
         except Exception as e:
             print e
 
-    print sym_to_ciks
+    with open('sym_to_ciks.py', 'w') as f:
+        f.write('sym_to_ciks = {}\n'.format(sym_to_ciks))
+        f.write('\n')
+        f.write('cik_to_syms = {}\n'.format(
+            {v: k for k, v in sym_to_ciks.items()}))
+    print 'Wrote sym_to_ciks.py'

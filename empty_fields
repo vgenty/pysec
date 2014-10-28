@@ -1,25 +1,25 @@
-ExtraordinaryItemsGainLoss: 9436
-CommitmentsAndContingencies: 9193
-TemporaryEquity: 8816
-ComprehensiveIncomeAttributableToNoncontrollingInterest: 7040
-IncomeFromDiscontinuedOperations: 6985
-MarketableSecurities: 6859
-DividendPerShare: 5441
-IntangibleAssets: 4541
-NonoperatingIncomeLoss: 2611
-InterestAndDebtExpense: 2611
-AccountsReceivable: 1138
-OtherOperatingIncome: 1005
-OperatingIncomeLoss: 986
-NetIncomeAvailableToCommonStockholdersBasic: 513
-PreferredStockDividendsAndOtherAdjustments: 513
-NetIncomeAttributableToParent: 513
-NetIncomeAttributableToNoncontrollingInterest: 512
-CostsAndExpenses: 481
-CostOfRevenue: 481
-GrossProfit: 478
-EarningsPerShare: 445
-OperatingExpenses: 410
+ExtraordinaryItemsGainLoss: 9583
+CommitmentsAndContingencies: 9339
+TemporaryEquity: 8953
+ComprehensiveIncomeAttributableToNoncontrollingInterest: 7157
+IncomeFromDiscontinuedOperations: 7114
+MarketableSecurities: 6971
+DividendPerShare: 5573
+IntangibleAssets: 4592
+NonoperatingIncomeLoss: 2648
+InterestAndDebtExpense: 2648
+AccountsReceivable: 1154
+OtherOperatingIncome: 1018
+OperatingIncomeLoss: 999
+NetIncomeAvailableToCommonStockholdersBasic: 515
+PreferredStockDividendsAndOtherAdjustments: 515
+NetIncomeAttributableToParent: 515
+NetIncomeAttributableToNoncontrollingInterest: 514
+CostsAndExpenses: 483
+CostOfRevenue: 483
+GrossProfit: 480
+EarningsPerShare: 469
+OperatingExpenses: 412
 Revenues: 161
 ComprehensiveIncomeAttributableToParent: 141
 NetCashFlowsFinancingDiscontinued: 95
@@ -45,7 +45,7 @@ NonoperatingIncomeLossPlusInterestAndDebtExpense: 74
 NonoperatingIncomePlusInterestAndDebtExpensePlusIncomeFromEquityMethodInvestments: 74
 IncomeTaxExpenseBenefit: 73
 IncomeFromEquityMethodInvestments: 73
-Cash: 47
+Cash: 62
 SharesOutstanding: 4
 NoncurrentLiabilities: 3
 Equity: 3
@@ -58,27 +58,27 @@ CurrentAssets: 2
 NoncurrentAssets: 2
 LiabilitiesAndEquity: 2
 
-Total empty fields: 73408, 7.76 per form
+Total empty fields: 74550, 7.76 per form
 
-IS2_5: 5744
-IS3: 3591
-IS11: 3389
-IS2: 1634
+IS2_5: 5837
+IS3: 3621
+IS11: 3441
+IS2: 1672
 IS5: 1140
-IS4: 1005
-IS7: 967
-BS5: 964
-IS1: 612
-IS9: 608
-IS10: 361
-BS3: 344
+IS4: 1007
+BS5: 976
+IS7: 970
+IS1: 626
+IS9: 612
+IS10: 362
+BS3: 347
 BS4: 293
-CF3: 244
-CF1: 201
+CF3: 259
+CF1: 209
 BS1: 105
 IS8: 49
 IS6: 10
 CF6: 1
-Total failed checks: 21262, 2.25 per form
+Total failed checks: 21537, 2.24 per form
 
-Total forms: 9464
+Total forms: 9611

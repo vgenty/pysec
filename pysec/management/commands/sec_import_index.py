@@ -7,10 +7,6 @@ from django.conf import settings
 from pysec.models import Index
 from zipfile import ZipFile
 
-from sym_to_ciks import sym_to_ciks
-
-CIKS = sym_to_ciks.values()
-
 DATA_DIR = settings.DATA_DIR
 
 ALWAYS_DOWNLOAD = True
@@ -56,11 +52,7 @@ def get_filing_list(year, qtr):
                   'date': date,
                   'quarter': quarter,
                   'filename': r[98:].strip()}
-        try:
-            if int(filing['cik']) not in CIKS:
-                continue
-        except ValueError:
-            print 'Problem with filing: {}'.format(filing)
+        if filing['form'] not in ['10-K', '10-Q']:
             continue
 
         result.append(Index(**filing))
@@ -74,10 +66,8 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **_options):
 
-        print "LIMITING TO CIKS IN sym_to_ciks"
-
-        for year in range(2009, 2015):
-            for qtr in range(1, 5):
+        for year in range(2014, 2015):
+            for qtr in range(4, 5):
                 quarter = "%s%s" % (year, qtr)
                 Index.objects.filter(quarter=quarter).delete()
                 objs = get_filing_list(year, qtr)

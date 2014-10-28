@@ -6,9 +6,7 @@ import requests
 
 from sym_to_ciks import sym_to_ciks
 
-sp600_symbols = ('ARO',)
-
-sp500_symbols = ('A', 'AA', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACE', 'ACN', 'ACT',
+symbols_sp500 = ('A', 'AA', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACE', 'ACN', 'ACT',
                  'ADBE', 'ADI', 'ADM', 'ADP', 'ADS', 'ADSK', 'ADT', 'AEE',
                  'AEP', 'AES', 'AET', 'AFL', 'AGN', 'AIG', 'AIV', 'AIZ',
                  'AKAM', 'ALL', 'ALLE', 'ALTR', 'ALXN', 'AMAT', 'AME', 'AMG',
@@ -31,46 +29,47 @@ sp500_symbols = ('A', 'AA', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACE', 'ACN', 'ACT',
                  'FAST', 'FB', 'FCX', 'FDO', 'FDX', 'FE', 'FFIV', 'FIS',
                  'FISV', 'FITB', 'FLIR', 'FLR', 'FLS', 'FMC', 'FOSL', 'FOXA',
                  'FSLR', 'FTI', 'FTR', 'GAS', 'GCI', 'GD', 'GE', 'GGP', 'GHC',
-                 'GILD', 'GIS', 'GLW', 'GM', 'GMCR', 'GME', 'GNW', 'GOOG',
-                 'GOOGL', 'GPC', 'GPS', 'GRMN', 'GS', 'GT', 'GWW', 'HAL',
-                 'HAR', 'HAS', 'HBAN', 'HCBK', 'HCN', 'HCP', 'HD', 'HES',
-                 'HIG', 'HOG', 'HON', 'HOT', 'HP', 'HPQ', 'HRB', 'HRL', 'HRS',
-                 'HSP', 'HST', 'HSY', 'HUM', 'IBM', 'ICE', 'IFF', 'INTC',
-                 'INTU', 'IP', 'IPG', 'IR', 'IRM', 'ISRG', 'ITW', 'IVZ', 'JBL',
-                 'JCI', 'JEC', 'JNJ', 'JNPR', 'JOY', 'JPM', 'JWN', 'K', 'KEY',
-                 'KIM', 'KLAC', 'KMB', 'KMI', 'KMX', 'KO', 'KORS', 'KR',
-                 'KRFT', 'KSS', 'KSU', 'L', 'LB', 'LEG', 'LEN', 'LH', 'LLL',
-                 'LLTC', 'LLY', 'LM', 'LMT', 'LNC', 'LO', 'LRCX', 'LUK', 'LUV',
-                 'LYB', 'M', 'MA', 'MAC', 'MAR', 'MAS', 'MAT', 'MCD', 'MCHP',
-                 'MCK', 'MCO', 'MDLZ', 'MDT', 'MET', 'MHFI', 'MHK', 'MJN',
-                 'MKC', 'MLM', 'MMC', 'MMM', 'MNST', 'MO', 'MON', 'MOS', 'MPC',
-                 'MRK', 'MRO', 'MS', 'MSFT', 'MSI', 'MTB', 'MU', 'MUR', 'MWV',
-                 'MYL', 'NAVI', 'NBL', 'NBR', 'NDAQ', 'NE', 'NEE', 'NEM',
-                 'NFLX', 'NFX', 'NI', 'NKE', 'NLSN', 'NOC', 'NOV', 'NRG',
-                 'NSC', 'NTAP', 'NTRS', 'NU', 'NUE', 'NVDA', 'NWL', 'NWSA',
-                 'OI', 'OKE', 'OMC', 'ORCL', 'ORLY', 'OXY', 'PAYX', 'PBCT',
-                 'PBI', 'PCAR', 'PCG', 'PCL', 'PCLN', 'PCP', 'PDCO', 'PEG',
-                 'PEP', 'PETM', 'PFE', 'PFG', 'PG', 'PGR', 'PH', 'PHM', 'PKI',
-                 'PLD', 'PLL', 'PM', 'PNC', 'PNR', 'PNW', 'POM', 'PPG', 'PPL',
-                 'PRGO', 'PRU', 'PSA', 'PSX', 'PVH', 'PWR', 'PX', 'PXD',
-                 'QCOM', 'QEP', 'R', 'RAI', 'RDC', 'REGN', 'RF', 'RHI', 'RHT',
-                 'RIG', 'RL', 'ROK', 'ROP', 'ROST', 'RRC', 'RSG', 'RTN',
-                 'SBUX', 'SCG', 'SCHW', 'SE', 'SEE', 'SHW', 'SIAL', 'SJM',
-                 'SLB', 'SNA', 'SNDK', 'SNI', 'SO', 'SPG', 'SPLS', 'SRCL',
-                 'SRE', 'STI', 'STJ', 'STT', 'STX', 'STZ', 'SWK', 'SWN', 'SWY',
-                 'SYK', 'SYMC', 'SYY', 'T', 'TAP', 'TDC', 'TE', 'TEG', 'TEL',
-                 'TGT', 'THC', 'TIF', 'TJX', 'TMK', 'TMO', 'TRIP', 'TROW',
-                 'TRV', 'TSCO', 'TSN', 'TSO', 'TSS', 'TWC', 'TWX', 'TXN',
-                 'TXT', 'TYC', 'UA', 'UNH', 'UNM', 'UNP', 'UPS', 'URBN', 'USB',
-                 'UTX', 'V', 'VAR', 'VFC', 'VIAB', 'VLO', 'VMC', 'VNO', 'VRSN',
-                 'VRTX', 'VTR', 'VZ', 'WAG', 'WAT', 'WDC', 'WEC', 'WFC', 'WFM',
-                 'WHR', 'WIN', 'WLP', 'WM', 'WMB', 'WMT', 'WU', 'WY', 'WYN',
-                 'WYNN', 'XEC', 'XEL', 'XL', 'XLNX', 'XOM', 'XRAY', 'XRX',
-                 'XYL', 'YHOO', 'YUM', 'ZION', 'ZMH', 'ZTS')
+                 'GILD', 'GIS', 'GLW', 'GM', 'GMCR', 'GME', 'GNW', 'GOOGL',
+                 'GPC', 'GPS', 'GRMN', 'GS', 'GT', 'GWW', 'HAL', 'HAR', 'HAS',
+                 'HBAN', 'HCBK', 'HCN', 'HCP', 'HD', 'HES', 'HIG', 'HOG',
+                 'HON', 'HOT', 'HP', 'HPQ', 'HRB', 'HRL', 'HRS', 'HSP', 'HST',
+                 'HSY', 'HUM', 'IBM', 'ICE', 'IFF', 'INTC', 'INTU', 'IP',
+                 'IPG', 'IR', 'IRM', 'ISRG', 'ITW', 'IVZ', 'JBL', 'JCI', 'JEC',
+                 'JNJ', 'JNPR', 'JOY', 'JPM', 'JWN', 'K', 'KEY', 'KIM', 'KLAC',
+                 'KMB', 'KMI', 'KMX', 'KO', 'KORS', 'KR', 'KRFT', 'KSS', 'KSU',
+                 'L', 'LB', 'LEG', 'LEN', 'LH', 'LLL', 'LLTC', 'LLY', 'LM',
+                 'LMT', 'LNC', 'LO', 'LRCX', 'LUK', 'LUV', 'LYB', 'M', 'MA',
+                 'MAC', 'MAR', 'MAS', 'MAT', 'MCD', 'MCHP', 'MCK', 'MCO',
+                 'MDLZ', 'MDT', 'MET', 'MHFI', 'MHK', 'MJN', 'MKC', 'MLM',
+                 'MMC', 'MMM', 'MNST', 'MO', 'MON', 'MOS', 'MPC', 'MRK', 'MRO',
+                 'MS', 'MSFT', 'MSI', 'MTB', 'MU', 'MUR', 'MWV', 'MYL', 'NAVI',
+                 'NBL', 'NBR', 'NDAQ', 'NE', 'NEE', 'NEM', 'NFLX', 'NFX', 'NI',
+                 'NKE', 'NLSN', 'NOC', 'NOV', 'NRG', 'NSC', 'NTAP', 'NTRS',
+                 'NU', 'NUE', 'NVDA', 'NWL', 'NWSA', 'OI', 'OKE', 'OMC',
+                 'ORCL', 'ORLY', 'OXY', 'PAYX', 'PBCT', 'PBI', 'PCAR', 'PCG',
+                 'PCL', 'PCLN', 'PCP', 'PDCO', 'PEG', 'PEP', 'PETM', 'PFE',
+                 'PFG', 'PG', 'PGR', 'PH', 'PHM', 'PKI', 'PLD', 'PLL', 'PM',
+                 'PNC', 'PNR', 'PNW', 'POM', 'PPG', 'PPL', 'PRGO', 'PRU',
+                 'PSA', 'PSX', 'PVH', 'PWR', 'PX', 'PXD', 'QCOM', 'QEP', 'R',
+                 'RAI', 'RDC', 'REGN', 'RF', 'RHI', 'RHT', 'RIG', 'RL', 'ROK',
+                 'ROP', 'ROST', 'RRC', 'RSG', 'RTN', 'SBUX', 'SCG', 'SCHW',
+                 'SE', 'SEE', 'SHW', 'SIAL', 'SJM', 'SLB', 'SNA', 'SNDK',
+                 'SNI', 'SO', 'SPG', 'SPLS', 'SRCL', 'SRE', 'STI', 'STJ',
+                 'STT', 'STX', 'STZ', 'SWK', 'SWN', 'SWY', 'SYK', 'SYMC',
+                 'SYY', 'T', 'TAP', 'TDC', 'TE', 'TEG', 'TEL', 'TGT', 'THC',
+                 'TIF', 'TJX', 'TMK', 'TMO', 'TRIP', 'TROW', 'TRV', 'TSCO',
+                 'TSN', 'TSO', 'TSS', 'TWC', 'TWX', 'TXN', 'TXT', 'TYC', 'UA',
+                 'UNH', 'UNM', 'UNP', 'UPS', 'URBN', 'USB', 'UTX', 'V', 'VAR',
+                 'VFC', 'VIAB', 'VLO', 'VMC', 'VNO', 'VRSN', 'VRTX', 'VTR',
+                 'VZ', 'WAG', 'WAT', 'WDC', 'WEC', 'WFC', 'WFM', 'WHR', 'WIN',
+                 'WLP', 'WM', 'WMB', 'WMT', 'WU', 'WY', 'WYN', 'WYNN', 'XEC',
+                 'XEL', 'XL', 'XLNX', 'XOM', 'XRAY', 'XRX', 'XYL', 'YHOO',
+                 'YUM', 'ZION', 'ZMH', 'ZTS')
 
-other = ('IACI',)
+symbols_other = ('ARLP', 'BREW', 'CHL', 'DECK', 'IACI', 'ILMN', 'MKL', 'MLNX',
+                 'SDRL', 'SWKS', 'TSLA', 'UBS')
 
-symbols = sp600_symbols + sp500_symbols + other
+symbols = symbols_sp500 + symbols_other
 
 
 def find_names():
@@ -119,6 +118,5 @@ def find_ciks():
     with open('sym_to_ciks.py', 'w') as f:
         f.write('sym_to_ciks = {}\n'.format(sym_to_ciks))
         f.write('\n')
-        f.write('cik_to_syms = {}\n'.format(
-            {v: k for k, v in sym_to_ciks.items()}))
+        f.write('cik_to_syms = {v: k for k, v in sym_to_ciks.items}\n')
     print 'Wrote sym_to_ciks.py'

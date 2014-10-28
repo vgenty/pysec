@@ -49,7 +49,7 @@ def create_pkl():
                .objects
                .filter(form__in=['10-Q', '10-K'],
                        cik__in=sym_to_ciks.values())
-                       # cik__in=[1390777])
+                       # cik__in=[891103])
                .order_by('quarter', 'name')
                # .order_by('?')
     ):

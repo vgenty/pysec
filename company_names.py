@@ -68,8 +68,9 @@ sp500_symbols = ('A', 'AA', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACE', 'ACN', 'ACT',
                  'WYNN', 'XEC', 'XEL', 'XL', 'XLNX', 'XOM', 'XRAY', 'XRX',
                  'XYL', 'YHOO', 'YUM', 'ZION', 'ZMH', 'ZTS')
 
+other = ('IACI',)
 
-symbols = sp600_symbols + sp500_symbols
+symbols = sp600_symbols + sp500_symbols + other
 
 
 def find_names():

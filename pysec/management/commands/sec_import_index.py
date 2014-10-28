@@ -13,6 +13,7 @@ CIKS = sym_to_ciks.values()
 
 DATA_DIR = settings.DATA_DIR
 
+ALWAYS_DOWNLOAD = True
 
 def removeNonAscii(s):
     return "".join(i for i in s if ord(i) < 128)
@@ -29,7 +30,8 @@ def get_filing_list(year, qtr):
     # Download the data and save to a file
     fn = '%s/company_%d_%d.zip' % (DATA_DIR, year, qtr)
 
-    if not os.path.exists(fn):
+    if (not os.path.exists(fn)) or (ALWAYS_DOWNLOAD):
+        print 'Downloading data'
         compressed_data = urllib.urlopen(url).read()
         fileout = open(fn, 'w')
         fileout.write(compressed_data)
@@ -72,10 +74,10 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **_options):
 
-        print "LIMITING TO S&P 500 CIKS"
+        print "LIMITING TO CIKS IN sym_to_ciks"
 
-        for year in range(2014, 2015):
-            for qtr in range(3, 5):
+        for year in range(2009, 2015):
+            for qtr in range(1, 5):
                 quarter = "%s%s" % (year, qtr)
                 Index.objects.filter(quarter=quarter).delete()
                 objs = get_filing_list(year, qtr)

@@ -118,5 +118,5 @@ def find_ciks():
     with open('sym_to_ciks.py', 'w') as f:
         f.write('sym_to_ciks = {}\n'.format(sym_to_ciks))
         f.write('\n')
-        f.write('cik_to_syms = {v: k for k, v in sym_to_ciks.items}\n')
+        f.write('cik_to_syms = {v: k for k, v in sym_to_ciks.items()}\n')
     print 'Wrote sym_to_ciks.py'

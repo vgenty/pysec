@@ -43,25 +43,51 @@ EXCLUDE_FIELDS = {
 
 
 def create_pkl():
-    forms = defaultdict(list)
+    from multiprocessing.dummy import Pool as ThreadPool
 
-    for ii in (Index
-               .objects
-               .filter(form__in=['10-Q', '10-K'],
-                       cik__in=sym_to_ciks.values())
-                       # cik__in=[891103])
-               .order_by('quarter', 'name')
-               # .order_by('?')
-    ):
-        print ii.name, ii.quarter, ii.cik, ii.local_dir
-        ff = ii.financial_fields
-        if not ff:
-            continue
-        if ii.ticker not in sym_to_ciks:
-            raise ValueError(
-                'Symbol {} is invalid - index {} {}'.format(
-                    ii.ticker, ii.name, ii.quarter))
-        forms[ii.ticker].append(ff)
+    def multi():
+        pool = ThreadPool(4)
+
+        def calc_xbrl(index):
+            return (index.ticker, index.quarter, index.financial_fields)
+
+        result = pool.map(calc_xbrl, (Index
+                   .objects
+                   .filter(form__in=['10-Q', '10-K'],
+                           cik__in=sym_to_ciks.values())
+                           # cik__in=[891103])
+                   .order_by('quarter', 'name')
+        ))
+
+        pruned = [rr for rr in result if rr[2]]
+        import ipdb; ipdb.set_trace()
+
+        return forms
+
+    def single():
+        forms = defaultdict(list)
+
+        for ii in (Index
+                   .objects
+                   .filter(form__in=['10-Q', '10-K'],
+                           cik__in=sym_to_ciks.values())
+                           # cik__in=[891103])
+                   .order_by('quarter', 'name')
+                   # .order_by('?')
+        ):
+            print ii.name, ii.quarter, ii.cik, ii.local_dir
+            ff = ii.financial_fields
+            if not ff:
+                continue
+            if ii.ticker not in sym_to_ciks:
+                raise ValueError(
+                    'Symbol {} is invalid - index {} {}'.format(
+                        ii.ticker, ii.name, ii.quarter))
+            forms[ii.ticker].append(ff)
+        return forms
+
+    forms = single()
+
     with open(PICKLE_FILE, 'w') as f:
         pickle.dump(forms, f)
 

@@ -99,6 +99,7 @@ class XBRL(object):
 
         if not isinstance(ContextReference, list):
             ContextReference = [ContextReference]
+
         # Limit to first contextreference found for old-style behavior
         use_contexts = (ContextReference if search_all_contexts
                         else ContextReference[:1])

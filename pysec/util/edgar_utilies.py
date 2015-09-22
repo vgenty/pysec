@@ -40,7 +40,6 @@ def get_acc_table(d):
     # Return pandas df with columns: Fillings, Acc, Filing Data
     return tables_df
 
-
 #
 # CIK Utilities
 #

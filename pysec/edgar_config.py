@@ -12,3 +12,10 @@ FTP_REGEX = re.compile('^[a-zA-Z]+-[0-9]{8}.xml$')
 
 XBRL_ZIP_EXT  = '-xbrl.zip'
 DOWNLOAD_FLDR = '/tmp/'
+
+SHORT_CIK_REGEX = re.compile("^[0-9]+$")
+LONG_CIK_REGEX  = re.compile("^[0-9]{10}$")
+
+# 0000005272-15-000014
+DASHED_ACC_REGEX   = re.compile('^[0-9]{10}-[0-9]{2}-[0-9]{6}$')
+UNDASHED_ACC_REGEX = re.compile('^[0-9]{18}$')

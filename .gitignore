@@ -31,3 +31,5 @@ data
 edgar.sqlite
 *.json
 *.pkl
+
+*.ipynb_checkpoints

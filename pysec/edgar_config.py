@@ -9,3 +9,6 @@ XBRL_REGEX    = re.compile("Interactive")
 FTP_IP    = 'ftp.sec.gov'
 FTP_DIR   = '/edgar/data/%(short_cik)s/%(acc)s'
 FTP_REGEX = re.compile('^[a-zA-Z]+-[0-9]{8}.xml$')
+
+XBRL_ZIP_EXT  = '-xbrl.zip'
+DOWNLOAD_FLDR = '/tmp/'

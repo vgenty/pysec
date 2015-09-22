@@ -3,8 +3,9 @@ import pandas as pd
 import sys
 from .. import edgar_config as ec
 
-
-
+#
+# Get pandas dataframe with columns Form type, Acc (with dashes), and time logged
+#
 def get_acc_table(d):
 
     assert 'cik' in d
@@ -41,7 +42,7 @@ def get_acc_table(d):
     return tables_df
 
 #
-# CIK Utilities
+# CIK Utilities, 10 digit long to short, short to 10 digit long
 #
 def short_to_long_cik(cik):
 
@@ -67,3 +68,30 @@ def long_to_short_cik(cik):
 
     return cik.lstrip('0')
 
+#
+# ACC Util, add or remove dashes to acc
+#
+
+def add_dashes_acc(acc):
+
+    if not isinstance(acc,str):
+        acc = str(acc)
+
+    if len(acc) != 18:
+        raise Exception('Given acc len not 18 as expected')
+
+    acc = acc[:10] + '-' + acc[11:13] + '-' + acc[13:]
+
+    return acc
+
+def remove_dashes_acc(acc):
+
+    if not isinstance(acc,str):
+        acc = str(acc)
+    
+    if len(acc) != 20:
+        raise Exception('Given acc len not 20 as expected')
+
+    acc = acc.replace('-','')
+
+    return acc

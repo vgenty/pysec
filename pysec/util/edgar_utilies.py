@@ -1,4 +1,4 @@
-from urllib2 import urlopen
+import urllib2
 import pandas as pd
 import sys
 
@@ -13,16 +13,17 @@ def get_acc_table(d):
 
     # this is horrible, need to use REQUEST and get error code
     # sec will always return me a page even is url is fucked
-    try:
-        tables    = urlopen(ec.BASE_URL % d)
-        tables    = tables.read()
-    except:
-        print 'Unable to open URL'
-        sys.exit(1)
-        
-    tables_df = pd.read_html(tables,header=0)[-1] # for some reason it's always the 3rd idx
     
-    # New column tells me if document will be XBRL complient
+    request  = urllib2.Request(ec.BASE_URL % d)
+    response = urllib2.urlopen(request)
+
+    if int(response.info()['Content-Length']) == 2854:
+        raise Exception('Bad URL!')    
+
+    tables   = response.read()
+    tables_df = pd.read_html(tables,header=0)[-1] # for some reason it's always the last idx
+    
+    # New column tells me if document will be XBRL compliant
     xbrl_yes = lambda x : ec.XBRL_REGEX.search(x) is not None
     tables_df['XBRL'] = tables_df.Format.apply(xbrl_yes)
     tables_df = tables_df[tables_df.XBRL == True]

@@ -45,10 +45,11 @@ class FTP_Connector :
         f.close()
 
         os.chdir(ec.DOWNLOAD_FLDR)
-        if os.system('unzip -o %s > /dev/null' % filename):
+        #if os.system('unzip -o %s > /dev/null' % filename):
+        if os.system('unzip -o -j %s %s -d %s > /dev/null' % (filename,xml_file,ec.DOWNLOAD_FLDR)):
             raise Exception("Unable to unzip %s" % filename)
         
         if not os.path.isfile(xml_file):
             raise Exception("Could not find %s in %s" % (xml_file,ec.DOWNLOAD_FLDR))
 
-        return xml_file
+        return ec.DOWNLOAD_FLDR + xml_file

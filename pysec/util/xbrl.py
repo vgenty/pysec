@@ -1,7 +1,7 @@
 from lxml import etree
 from xbrl_fundamentals import FundamentantalAccountingConcepts
 import re
-
+from .. import edgar_config as ec
 
 class XBRL(object):
 

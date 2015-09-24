@@ -1,33 +1,43 @@
-import pysec.edgar_config as ec
-import os
-
+import Queue
+import threading
 from pysec.util import ftp_connector
 
-ftp = ftp_connector.FTP_Connector()
+class FTPPool:
+    def __init__(self,pool_size = 3):
+        self.proxy_pool = Queue.Queue() # FIFO instance
+        for i in xrange(pool_size):
+            instance = ftp_connector.FTP_Connector()
+            self.proxy_pool.put(instance)
 
-d = {'short_cik' : '5272' , 'acc' : '000110465909053270'}
+    def get(self,cik,acc):
+        proxy  = self.proxy_pool.get()  # Get some object in FIFO
+        result = proxy.get_sec_XRBL(cik,acc) # open FTP to get data
+        self.proxy_pool.put(proxy)
+        
+        return result
+    
+pool = FTPPool(5)
 
-a = ftp._connection.cwd(ec.FTP_DIR % d)
-b = ftp._connection.nlst()
+def get_file(cik,acc):
+    print pool.get(cik,acc)
+    
+j = ['0000005272-15-000014',
+     '0000005272-15-000006',
+     '0000005272-14-000013',
+     '0000005272-14-000010',
+     '0000005272-14-000007',
+     '0001047469-13-010141',
+     '0001047469-13-008075',
+     '0001047469-13-005458',
+     '0001047469-12-009952',
+     '0001047469-12-007690']
 
-y = None
-for i in b:
-    if ec.FTP_REGEX.search(i) is not None:
-        y = i; break;
+def test():
+    for i in j:
+        t = threading.Thread(target = get_file,
+                             args=('5272',i))
+        t.start()
+        
 
-if y is None:
-    raise Exception("Can not find .xml file in FTP server on cik %s" % d['short_cik'])
-
-acc = '0001104659-09-053270'
-filename = acc + ec.XBRL_ZIP_EXT
-
-f = open(ec.DOWNLOAD_FLDR + filename, 'wb')
-ftp._connection.retrbinary("RETR " + filename, f.write)
-f.close()
-
-os.chdir(ec.DOWNLOAD_FLDR)
-if os.system('unzip -o %s > /dev/null' % filename):
-    raise Exception("Unable to unzip %s" % filename)
-
-if not os.path.isfile(y):
-    raise Exception("Could not find %s in %s" % (y,ec.DOWNLOAD_FLDR))
+test()
+                             

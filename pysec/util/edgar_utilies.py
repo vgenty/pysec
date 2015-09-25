@@ -22,7 +22,7 @@ def get_acc_table(d):
     tables   = response.read()
     tables_df = pd.read_html(tables,header=0)[-1] # for some reason it's always the last idx
 
-    assert tables_df.columns.size == 5,'Number of columns should be size 5, BAD PARSE!'
+    assert tables_df.columns.size == 5,'Number of columns should be size 5, BAD PARSE!' #Probably best way to avoid this is use BeautifulSoup!!!
     
     # New column tells me if document will be XBRL compliant
     xbrl_yes = lambda x : ec.XBRL_REGEX.search(x) is not None

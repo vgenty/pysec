@@ -47,7 +47,7 @@ def login_to_submit():
         if not next_is_valid(next):
             return abort(400)
 
-        return redirect(next or url_for('upload.upload_to_server'))
+        return redirect(next or url_for('datadisplay.show_data'))
 
 
     return render_template('login.html', form=form)

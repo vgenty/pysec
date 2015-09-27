@@ -1,20 +1,25 @@
-{% include "layout.html" %} <!-- This just includes everything, we need better layout for the next page -->
+{% extends "bootstrap/base.html" %} <!-- simple CSS in site-packages/flask_bootstrap/templates/bootstrap -->
+{% block title %}EDGAR WEB{% endblock %}
+{% block content %}
+<center>
+  <h1>EDGAR WEB</h1>
+  <br>
+  <img src="static/images/sec.png" height="150" width="150">
+</center>
+
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <!-- <ul class=flashes> -->
-  {% for message in messages %}
+{% for message in messages %}
 <center><h4>{{ message }}</h4></center>
-<br>
-  {% endfor %}
+{% endfor %}
 <!-- </ul> -->
 {% endif %}
 {% endwith %}
-
-{% block content %}
 <center>
+
   <div class="container">
- 
     <form class="form-signin" action="/login" method="post">
       {{ form.hidden_tag() }}
       <div class="row">
@@ -28,17 +33,7 @@
 	<div class="col-md-4"></div>
       </div>
     </form>
-    
-  </div> <!-- /container -->
   
-  <!-- <form action="/login" method="post"> -->
-  <!--   {{ form.hidden_tag() }} <\!-- why the fuck do i need this -\-> -->
-  <!--   {{ form.username.label }}<br> -->
-  <!--   {{ form.username(size=10) }}<br> -->
-  <!--   {{ form.password.label }}<br> -->
-  <!--   {{ form.password(size=10) }}<br><br> -->
-  <!--   {{ form.submit   }}<br> -->
-  <!-- </form> -->
-  
+  </div>
 </center>
 {% endblock %}

@@ -21,7 +21,7 @@ def get_xbrl_file(cik,acc,q):
 th = []
 for i in TCKR_df.Acc.values:
     t = threading.Thread(target = get_xbrl_file,
-                         args=(str(TCKR),i,q))
+                         args=(str(TCKR),i,q)) # Send queue as parameters to safeguard blocking
     t.start()
     th.append(t)
 

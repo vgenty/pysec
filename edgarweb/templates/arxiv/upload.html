@@ -1,0 +1,37 @@
+{% include "layout.html" %}
+
+{% block content %}
+<center>
+  {% if form.errors %}
+  <p class=error><strong>Error:</strong>
+    {% for key, value in form.errors.iteritems() %}
+    <dt>{{ key|e }}</dt>
+    <dd>{{ value|e }}</dd>
+    {% endfor %}</p>
+  {% endif %}
+
+  {% if filename %}
+  <p><strong>Sucessful Upload</strong></p>
+  <p><strong><font color="red">{{ filename }}</font> sent to printer.</strong></p>
+  {% endif %}
+  
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {{ form.document }}
+    <br>
+    <table style="text-align:center;">
+      <tr>
+	<th>Double sided:&nbsp;{{ form.sides }}&nbsp;&nbsp;&nbsp;</th>
+	<th>Landscape:&nbsp;{{ form.orientation }}</th>
+      </tr>
+      <tr>
+	<th colspan="2"><center><br>Copies:&nbsp;{{ form.copies(size=1) }}</center></th>
+      </tr>
+    </table>
+    <br>
+    {{ form.submit }}
+  </form>
+  
+</center>
+
+{% endblock %}

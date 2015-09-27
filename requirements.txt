@@ -1,1 +1,14 @@
-lxml
+flask
+flask.ext.script
+flask.ext.login
+flask_wtf
+flask.ext.bootstrap
+
+wtforms
+werkzeug
+
+sys
+os
+re
+
+pandas

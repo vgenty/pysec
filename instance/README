@@ -1,0 +1,7 @@
+Must provide:
+
+SECRET_KEY
+
+UPLOAD_USER
+
+UPLOAD_PASS

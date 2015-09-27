@@ -2,7 +2,7 @@ import urllib2
 import pandas as pd
 import sys
 from .. import edgar_config as ec
-
+import xbrl
 
 #
 # Get pandas dataframe with columns Form type, Acc (with dashes), and time logged

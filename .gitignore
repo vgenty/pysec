@@ -1,3 +1,5 @@
+instance/config.py
+
 local_settings.py
 *cheatsheet*
 *.DS_Store
@@ -28,8 +30,5 @@ lib
 lib64
 
 data
-edgar.sqlite
-*.json
-*.pkl
 
 *.ipynb_checkpoints

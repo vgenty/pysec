@@ -38,7 +38,7 @@ def login_to_submit():
         if (user and user.password == form.password.data):
             login_user(user)
         else:
-            flash(u'Contact Vic for User/Pass')
+            flash(u'I wont tell')
             return redirect(url_for('.login_to_submit'))
 
         # Not sure what this does...
@@ -46,6 +46,7 @@ def login_to_submit():
         
         if not next_is_valid(next):
             return abort(400)
+
         return redirect(next or url_for('upload.upload_to_server'))
 
 

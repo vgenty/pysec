@@ -8,6 +8,7 @@ app.config.from_pyfile('config.py')
 from flask.ext.login import LoginManager
 login_manager = LoginManager()
 
-from .views.upload import upload
+from .views.login import login
+#from .views.upload import upload
 
 app.register_blueprint(login)

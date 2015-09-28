@@ -41,7 +41,11 @@ def show_data():
         c = ColumnDataSource(the_df[['Date',form.value.data,'DateStr']])
         
 
-        plot = figure(x_axis_type = "datetime",toolbar_location="below",tools=TOOLS)
+        plot = figure(x_axis_label = "Time",
+                      y_axis_label = "Dollars ($)",
+                      x_axis_type  = "datetime",
+                      toolbar_location="below",
+                      tools=TOOLS)
         
         hover = plot.select(dict(type=HoverTool))
         hover.tooltips = [
@@ -52,8 +56,6 @@ def show_data():
         
         plot.line   ('Date',form.value.data,color='#1F78B4',source=c)
         plot.scatter('Date',form.value.data,color='#1F78B4',source=c,size=10)
-        
-        
         
         
         script, div = components(plot)

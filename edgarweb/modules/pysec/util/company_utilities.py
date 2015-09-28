@@ -78,5 +78,7 @@ def get_complete_df(ticker):
     final_df['Date'] = final_df.apply(get_date,axis=1)
     
     final_df.sort(['Date'],inplace=True)
-    
+
+    final_df['DateStr'] = final_df.apply(lambda x : x.Date.strftime("%B %d %Y"),axis=1)
+                                        
     return final_df

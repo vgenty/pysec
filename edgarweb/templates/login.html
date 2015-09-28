@@ -6,8 +6,6 @@
   <br>
   <img src="static/images/sec.png" height="150" width="150">
 </center>
-
-
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <!-- <ul class=flashes> -->
@@ -18,22 +16,22 @@
 {% endif %}
 {% endwith %}
 <center>
-
   <div class="container">
     <form class="form-signin" action="/login" method="post">
       {{ form.hidden_tag() }}
       <div class="row">
-	<div class="col-md-4"></div>
-	<div class="col-md-4">
-	  <h2 class="form-signin-heading">Don't Sign In</h2>
+	<div class="col-md-5"></div>
+	<div class="col-xs-2">
+	  </br>
+	  <!-- <h2 class="form-signin-heading">Stop</h2> -->
 	  {{ form.username(class_="form-control",placeholder="Username") }}
 	  {{ form.password(class_="form-control",placeholder="Password") }}
+	  </br>
 	  {{ form.submit(class_="btn btn-primary") }}
 	</div>
-	<div class="col-md-4"></div>
+	<div class="col-md-5"></div>
       </div>
     </form>
-  
   </div>
 </center>
 {% endblock %}

@@ -1,6 +1,6 @@
 import ftplib
 from .. import edgar_config as ec
-import pysec.util.edgar_utilies as eu
+import edgar_utilies as eu
 import os
 import Queue
 

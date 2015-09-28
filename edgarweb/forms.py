@@ -17,8 +17,13 @@ from wtforms.validators import ValidationError, NumberRange
 #         m = re.search(r'.([a-z]{3})$',field.data.filename)
 #         if m is None or m.group(1) not in ftypes:
 #             raise ValidationError(message)
-        
+
 #     return _allowed_file_types
+class CompanyForm(Form):
+    ticker = TextField  ( 'Ticker' )
+    value  = TextField  ( 'Value'  )
+    submit = SubmitField( 'Fetch' )
+    
 
 class LoginForm(Form):
     username = TextField    ( 'Username' )

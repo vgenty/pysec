@@ -3,6 +3,7 @@ import pandas as pd
 import sys
 from .. import edgar_config as ec
 import xbrl
+from datetime import datetime
 
 #
 # Get pandas dataframe with columns Form type, Acc (with dashes), and time logged
@@ -40,6 +41,7 @@ def get_acc_table(d):
     
     # Return pandas df with columns: Fillings, Acc, Filing Data
     return tables_df
+
 
 #
 # CIK Utilities, 10 digit long to short, short to 10 digit long
@@ -128,3 +130,12 @@ def is_undashed_acc(acc):
     if ec.UNDASHED_ACC_REGEX.search(acc):
         return True
     return False
+
+#
+# Convert year-month-date to datetime object
+#
+def to_datetime(date):
+    if ec.XBRL_DATE_REGEX.search(date) is None:
+        raise Exception("Given date: %s did not pass regex" % date)
+    
+    return datetime.strptime(date, '%Y-%m-%d')

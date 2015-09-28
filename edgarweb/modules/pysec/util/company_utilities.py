@@ -1,10 +1,18 @@
 import Queue
 import threading
 
-import pysec.util.edgar_utilies as eu
-import pysec.util.ftp_utilities as fu
+from .. import edgar_config as ec
+
+import edgar_utilies as eu
+import ftp_utilities as fu
+import xbrl as xbrl
 
 import sym_to_ciks as stc
+
+import pandas as pd
+
+from datetime import datetime
+
 # T = 'AET'
 
 # TCKR = sym_to_ciks.sym_to_ciks[T]
@@ -49,4 +57,26 @@ def get_company_df(ticker,qk):
         TCKR_df.loc[TCKR_df['Acc'] == ret[0],'Fileloc'] = ret[1]
     
 
+    y = lambda x : xbrl.XBRL(x)
+    TCKR_df['xbrl'] = TCKR_df['Fileloc'].apply(y)
+    
     return TCKR_df
+
+def get_date(row):
+    date = row.xbrl.fields[ec.XBRL_DATE_KEY]
+    return eu.to_datetime(date)
+
+def get_field(row,field): # we will attempt to call this interactively...
+    return row.xbrl.fields[field]
+    
+def get_complete_df(ticker):
+    tenq_df = get_company_df(ticker,'q')
+    tenk_df = get_company_df(ticker,'k')
+
+    final_df = pd.concat([tenk_df,tenq_df])
+    print final_df.columns
+    final_df['Date'] = final_df.apply(get_date,axis=1)
+    
+    final_df.sort(['Date'],inplace=True)
+    
+    return final_df

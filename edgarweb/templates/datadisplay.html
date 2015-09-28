@@ -4,8 +4,26 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-md-4">AHO</div>
-    <div class="col-md-8">BOKE</div>
+    <div class="col-md-4">
+      <form class="form-horizontal" action="/datadisplay" method="post">
+	{{ form.hidden_tag() }}
+	<div class="form-group">
+	  {{ form.ticker(class_="form-control",placeholder="Ticker") }}
+	  {{ form.value (class_="form-control",placeholder="Value") }}
+	  {{ form.submit(class_="btn btn-default") }}
+	</div>
+    </div>
+    <div class="col-md-8">
+      {% if script %}
+      <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.10.0.min.css" type="text/css" />
+      <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.10.0.min.js"></script>
+      {{ script | safe }}
+      <div class=page>
+	<h1>Time Series of {{ form.ticker.data }} : {{ form.value.data }}</h1>
+	{{ div | safe }}
+      </div>
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}

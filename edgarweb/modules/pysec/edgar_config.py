@@ -19,3 +19,6 @@ LONG_CIK_REGEX  = re.compile("^[0-9]{10}$")
 # 0000005272-15-000014
 DASHED_ACC_REGEX   = re.compile('^[0-9]{10}-[0-9]{2}-[0-9]{6}$')
 UNDASHED_ACC_REGEX = re.compile('^[0-9]{18}$')
+
+XBRL_DATE_KEY   = 'BalanceSheetDate'
+XBRL_DATE_REGEX = re.compile('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')

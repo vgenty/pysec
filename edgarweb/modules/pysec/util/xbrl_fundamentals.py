@@ -29,8 +29,9 @@ class FundamentantalAccountingConcepts(object):
         impute_passes = self.impute_loop()
         _valid = self.check()
 
-        print '{} impute {}'.format(impute_passes,
-                                    'pass' if impute_passes == 1 else 'passes')
+        # print '{} impute {}'.format(impute_passes,
+        #                             'pass' if impute_passes == 1 else 'passes') vic 0928
+
 
     def _sum(self, *fields):
         return sum(self.xbrl.fields[f] for f in fields)
@@ -84,14 +85,15 @@ class FundamentantalAccountingConcepts(object):
             value = right_side_sum - left_side_sum
         else:
             value = left_side_sum - right_side_sum
-        print '{}: Imputed {}: {}  from {} == {}'.format(
-            self.impute_count, field, value,
-            '+'.join([self.format_field(f, f in zero_ok_fields)
-                      for f in left_side]),
-            '+'.join([self.format_field(f, f in zero_ok_fields)
-                      for f in right_side])
-        )
+        # print '{}: Imputed {}: {}  from {} == {}'.format( # vic 0928
+        #     self.impute_count, field, value,
+        #     '+'.join([self.format_field(f, f in zero_ok_fields)
+        #               for f in left_side]),
+        #     '+'.join([self.format_field(f, f in zero_ok_fields)
+        #               for f in right_side])
+        # )
         self.xbrl.fields[field] = value
+
         # TODO: get rid of this
         self.xbrl.fields['Changed'] = self.xbrl.fields.get('Changed', 0) + 1
 
@@ -124,7 +126,7 @@ class FundamentantalAccountingConcepts(object):
             self.impute()
             self.impute_count += 1
             if self.impute_count >= 10:
-                print dict_diff(old_fields, self.xbrl.fields)
+                # print dict_diff(old_fields, self.xbrl.fields) # vic 0928
                 raise ValueError('Failed to converge after 10 iterations')
         return self.impute_count - 1
 
@@ -976,8 +978,8 @@ class FundamentantalAccountingConcepts(object):
         def _check_expr(name, expr):
             solvr = ExprSolver(expr, lookup_context=self.xbrl.fields)
             solvr.verify()
-            if solvr.diff:
-                print '{}: {},  {}'.format(name, solvr.rendered, solvr.diff)
+            # if solvr.diff: # vic 0928
+            #     print '{}: {},  {}'.format(name, solvr.rendered, solvr.diff)
             checks[name] = solvr.diff
 
         # Balance sheet

@@ -17,7 +17,7 @@ from datetime import datetime
 
 # TCKR = sym_to_ciks.sym_to_ciks[T]
 
-def get_company_df(ticker,qk):
+def get_company_df(ticker,qk,celery_obj=None):
 
     # keep them separate for now, in the future we return them
     # in the same dataframe ordered by filing date (Q1-Q4 per year whatever)
@@ -25,10 +25,13 @@ def get_company_df(ticker,qk):
         raise Exception("qk parameter is not q or k...")
 
     cik = stc.sym_to_ciks[ticker] # hopefully it's in there i don't even fucking check
+
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'scraping SEC web'})
     
     TCKR_df = eu.get_acc_table({'cik' : eu.short_to_long_cik(cik),
                                 'qk'  : qk})
-    
+
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'opening SEC FTP FIFO'})
     # ftp connection is finite resource sec.gov only give 6? connections per ip. May be we can farm
     # this out as some point with zmq and have many workers pull data @ once and send to me
     pool = fu.FTP_Pool(5)
@@ -56,9 +59,12 @@ def get_company_df(ticker,qk):
         ret = q.get()
         TCKR_df.loc[TCKR_df['Acc'] == ret[0],'Fileloc'] = ret[1]
     
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'downloaded XML'})
 
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'building XBRL'})
     y = lambda x : xbrl.XBRL(x)
     TCKR_df['xbrl'] = TCKR_df['Fileloc'].apply(y)
+    
     
     return TCKR_df
 
@@ -69,16 +75,22 @@ def get_date(row):
 def get_field(row,field): # we will attempt to call this interactively...
     return row.xbrl.fields[field]
     
-def get_complete_df(ticker):
-    tenq_df = get_company_df(ticker,'q')
-    tenk_df = get_company_df(ticker,'k')
+def get_complete_df(ticker,celery_obj=None):
 
+    if celery_object: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form'})
+    tenq_df = get_company_df(ticker,'q',celery_obj)
+
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-K data form'})
+    tenk_df = get_company_df(ticker,'k',celery_obj)
+    
     final_df = pd.concat([tenk_df,tenq_df])
-    print final_df.columns
+    
     final_df['Date'] = final_df.apply(get_date,axis=1)
     
     final_df.sort(['Date'],inplace=True)
-
+    
     final_df['DateStr'] = final_df.apply(lambda x : x.Date.strftime("%B %d %Y"),axis=1)
-                                        
+    
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'assembled company dataframe'})
+    
     return final_df

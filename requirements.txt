@@ -12,3 +12,7 @@ os
 re
 
 pandas
+celery
+redis
+
+pandas

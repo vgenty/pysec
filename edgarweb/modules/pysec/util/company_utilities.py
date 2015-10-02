@@ -26,12 +26,14 @@ def get_company_df(ticker,qk,celery_obj=None):
 
     cik = stc.sym_to_ciks[ticker] # hopefully it's in there i don't even fucking check
 
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'scraping SEC web'})
+    prefix = '10-' + qk + ': '
+
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': prefix+'scraping SEC web'})
     
     TCKR_df = eu.get_acc_table({'cik' : eu.short_to_long_cik(cik),
                                 'qk'  : qk})
 
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'opening SEC FTP FIFO'})
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': prefix+'opening SEC FTP FIFO'})
     # ftp connection is finite resource sec.gov only give 6? connections per ip. May be we can farm
     # this out as some point with zmq and have many workers pull data @ once and send to me
     pool = fu.FTP_Pool(5)
@@ -59,9 +61,9 @@ def get_company_df(ticker,qk,celery_obj=None):
         ret = q.get()
         TCKR_df.loc[TCKR_df['Acc'] == ret[0],'Fileloc'] = ret[1]
     
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'downloaded XML'})
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': prefix+'downloaded XML'})
 
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'building XBRL'})
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': prefix+'building XBRL'})
     y = lambda x : xbrl.XBRL(x)
     TCKR_df['xbrl'] = TCKR_df['Fileloc'].apply(y)
     
@@ -77,7 +79,7 @@ def get_field(row,field): # we will attempt to call this interactively...
     
 def get_complete_df(ticker,celery_obj=None):
 
-    if celery_object: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form'})
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form'})
     tenq_df = get_company_df(ticker,'q',celery_obj)
 
     if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-K data form'})

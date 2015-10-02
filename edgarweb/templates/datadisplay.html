@@ -7,20 +7,26 @@
     <div class="col-md-4">
       <h2>Edgar Tool <small>by vic.</small></h2>
       <div class="panel panel-success">
-	<div class="panel-heading">
-	  <h3 class="panel-title">S&P 500 Company</h3>
-	</div>
+	<div class="panel-heading"> <h3 class="panel-title">S&P 500 Company</h3> </div>
 	<div class="panel-body">
-	  <form class="form-horizontal" action="/datadisplay" method="post">
+	  <!-- <form class="form-horizontal" action="/datadisplay" method="post"> -->
+	  <!-- <form class="form-horizontal" method="POST"> -->
+	  <form class="form-horizontal" action="" method="POST">
 	    {{ form.hidden_tag() }}
 	    <div class="form-group">
 	      {{ form.ticker(class_="form-control",placeholder="Ticker") }}
-	      {{ form.value (class_="form-control",placeholder="Value") }}
+	      {{ form.value (class_="form-control",placeholder="Value")  }}
+	      <!-- <input class="form-control" id="ticker" name="ticker" placeholder="Ticker" type="text" value=""> -->
+	      <!-- <input class="form-control" id="value"  name="value"  placeholder="Value"  type="text" value=""> -->
 	      <br>
-	      <center>{{ form.submit(class_="btn btn-default") }}</center>
+	      <!-- <center><button class="btn btn-default" type="boke" id="boke">Submit</button></center> -->
+	      <center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
+	      <br>
 	    </div>
+	  </form>
 	</div>
       </div>
+      <div id="progress"></div>
     </div>
     <div class="col-md-8">
       {% if script %}
@@ -28,11 +34,84 @@
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.10.0.min.js"></script>
       {{ script | safe }}
       <div class=page>
-	<h3>Time Series of {{ form.ticker.data }} : {{ form.value.data }}</h3>
-	{{ div | safe }}
+      	<!-- <h3>Time Series of {{ form.ticker.data }} : {{ form.value.data }}</h3> -->
+	<h3>Time Series of baka</h3>
+      	{{ div | safe }}
       </div>
       {% endif %}
     </div>
   </div>
 </div>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script type="text/javascript">
+    function start_long_task() {
+	// add task status elements
+
+	div = $('<div id="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
+	$('#progress').append(div); //must be hashtag id string
+	// create a progress bar
+	var nanobar = new Nanobar({
+	    bg: '#44f',
+	    target: div[0].childNodes[0]
+	});
+	// send ajax POST request to start background job
+	$.ajax({
+	    type: 'POST',
+	    url:  '/getdataframe',
+	    success: function(data, status, request) {
+		status_url = request.getResponseHeader('Location');
+		update_progress(status_url, nanobar, div[0]);
+	    },
+	    error: function() {
+		alert('Unexpected error');
+	    }
+	});
+	return false; //hot tip this makes sure form action doesn't return to /datadisplay
+    }
+  function update_progress(status_url, nanobar, status_div) {
+      // send GET request to status URL
+      $.getJSON(status_url, function(data) {
+	  //update UI
+	  //percent = parseInt(data['current'] * 100 / data['total']);
+	  if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+	      if ('result' in data) {
+		  //show result
+		  $(status_div.childNodes[2]).text('Done');
+		  $(status_div.childNodes[3]).text('Result: ' + data['result']);
+
+		  //is this ghetto I copy from stack exchange, to redirect fillout a
+		  //hidden form then submit it so that we load datadisplay in POST
+		  //then we play with dataframe
+		  var url = '/datadisplay';
+		  var form = $('<form action="' + url + '" method="post">' +
+			       '<input type="text" name="api_url" value="' + 'aho' + '" />' +
+			       '</form>');
+		  $('body').append(form);
+		  form.submit();
+	      }
+	      else {
+		  // something bad happened
+		  $(status_div.childNodes[3]).text('Result: ' + data['state']);
+	      }
+	  }
+	  else {
+	      // rerun in 1.0 seconds
+	      percent = parseInt(20);
+	      nanobar.go(percent);
+	      $(status_div.childNodes[1]).text(percent + '%');
+	      $(status_div.childNodes[2]).text(data['state'] + ' : ' + data['message']);
+
+	      setTimeout(function() {
+		  update_progress(status_url, nanobar, status_div);
+	      }, 1000);
+	  }
+      });
+  }
+  
+  $(function() {
+      $('#boke').click(start_long_task);
+  });
+</script>
 {% endblock %}

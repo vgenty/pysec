@@ -22,7 +22,8 @@ from wtforms.validators import ValidationError, NumberRange
 class CompanyForm(Form):
     ticker = TextField  ( 'Ticker' )
     value  = TextField  ( 'Value'  )
-    submit = SubmitField( 'Fetch' )
+    submit = SubmitField( 'Fetch ' )
+    series = SubmitField( 'Plot'   )
     
 
 class LoginForm(Form):

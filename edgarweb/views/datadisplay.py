@@ -24,9 +24,13 @@ the_df = None
 @login_required
 def show_data():
     global the_df
-    print '\n\na\n\n'
+
     script = None
     div    = None
+    loaded = False
+    
+    if the_df is not None:
+        loaded = True;
 
     form = CompanyForm()
     
@@ -34,46 +38,50 @@ def show_data():
         return render_template("datadisplay.html",
                                form   = form,
                                script = script,
-                               div    = div)
+                               div    = div,
+                               dfloaded  = int(loaded))
 
 
     if request.method == 'POST':
-        print the_df
 
-        TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+        #VIC STOPPED HERE
+        form.ticker.data = the_df.iloc[0,'Tick']
         
-        # the_df[form.value.data] = the_df.apply(cu.get_field,axrgs=(form.value.data,),axis=1)
-        the_df['Cash'] = the_df.apply(cu.get_field,args=('Cash',),axis=1)
-        # c = ColumnDataSource(the_df[['Date',form.value.data,'DateStr']])
-        c = ColumnDataSource(the_df[['Date','Cash','DateStr']])
-        
+        if form.validate_on_submit(): #no validation yet...
+            
+            TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+            choice = str(form.value.data)
 
-        plot = figure(x_axis_label = "Time",
-                      y_axis_label = "Dollars ($)",
-                      x_axis_type  = "datetime",
-                      toolbar_location = "below",
-                      tools=TOOLS)
+            the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
+            c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
+
+            plot = figure(x_axis_label = "Time",
+                          y_axis_label = "Dollars ($)",
+                          x_axis_type  = "datetime",
+                          toolbar_location = "below",
+                          tools=TOOLS)
+            
+            hover = plot.select(dict(type=HoverTool))
+            hover.tooltips = [
+                ("Amount:", "@%s"%choice),
+                ("Date:",   "@DateStr"),
+            ]
+            
         
-        hover = plot.select(dict(type=HoverTool))
-        hover.tooltips = [
-            ("Amount:", "@%s"%form.value.data),
-            ("Date:",   "@DateStr"),
-        ]
+            plot.line   ('Date','Cash',color='#1F78B4',source=c)
+            plot.scatter('Date','Cash',color='#1F78B4',source=c,size=10)
+            
         
-        
-        plot.line   ('Date','Cash',color='#1F78B4',source=c)
-        plot.scatter('Date','Cash',color='#1F78B4',source=c,size=10)
-        
-        
-        script, div = components(plot)
+            script, div = components(plot)
         
         
         return render_template("datadisplay.html",
-                               form   = form,
-                               script = script,
-                               div    = div)
-
-    # if form.validate_on_submit(): #no validation yet...
+                               form      = form,
+                               script    = script,
+                               div       = div,
+                               dfloaded  = loaded)
+    
+    # 
 
     #     res    = None
     #     result = None
@@ -112,10 +120,10 @@ def show_data():
     #                        script = script,
     #                        div    = div)
 
-@datadisplay.route('/getdataframe', methods=['POST'])
-def getdataframe():
+@datadisplay.route('/getdataframe/<ticker>', methods=['POST'])
+def getdataframe(ticker):
     #result = tasks.get_data_frame_background.apply_async(args=[form.ticker.data])
-    result = tasks.get_data_frame_background.apply_async(args=['IBM'])
+    result = tasks.get_data_frame_background.apply_async(args=[ticker])
     return jsonify({}), 202, {'Location': url_for('datadisplay.resultstatus',
                                                   task_id = result.id) }
 

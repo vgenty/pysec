@@ -11,16 +11,19 @@
 	<div class="panel-body">
 	  <!-- <form class="form-horizontal" action="/datadisplay" method="post"> -->
 	  <!-- <form class="form-horizontal" method="POST"> -->
-	  <form class="form-horizontal" action="" method="POST">
+	  <form class="form-horizontal" action="/datadisplay" method="POST">
 	    {{ form.hidden_tag() }}
 	    <div class="form-group">
-	      {{ form.ticker(class_="form-control",placeholder="Ticker") }}
-	      {{ form.value (class_="form-control",placeholder="Value")  }}
-	      <!-- <input class="form-control" id="ticker" name="ticker" placeholder="Ticker" type="text" value=""> -->
-	      <!-- <input class="form-control" id="value"  name="value"  placeholder="Value"  type="text" value=""> -->
+	      {{ form.ticker(class_="form-control",placeholder="Ticker",id="baka") }}
+	      {% if not dfloaded %}
+	      {{ form.value (class_="form-control",placeholder="Value",disabled=True,id="doji")  }}
 	      <br>
-	      <!-- <center><button class="btn btn-default" type="boke" id="boke">Submit</button></center> -->
 	      <center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
+	      {% else %}
+	      {{ form.value (class_="form-control",placeholder="Value",disabled=False,id="doji")  }}
+	      <br>
+	      <center>{{ form.series(class_="btn btn-default") }}</center>
+	      {% endif %}
 	      <br>
 	    </div>
 	  </form>
@@ -46,7 +49,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script type="text/javascript">
-    function start_long_task() {
+    function start_long_task(tick) {
 	// add task status elements
 
 	div = $('<div id="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
@@ -59,7 +62,7 @@
 	// send ajax POST request to start background job
 	$.ajax({
 	    type: 'POST',
-	    url:  '/getdataframe',
+	    url:  '/getdataframe/' + tick,
 	    success: function(data, status, request) {
 		status_url = request.getResponseHeader('Location');
 		update_progress(status_url, nanobar, div[0]);
@@ -109,9 +112,13 @@
 	  }
       });
   }
-  
-  $(function() {
-      $('#boke').click(start_long_task);
+
+  // is this jQuery? I know so little...
+  $(document).ready(function() {
+      $('#boke').click(function() {
+	  start_long_task($('#baka').val());
+      });
   });
+
 </script>
 {% endblock %}

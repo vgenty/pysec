@@ -45,13 +45,15 @@ def show_data():
     if request.method == 'POST':
 
         #VIC STOPPED HERE
-        form.ticker.data = the_df.iloc[0,'Tick']
+        form.ticker.data = the_df.iloc[0]['Ticker']
         
         if form.validate_on_submit(): #no validation yet...
             
             TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
-            choice = str(form.value.data)
 
+            choice = str(form.value.data)
+            print choice
+            
             the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
             c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
 
@@ -68,8 +70,8 @@ def show_data():
             ]
             
         
-            plot.line   ('Date','Cash',color='#1F78B4',source=c)
-            plot.scatter('Date','Cash',color='#1F78B4',source=c,size=10)
+            plot.line   ('Date',choice,color='#1F78B4',source=c)
+            plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
             
         
             script, div = components(plot)
@@ -81,48 +83,9 @@ def show_data():
                                div       = div,
                                dfloaded  = loaded)
     
-    # 
-
-    #     res    = None
-    #     result = None
-
-    #     if not isinstance(the_df,pd.DataFrame):
-    #         #flash something and try again
-        
-    #     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
-        
-    #     the_df[form.value.data] = the_df.apply(cu.get_field,args=(form.value.data,),axis=1)
-    #     c = ColumnDataSource(the_df[['Date',form.value.data,'DateStr']])
-        
-
-    #     plot = figure(x_axis_label = "Time",
-    #                   y_axis_label = "Dollars ($)",
-    #                   x_axis_type  = "datetime",
-    #                   toolbar_location = "below",
-    #                   tools=TOOLS)
-        
-    #     hover = plot.select(dict(type=HoverTool))
-    #     hover.tooltips = [
-    #         ("Amount:", "@%s"%form.value.data),
-    #         ("Date:",   "@DateStr"),
-    #     ]
-        
-        
-    #     plot.line   ('Date',form.value.data,color='#1F78B4',source=c)
-    #     plot.scatter('Date',form.value.data,color='#1F78B4',source=c,size=10)
-        
-        
-    #     script, div = components(plot)
-
-    # # return redirect(url_for('datadisplay.show_data'))
-    # return render_template("datadisplay.html",
-    #                        form   = form,
-    #                        script = script,
-    #                        div    = div)
 
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])
 def getdataframe(ticker):
-    #result = tasks.get_data_frame_background.apply_async(args=[form.ticker.data])
     result = tasks.get_data_frame_background.apply_async(args=[ticker])
     return jsonify({}), 202, {'Location': url_for('datadisplay.resultstatus',
                                                   task_id = result.id) }
@@ -137,12 +100,14 @@ def resultstatus(task_id):
     if task.state == 'PENDING':
         response = {
             'state'  : task.state,
-            'message': 'Task pending'
+            'message': 'Task pending',
+            'percent': 0
         }
     elif task.state == 'PROGRESS':
         response = {
             'state'  : task.state,
-            'message': task.info['message']
+            'message': task.info['message'],
+            'percent': task.info['percent']
         }
     elif task.state == 'SUCCESS':
         # we need to tell someone we just got the full dataframe!!! although i hope we don't send this back to ajax
@@ -154,12 +119,14 @@ def resultstatus(task_id):
         response = {
             'state'   : task.state,
             'message' : 'Complete',
-            'result'  : 'Success'
+            'result'  : 'Success',
+            'percent'  : 100
         }
     elif task.state == 'FAILURE':
         response = {
             'state'  : task.state,
-            'message': str(task.info['message']) #this is exception...
+            'message': str(task.info['message']), #this is exception...
+            'percent': 0
         }
     
     return jsonify(response)

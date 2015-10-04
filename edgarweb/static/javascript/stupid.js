@@ -26,7 +26,7 @@ function update_progress(status_url, nanobar, status_div) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
 	//update UI
-	//percent = parseInt(data['current'] * 100 / data['total']);
+	percent = parseInt(data['percent']);
 	if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
 	    if ('result' in data) {
 		//show result
@@ -50,7 +50,6 @@ function update_progress(status_url, nanobar, status_div) {
 	}
 	else {
 	    // rerun in 1.0 seconds
-	    percent = parseInt(20);
 	    nanobar.go(percent);
 	    $(status_div.childNodes[1]).text(percent + '%');
 	    $(status_div.childNodes[2]).text(data['state'] + ' : ' + data['message']);
@@ -65,6 +64,10 @@ function update_progress(status_url, nanobar, status_div) {
 // is this jQuery? I know so little...
 $(document).ready(function() {
     $('#boke').click(function() {
-	start_long_task($('#baka').val());
+	if(!$('#baka').val()) { window.alert("You must supply S&P ticker"); }
+	else {
+	    this.disabled = true;
+	    start_long_task($('#baka').val());
+	}
     });
 });

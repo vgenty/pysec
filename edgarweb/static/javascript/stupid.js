@@ -1,3 +1,20 @@
+function get_plot(choice) {
+    if(choice.length != 0)
+    {
+
+	$.post('/getplot', {'choice' : choice}, function(response){
+	    $('#butthole').empty().append(response);
+	});
+
+	//     var url = '/datadisplay';
+	// var form = $('<form action="' + url + '" method="post">' +
+	// 	     '<input type="text" name="choice" value="' + choice + '" />' +
+	// 	     '</form>');
+	//$('body').append(form);
+	//form.submit();
+    }
+}
+
 function current_df_name(chosen_tick,choice) {
 
     $.getJSON('/currentdfname', function(data) {
@@ -7,18 +24,17 @@ function current_df_name(chosen_tick,choice) {
 		window.location = "/datadisplay";
 	    } 
 	}
-	else if(choice.length != 0)
-	{
-	    var url = '/datadisplay';
-	    var form = $('<form action="' + url + '" method="post">' +
-			 '<input type="text" name="choice" value="' + choice + '" />' +
-			 '</form>');
-	    $('body').append(form);
-	    form.submit();
-	}
+	// else if(choice.length != 0)
+	// {
+	//     var url = '/datadisplay';
+	//     var form = $('<form action="' + url + '" method="post">' +
+	// 		 '<input type="text" name="choice" value="' + choice + '" />' +
+	// 		 '</form>');
+	//     $('body').append(form);
+	//     form.submit();
+	// }
     });
 
-    
     //return false; // temporary
 }
 
@@ -27,12 +43,15 @@ function start_long_task(tick) {
 
     div = $('<div id="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
     $('#progress').append(div); //must be hashtag id string
+
     // create a progress bar
     var nanobar = new Nanobar({
 	bg: '#44f',
 	target: div[0].childNodes[0]
     });
+    
     // send ajax POST request to start background job
+    // ajax is asynchronus
     $.ajax({
 	type: 'POST',
 	url:  '/getdataframe/' + tick,
@@ -57,9 +76,9 @@ function update_progress(status_url, nanobar, status_div) {
 		$(status_div.childNodes[2]).text('Done');
 		$(status_div.childNodes[3]).text('Result: ' + data['result']);
 
-		//is this ghetto I copy from stack exchange, to redirect fillout a
-		//hidden form then submit it so that we load datadisplay in POST
-		//then we play with dataframe
+		// is this ghetto I copy from stack exchange, to redirect fillout a
+		// (hidden?) form then submit it so that we load datadisplay in POST
+		// then we play with dataframe
 		var url = '/datadisplay';
 		var form = $('<form action="' + url + '" method="post">' +
 			     '<input type="text" name="api_url" value="' + 'aho' + '" />' +
@@ -89,14 +108,13 @@ function update_progress(status_url, nanobar, status_div) {
 $(document).ready(function() {
     $('#fuck').click(function() {
 	current_df_name($('#baka').val(),$('#doji').val());
+	get_plot($('#doji').val());
     });
     
     $('#boke').click(function() {
 	if(!$('#baka').val()) { window.alert("You must supply S&P ticker"); }
-	else {
-	    this.disabled = true;
-	    start_long_task($('#baka').val());
-	}
+	else { this.disabled = true;
+	       start_long_task($('#baka').val()); }
     });
 
 });

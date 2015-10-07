@@ -45,59 +45,66 @@ def show_data():
 
     if request.method == 'POST':
         loaded = 1;
-        if 'choice' in request.form:
-
-            # this is also really dumb
-            # lets have javascript query this page for python script and div
-
-            choice = request.form['choice']
-            
-            tckr = the_df.iloc[0]['Ticker']
-
-            #if form.validate_on_submit():
-            # currently disabling validation, i will let javascript do most of the routing from now
-            # on (i.e. client)
-
-            TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
-            
-            #choice = str(form.value.data)
-            
-            the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
-            
-            c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
-            
-            plot = figure(x_axis_label = "Time",
-                          y_axis_label = "Dollars ($)",
-                          x_axis_type  = "datetime",
-                          toolbar_location = "below",
-                          tools=TOOLS)
-            
-            hover = plot.select(dict(type=HoverTool))
-            hover.tooltips = [
-                ("Amount:", "@%s"%choice),
-                ("Date:",   "@DateStr"),
-            ]
-            
-
-            plot.line   ('Date',choice,color='#1F78B4',source=c)
-            plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
-            
-
-            script, div = components(plot)
-            
         form.ticker.data = the_df.iloc[0]['Ticker']
         form.value.data  = None
         
         return render_template("datadisplay.html", #this requires a page reload which is not good...
                                form      = form,
-                               script    = script,
-                               div       = div,
+                               #script    = script,
+                               #div       = div,
                                dfloaded  = loaded)
+
+@datadisplay.route('/getplot',methods=['POST'])
+def getplot():
+    global the_df
+    #if 'choice' in request.form:
     
+    # this is also really dumb
+    # lets have javascript query this page for python script and div
+    
+    choice = request.form['choice']
+    print choice
+    #tckr   = the_df.iloc[0]['Ticker']
+    
+    #if form.validate_on_submit():
+    # currently disabling validation, i will let javascript do most of the routing from now
+    # on (i.e. client)
+    
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+    
+        #at this point we should check choice and make sure tht it is
+    #actually a valid XBRL but whatever maybe we just send
+    #error status back to client
+    the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
+    
+    c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
+    
+    plot = figure(x_axis_label = "Time",
+                  y_axis_label = "Dollars ($)",
+                  x_axis_type  = "datetime",
+                  toolbar_location = "below",
+                  tools=TOOLS)
+    
+    hover = plot.select(dict(type=HoverTool))
+    hover.tooltips = [
+        ("Amount:", "@%s"%choice),
+        ("Date:",   "@DateStr"),
+    ]
+            
+
+    plot.line   ('Date',choice,color='#1F78B4',source=c)
+    plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
+    
+    script, div = components(plot)
+    #return this somehow probably JSON
+    print script
+    print div
+    return render_template("plot.html",script=script,div=div)
+        
 @datadisplay.route('/currentdfname')
 def currentdfname():
     global the_df
-    print the_df.iloc[0]['Ticker']
+    #print the_df.iloc[0]['Ticker']
     return jsonify({'df_name' : the_df.iloc[0]['Ticker']})
     
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])

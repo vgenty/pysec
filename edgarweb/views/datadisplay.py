@@ -29,12 +29,13 @@ def show_data():
     div    = None
     loaded = False
     
-    if the_df is not None:
-        loaded = True;
+    # if the_df is not None:
+    #     loaded = True;
 
     form = CompanyForm()
     
     if request.method == 'GET':
+        loaded = 0;
         return render_template("datadisplay.html",
                                form   = form,
                                script = script,
@@ -43,20 +44,28 @@ def show_data():
 
 
     if request.method == 'POST':
+        loaded = 1;
+        if 'choice' in request.form:
 
-        #VIC STOPPED HERE
-        form.ticker.data = the_df.iloc[0]['Ticker']
-        
-        if form.validate_on_submit(): #no validation yet...
+            # this is also really dumb
+            # lets have javascript query this page for python script and div
+
+            choice = request.form['choice']
             
-            TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+            tckr = the_df.iloc[0]['Ticker']
 
-            choice = str(form.value.data)
-            print choice
+            #if form.validate_on_submit():
+            # currently disabling validation, i will let javascript do most of the routing from now
+            # on (i.e. client)
+
+            TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+            
+            #choice = str(form.value.data)
             
             the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
+            
             c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
-
+            
             plot = figure(x_axis_label = "Time",
                           y_axis_label = "Dollars ($)",
                           x_axis_type  = "datetime",
@@ -69,21 +78,28 @@ def show_data():
                 ("Date:",   "@DateStr"),
             ]
             
-        
+
             plot.line   ('Date',choice,color='#1F78B4',source=c)
             plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
             
-        
+
             script, div = components(plot)
+            
+        form.ticker.data = the_df.iloc[0]['Ticker']
+        form.value.data  = None
         
-        
-        return render_template("datadisplay.html",
+        return render_template("datadisplay.html", #this requires a page reload which is not good...
                                form      = form,
                                script    = script,
                                div       = div,
                                dfloaded  = loaded)
     
-
+@datadisplay.route('/currentdfname')
+def currentdfname():
+    global the_df
+    print the_df.iloc[0]['Ticker']
+    return jsonify({'df_name' : the_df.iloc[0]['Ticker']})
+    
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])
 def getdataframe(ticker):
     result = tasks.get_data_frame_background.apply_async(args=[ticker])

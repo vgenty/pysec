@@ -1,3 +1,27 @@
+function current_df_name(chosen_tick,choice) {
+
+    $.getJSON('/currentdfname', function(data) {
+	current_tick = data['df_name'];
+	if(current_tick != chosen_tick) {
+	    if (confirm('Gave me different ticker than before,\ndo you want to load a new Ticker?')) {
+		window.location = "/datadisplay";
+	    } 
+	}
+	else if(choice.length != 0)
+	{
+	    var url = '/datadisplay';
+	    var form = $('<form action="' + url + '" method="post">' +
+			 '<input type="text" name="choice" value="' + choice + '" />' +
+			 '</form>');
+	    $('body').append(form);
+	    form.submit();
+	}
+    });
+
+    
+    //return false; // temporary
+}
+
 function start_long_task(tick) {
     // add task status elements
 
@@ -63,6 +87,10 @@ function update_progress(status_url, nanobar, status_div) {
 
 // is this jQuery? I know so little...
 $(document).ready(function() {
+    $('#fuck').click(function() {
+	current_df_name($('#baka').val(),$('#doji').val());
+    });
+    
     $('#boke').click(function() {
 	if(!$('#baka').val()) { window.alert("You must supply S&P ticker"); }
 	else {
@@ -70,4 +98,7 @@ $(document).ready(function() {
 	    start_long_task($('#baka').val());
 	}
     });
+
 });
+
+

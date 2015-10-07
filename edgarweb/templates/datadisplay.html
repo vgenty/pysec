@@ -15,14 +15,16 @@
 	    {{ form.hidden_tag() }}
 	    <div class="form-group">
 	      {{ form.ticker(class_="form-control",placeholder="Ticker",id="baka") }}
+
 	      {% if not dfloaded %}
+
 	      {{ form.value (class_="form-control",placeholder="Value",disabled=True,id="doji")  }}
 	      <br>
 	      <center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
 	      {% else %}
 	      {{ form.value (class_="form-control",placeholder="Value",disabled=False,id="doji")  }}
 	      <br>
-	      <center>{{ form.series(class_="btn btn-default") }}</center>
+	      <center>{{ form.series(class_="btn btn-default",id="fuck",type="fuck") }}</center>
 	      {% endif %}
 	      <br>
 	    </div>

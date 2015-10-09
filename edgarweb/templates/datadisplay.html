@@ -9,15 +9,11 @@
       <div class="panel panel-success">
 	<div class="panel-heading"> <h3 class="panel-title">S&P 500 Company</h3> </div>
 	<div class="panel-body">
-	  <!-- <form class="form-horizontal" action="/datadisplay" method="post"> -->
-	  <!-- <form class="form-horizontal" method="POST"> -->
 	  <form class="form-horizontal" action="/datadisplay" method="POST">
 	    {{ form.hidden_tag() }}
 	    <div class="form-group">
 	      {{ form.ticker(class_="form-control",placeholder="Ticker",id="baka") }}
-
 	      {% if not dfloaded %}
-
 	      {{ form.value (class_="form-control",placeholder="Value",disabled=True,id="doji")  }}
 	      <br>
 	      <center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
@@ -31,13 +27,13 @@
 	  </form>
 	</div>
       </div>
-      <div id="progress"></div>
+      <div id="progress"></div> <!-- This is the progressbar -->
     </div>
     <div class="col-md-8">
+      <!-- Force client to load this shit ahead of time from CDN -->
       <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.10.0.min.css" type="text/css" />
       <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.10.0.min.js"></script>
-      <div id="butthole">
-      </div>
+      <div id="butthole"></div> <!-- This where the plot goes -->
     </div>
   </div>
 </div>

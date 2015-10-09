@@ -1,4 +1,6 @@
-from . import re
+import sys
+import redis
+import re
 
 BASE_URL  = u'http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=%(cik)s&type=10-%(qk)s&dateb=&owner=exclude&count=1000'
 URL_ERROR = u'No matching Ticker Symbol'
@@ -22,3 +24,17 @@ UNDASHED_ACC_REGEX = re.compile('^[0-9]{18}$')
 
 XBRL_DATE_KEY   = 'BalanceSheetDate'
 XBRL_DATE_REGEX = re.compile('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB   = 0
+
+REDIS_CON = None
+try:
+    REDIS_CON = redis.StrictRedis(host = REDIS_HOST,
+                                  port = REDIS_PORT,
+                                  db   = REDIS_DB)
+except redis.RedisError():
+    print '\t Can not connect to redis database... is it on?'
+    sys.exit(1)
+    

@@ -29,20 +29,17 @@ def show_data():
     div    = None
     loaded = False
     
-    # if the_df is not None:
-    #     loaded = True;
-
     form = CompanyForm()
     
     if request.method == 'GET':
+            
+        the_df = None
         loaded = 0;
         return render_template("datadisplay.html",
                                form   = form,
-                               script = script,
-                               div    = div,
                                dfloaded  = int(loaded))
-
-
+    
+    
     if request.method == 'POST':
         loaded = 1;
         form.ticker.data = the_df.iloc[0]['Ticker']
@@ -50,8 +47,6 @@ def show_data():
         
         return render_template("datadisplay.html", #this requires a page reload which is not good...
                                form      = form,
-                               #script    = script,
-                               #div       = div,
                                dfloaded  = loaded)
 
 @datadisplay.route('/getplot',methods=['POST'])
@@ -63,8 +58,7 @@ def getplot():
     # lets have javascript query this page for python script and div
     
     choice = request.form['choice']
-    print choice
-    #tckr   = the_df.iloc[0]['Ticker']
+    tckr   = the_df.iloc[0]['Ticker']
     
     #if form.validate_on_submit():
     # currently disabling validation, i will let javascript do most of the routing from now
@@ -97,9 +91,7 @@ def getplot():
     
     script, div = components(plot)
     #return this somehow probably JSON
-    print script
-    print div
-    return render_template("plot.html",script=script,div=div)
+    return render_template("plot.html",script=script,div=div,tckr=tckr,choice=choice)
         
 @datadisplay.route('/currentdfname')
 def currentdfname():

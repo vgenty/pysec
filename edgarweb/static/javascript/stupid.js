@@ -1,17 +1,11 @@
 function get_plot(choice) {
-    if(choice.length != 0)
-    {
-
+    if(choice.length != 0) {
 	$.post('/getplot', {'choice' : choice}, function(response){
 	    $('#butthole').empty().append(response);
 	});
-
-	//     var url = '/datadisplay';
-	// var form = $('<form action="' + url + '" method="post">' +
-	// 	     '<input type="text" name="choice" value="' + choice + '" />' +
-	// 	     '</form>');
-	//$('body').append(form);
-	//form.submit();
+    }
+    else {
+	alert('Please provide input!');
     }
 }
 
@@ -24,15 +18,6 @@ function current_df_name(chosen_tick,choice) {
 		window.location = "/datadisplay";
 	    } 
 	}
-	// else if(choice.length != 0)
-	// {
-	//     var url = '/datadisplay';
-	//     var form = $('<form action="' + url + '" method="post">' +
-	// 		 '<input type="text" name="choice" value="' + choice + '" />' +
-	// 		 '</form>');
-	//     $('body').append(form);
-	//     form.submit();
-	// }
     });
 
     //return false; // temporary
@@ -81,8 +66,8 @@ function update_progress(status_url, nanobar, status_div) {
 		// then we play with dataframe
 		var url = '/datadisplay';
 		var form = $('<form action="' + url + '" method="post">' +
-			     '<input type="text" name="api_url" value="' + 'aho' + '" />' +
-			     '</form>');
+			     '<input type="hidden" name="api_url" value="nothing" />' +
+			     '</input>');
 		$('body').append(form);
 		form.submit();
 	    }

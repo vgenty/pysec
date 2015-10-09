@@ -4,20 +4,28 @@ import Queue
 import threading
 
 from .. import edgar_config as ec
-
 import edgar_utilies as eu
 import ftp_utilities as fu
+
 import xbrl as xbrl
 
 import sym_to_ciks as stc
 
 import pandas as pd
+import numpy as np
+import json 
 
 from datetime import datetime
 
-# T = 'AET'
 
-# TCKR = sym_to_ciks.sym_to_ciks[T]
+def build_xbrl(df) :
+
+    df[ 'xbrl'  ] = df['Fileloc'].apply(lambda x : xbrl.XBRL(x))
+    df[ 'Date'  ] = df.apply(lambda x : eu.to_datetime(x.xbrl.fields[ec.XBRL_DATE_KEY]),axis=1)
+    df['DateStr'] = df.apply(lambda x : x.Date.strftime("%B %d %Y"),axis=1)
+    df.sort(['Date'],inplace=True)
+        
+    return df
 
 def get_company_df(ticker,qk,celery_obj=None,init_p=None):
 
@@ -75,6 +83,7 @@ def get_company_df(ticker,qk,celery_obj=None,init_p=None):
     while not q.empty():
         ret = q.get()
         TCKR_df.loc[TCKR_df['Acc'] == ret[0],'Fileloc'] = ret[1]
+
     print default_timer()-start_time;
     print 'pulled data out of FIFO'
     start_time = default_timer()
@@ -83,8 +92,6 @@ def get_company_df(ticker,qk,celery_obj=None,init_p=None):
     
     if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': prefix+'building XBRL',
                                                                    'percent': init_p + 20})
-    y = lambda x : xbrl.XBRL(x)
-    TCKR_df['xbrl'] = TCKR_df['Fileloc'].apply(y)
     
     print default_timer()-start_time;
     print 'built XBRL objects...'
@@ -92,39 +99,55 @@ def get_company_df(ticker,qk,celery_obj=None,init_p=None):
     
     return TCKR_df
 
-def get_date(row):
-    date = row.xbrl.fields[ec.XBRL_DATE_KEY]
-    return eu.to_datetime(date)
 
 def get_field(row,field): # we will attempt to call this interactively...
     return row.xbrl.fields[field]
     
 def get_complete_df(ticker,celery_obj=None):
 
+    final_df = None
     
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form',
-                                                                   'percent': 25})
+    #Should check if we already loaded this, let's check REDIS!
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'Checking redis for cache dataframe',
+                                                                   'percent': 10})
+    if ec.REDIS_CON.exists(ticker):
+        #great its already there lets get it out, it should be missing XBRL 
+        json_data = json.loads(ec.REDIS_CON.get(ticker))
+        final_df  = pd.read_json(json_data)
+        final_df  = build_xbrl(final_df)
+        
+    else: #not in database
+        if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form',
+                                                                       'percent': 25})
 
-    tenq_df = get_company_df(ticker,'q',celery_obj,25)
+        tenq_df = get_company_df(ticker,'q',celery_obj,25)
 
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-K data form',
-                                                                   'percent': 50})
+        if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-K data form',
+                                                                       'percent': 50})
 
-    tenk_df = get_company_df(ticker,'k',celery_obj,50)
-    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'cleaning up',
+        tenk_df = get_company_df(ticker,'k',celery_obj,50)
+        if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'cleaning up',
                                                                    'percent': 95})
 
-    final_df = pd.concat([tenk_df,tenq_df])
+        final_df = pd.concat([tenk_df,tenq_df])
 
-    final_df['Date'] = final_df.apply(get_date,axis=1)
+        final_df['Ticker'] = ticker
+        
+        if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'storing in redis',
+                                                                       'percent': 99})
 
-    final_df.sort(['Date'],inplace=True)
 
-    final_df['DateStr'] = final_df.apply(lambda x : x.Date.strftime("%B %d %Y"),axis=1)
 
+        # lets store it in redis...
+        final_df.reset_index(inplace=True)
+
+        json_df = json.dumps(final_df.to_json())
+        ec.REDIS_CON.set(ticker,json_df)
+
+        final_df  = build_xbrl(final_df)
+        
+        
+        
     if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'assembled ' + ticker + ' dataframe',
-                                                                   'percent': 100})
-
-    final_df['Ticker'] = ticker
-    
+                                                                   'percent': 99})
     return final_df

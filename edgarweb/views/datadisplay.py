@@ -91,13 +91,14 @@ def getplot():
     plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
     
     script, div = components(plot)
+
     #return this somehow probably JSON
     return render_template("plot.html",script=script,div=div,tckr=tckr,choice=choice)
         
 @datadisplay.route('/currentdfname')
 def currentdfname():
     global the_df
-    #print the_df.iloc[0]['Ticker']
+    
     return jsonify({'df_name' : the_df.iloc[0]['Ticker']})
     
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])
@@ -126,9 +127,6 @@ def resultstatus(task_id):
             'percent': task.info['percent']
         }
     elif task.state == 'SUCCESS':
-        # we need to tell someone we just got the full dataframe!!! although i hope we don't send this back to ajax
-        # lets just set the_df to task.get(), then return success. Then once AJAX sees this lets let it take us back to
-        # datadisplay view with post call? I don't know yet
         
         the_df = task.get()
         

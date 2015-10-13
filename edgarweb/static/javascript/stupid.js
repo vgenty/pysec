@@ -10,7 +10,6 @@ function get_plot(choice) {
 }
 
 function current_df_name(chosen_tick,choice) {
-
     $.getJSON('/currentdfname', function(data) {
 	current_tick = data['df_name'];
 	if(current_tick != chosen_tick) {
@@ -26,14 +25,11 @@ function current_df_name(chosen_tick,choice) {
 function start_long_task(tick) {
     // add task status elements
 
-    div = $('<div id="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
+    var div = $('<div id="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
     $('#progress').append(div); //must be hashtag id string
 
     // create a progress bar
-    var nanobar = new Nanobar({
-	bg: '#44f',
-	target: div[0].childNodes[0]
-    });
+    var nanobar = new Nanobar({ bg: '#44f', target: div[0].childNodes[0] });
     
     // send ajax POST request to start background job
     // ajax is asynchronus
@@ -89,7 +85,6 @@ function update_progress(status_url, nanobar, status_div) {
     });
 }
 
-// is this jQuery? I know so little...
 $(document).ready(function() {
     $('#fuck').click(function() {
 	current_df_name($('#baka').val(),$('#doji').val());

@@ -1,0 +1,29 @@
+Activity Analysis
+	 inventory turnover days = 365/(cost of goods sold/average inventory)
+	 accounts receivable turnover days = 365/(credit sales/average accounts receivable)
+	 accounts payable turnover days = 365/(purchases / average accounts payable)
+	 cash conversion cycle (CCC) = A/R days + inventory days - A/P days === A/R = accounts receivable, A/P == accounts payable
+Liquidity Analysis
+	 current ratio = current asses / current liabilities
+	 quick ratio = (cash + marketable securities + accounts receivable) / ( current liabilities )
+	 cash ratio = (cash + marketable securities) / current liabilities
+Long term debt and Solvency Analysis
+     	  debt to capital ratio = local debt / ( total debt + total equity )
+	  debt to equity ratio  = local debt / (total equity)
+	  times interest earned = EBIT / interest
+Proftability analysis
+	  gross margin = gross profit / sales
+	  operating margin = operating income / sales
+	  profit margin = net income / sales
+Return analysis
+          return on assets = net income / total assets
+	  return on total capital = net income / ( total debt + total equity)
+	  reuturn on equity = net income / total equity
+Market analysis
+          price to earnings ratio = stock price / earnings per share
+	  earnings yield = earnings per share / market price per share
+	  dividend yeidl = dividends per share / market price per share
+	  dividence payout equity = dividends per share / earnings per share
+	  price to book ratio = market price per share / book price per share
+EVA (economic value added)
+    	  net operating profi after taxes - capital * cost of capital

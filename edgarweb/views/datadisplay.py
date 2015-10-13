@@ -35,6 +35,7 @@ def show_data():
             
         the_df = None
         loaded = 0;
+        form.value.choices = [ (0,'') ]
         return render_template("datadisplay.html",
                                form   = form,
                                dfloaded  = int(loaded))
@@ -43,7 +44,7 @@ def show_data():
     if request.method == 'POST':
         loaded = 1;
         form.ticker.data = the_df.iloc[0]['Ticker']
-        form.value.data  = None
+        form.value.choices = [ (key,key) for key in the_df.iloc[0]['xbrl'].fields ]
         
         return render_template("datadisplay.html", #this requires a page reload which is not good...
                                form      = form,
@@ -66,7 +67,7 @@ def getplot():
     
     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
     
-        #at this point we should check choice and make sure tht it is
+    #at this point we should check choice and make sure tht it is
     #actually a valid XBRL but whatever maybe we just send
     #error status back to client
     the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)

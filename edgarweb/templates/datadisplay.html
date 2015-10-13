@@ -1,7 +1,8 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}EDGAR Data Display{% endblock %}
 {% block content %}
-<br>      
+<link type="text/css" rel="stylesheet" href="../static/css/stupid.css"/>
+<br/>      
 <div class="container">
   <div class="row">
     <div class="col-md-4">
@@ -9,22 +10,24 @@
       <div class="panel panel-success">
 	<div class="panel-heading"> <h3 class="panel-title">S&P 500 Company</h3> </div>
 	<div class="panel-body">
-	  <form class="form-horizontal" action="/datadisplay" method="POST">
-	    {{ form.hidden_tag() }}
-	    <div class="form-group">
-	      {{ form.ticker(class_="form-control",placeholder="Ticker",id="baka") }}
-	      {% if not dfloaded %}
-	      {{ form.value (class_="form-control",placeholder="Value",disabled=True,id="doji")  }}
-	      <br>
-	      <center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
-	      {% else %}
-	      {{ form.value (class_="form-control",placeholder="Value",disabled=False,id="doji")  }}
-	      <br>
-	      <center>{{ form.series(class_="btn btn-default",id="fuck",type="fuck") }}</center>
+	  <div class="insidecolmd4">
+	    <form class="form-horizontal" action="/datadisplay" method="POST">
+	      {{ form.hidden_tag() }}
+	      <div class="form-group">
+		{{ form.ticker(class_="form-control",placeholder="Ticker",id="baka") }}
+		{% if not dfloaded %}
+		<center>{{ form.value (class_="form-control",placeholder="Value",disabled=True,id="doji")  }}</center>
+		<br/>
+		<center>{{ form.submit(class_="btn btn-default",id="boke",type="boke") }}</center>
+		{% else %}
+		{{ form.value (class_="form-control",placeholder="Value",disabled=False,id="doji")  }}
+		<br/>
+		<center>{{ form.series(class_="btn btn-default",id="fuck",type="fuck") }}</center>
 	      {% endif %}
-	      <br>
+	      <br/>
 	    </div>
 	  </form>
+	  </div>
 	</div>
       </div>
       <div id="progress"></div> <!-- This is the progressbar -->

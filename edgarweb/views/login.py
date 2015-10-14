@@ -8,8 +8,6 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request,
 
 from flask.ext.login import login_user
 
-import os
-
 login = Blueprint('login',__name__,
                   template_folder = 'templates')
 

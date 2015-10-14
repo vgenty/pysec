@@ -40,7 +40,7 @@ class FundamentantalAccountingConcepts(object):
         return '{}({}){}'.format(
             f, self.xbrl.fields[f], 'Z' if zero_ok else '')
 
-    def _impute(self, left_side, right_side):
+    def _impute(self, left_side, right_side): #finance word for "assign by inference"
         """
         Given a set of variables that relate to each other such that
 
@@ -77,8 +77,8 @@ class FundamentantalAccountingConcepts(object):
         # We know there's only one
         field = unset_fields[0]
 
-        left_side_sum = sum(self.xbrl.fields[f] for f in left_side
-                            if self.xbrl.is_set(f))
+        left_side_sum  = sum(self.xbrl.fields[f] for f in left_side
+                             if self.xbrl.is_set(f))
         right_side_sum = sum(self.xbrl.fields[f] for f in right_side
                              if self.xbrl.is_set(f))
         if field in left_side:
@@ -209,6 +209,23 @@ class FundamentantalAccountingConcepts(object):
                 self.xbrl.fields['NoncurrentLiabilities'] = self.xbrl.fields['Liabilities'] - self.xbrl.fields['CurrentLiabilities']
             else:
                 self.xbrl.fields['NoncurrentLiabilities'] = 0
+
+
+        # Short Term Debt
+        self.xbrl.fields['CurrentDebt'] = self.first_valid_field(
+            [
+                'us-gaap:DebtCurrent'
+            ],
+            'Instant'
+        )
+
+        # Long Term Debt
+        self.xbrl.fields['LongTermDebt'] = self.first_valid_field(
+            [
+                'us-gaap:LongTermDebtAndCapitalLeaseObligations'
+            ],
+            'Instant'
+        )
 
         # CommitmentsAndContingencies
         self.xbrl.fields['CommitmentsAndContingencies'] = self.xbrl.GetFactValue("us-gaap:CommitmentsAndContingencies", "Instant")

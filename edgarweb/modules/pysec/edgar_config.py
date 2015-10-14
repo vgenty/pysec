@@ -38,3 +38,4 @@ except redis.RedisError():
     print '\t Can not connect to redis database... is it on?'
     sys.exit(1)
     
+RATIOS_FILE='$EDGARTOP/edgarweb/modules/pysec/resource/ratios.json'

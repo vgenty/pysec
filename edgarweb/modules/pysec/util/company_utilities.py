@@ -32,46 +32,7 @@ def ratios(fields):
     #plus now we have no way to check if the data is any good
     
     return json.dumps(
-        {
-            "Liquidity Analysis" : {
-
-                "Current Ratio" : fields['CurrentAssets']/fields['CurrentLiabilities'] ,
-
-                "Quick Ratio"   : (fields['Cash'] +
-                                   fields['MarketableSecurities'] +
-                                   fields['AccountsReceivable']) /
-                                   fields['CurrentLiabilities'],
-
-                "Cash Ratio"    : (fields['Cash'] +
-                                   fields['MarketableSecurities'])/
-                                   fields['AccountsReceivable'])
-
-                                   },
-            "Long Term Debt and Solvency Analysis" : {
-
-                "Debt to Capital Ratio" : (fields['CurrentDebt']  +
-                                           fields['LongTermDebt']) /
-                                          (fields['CurrentDebt']  +
-                                           fields['LongTermDebt'] +
-                                           fields['Equity']),
-
-                "Debt to Equity Ratio"  : (fields['CurrentDebt'] +
-                                           fields['LongTermDebt']) /
-                                          (fields['Equity'])
-
-                                                      },
-            "Return Analysis" : {
-
-                "Return on Assets"        : fields['NetIncomeLoss'] / fields['Assets'],
-
-                "Return on Total Capital" : fields['NetIncomeLoss'] /
-                                            (fields['CurrentDebt'] + fields['LongTermDebt'] + fields['Equity']),
-
-                "Return on Equity"        : fields['NetIncomeLoss'] / fields['Equity']
-
-                                }
-            
-        }
+        
         
         )
     

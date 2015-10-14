@@ -1,0 +1,22 @@
+{
+   "Liquidity Analysis" : {
+	    
+     "Current Ratio" : ["CurrentAssets","/","CurrentLiabilities"],
+     "Quick Ratio"   : ["Cash","+","MarketableSecurities","+","AccountsReceivable", "/","CurrentLiabilities"],
+     "Cash Ratio"    : ["Cash","+","MarketableSecurities","/","AccountsReceivable"]
+
+                          },
+   "Long Term Debt and Solvency Analysis" : {
+
+     "Debt to Capital Ratio" : ["CurrentDebt","+","LongTermDebt","/","CurrentDebt","+","LongTermDebt","+","Equity"],
+     "Debt to Equity Ratio"  : ["CurrentDebt","+","LongTermDebt","/","Equity"]
+
+                                            },
+   "Return Analysis" : {
+
+     "Return on Assets"        : ["NetIncomeLoss","/","Assets"],
+     "Return on Total Capital" : ["NetIncomeLoss","/","CurrentDebt","+","LongTermDebt","+","Equity"],
+     "Return on Equity"        : ["NetIncomeLoss","/","Equity"]
+
+                       }            
+}

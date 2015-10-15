@@ -27,16 +27,22 @@ def build_xbrl(df) :
         
     return df
 
-def ratios(fields):
-    #this all needs to be in config FILE!!!!
-    #plus now we have no way to check if the data is any good
-    
-    return json.dumps(
-        
-        
-        )
+def calculate_ratios(df) :
+    df['Ratios'] = df['xbrl'].apply(ratios,axis=1)
+
+def ratios(xbrl):
+    fields = xbrl.fields
+    ratios = ec.RATIOS.copy() # make a copy (ouch)
+
+    for ana in ratios:
+        for ratio in ratios[ana]:
+            value = ec.ratios.parse(fields,ratios[ana][ratio])
+            ratios[ana][ratio] = (ratios[ana][ratio],value)
+
+    return ratios                   
     
 
+    
 def calculate_ratios(df):
     df['ratios'] = df['xbrl'].apply(lambda x : ratios(x.fields))
     return df # return might not be needed here

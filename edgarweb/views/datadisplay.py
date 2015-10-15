@@ -50,26 +50,24 @@ def show_data():
                                form      = form,
                                dfloaded  = loaded)
 
+
+#
+# Various URLS for javascript to query and get result
+#
+
 @datadisplay.route('/getplot',methods=['POST'])
 def getplot():
     global the_df
-    #if 'choice' in request.form:
-    
-    # this is also really dumb
-    # lets have javascript query this page for python script and div
-    
+
     choice = request.form['choice']
     tckr   = the_df.iloc[0]['Ticker']
-    
-    #if form.validate_on_submit():
-    # currently disabling validation, i will let javascript do most of the routing from now
-    # on (i.e. client)
-    
+        
     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
     
-    #at this point we should check choice and make sure tht it is
-    #actually a valid XBRL but whatever maybe we just send
-    #error status back to client
+    # at this point we should check choice and make sure tht it is
+    # actually a valid XBRL but whatever maybe we just send
+    # error status back to client somehow
+    
     the_df[choice] = the_df.apply(cu.get_field,args=(choice,),axis=1)
     
     c = ColumnDataSource(the_df[['Date',choice,'DateStr']])
@@ -86,7 +84,6 @@ def getplot():
         ("Date:",   "@DateStr"),
     ]
             
-
     plot.line   ('Date',choice,color='#1F78B4',source=c)
     plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
     
@@ -94,11 +91,21 @@ def getplot():
 
     #return this somehow probably JSON
     return render_template("plot.html",script=script,div=div,tckr=tckr,choice=choice)
-        
+
+@datadisplay.route('/currentdfratios/<acc>')
+def currentdfratios(acc): # ratios already calculated when this is called
+    global the_df
+    xxx = the_df[the_df.Acc==acc].iloc[0]['xbrl']
+    jjj = json.dumps( { 
+
+    }
+                      
+        })
+    return jsonify(jjj)
+
 @datadisplay.route('/currentdfname')
 def currentdfname():
     global the_df
-    
     return jsonify({'df_name' : the_df.iloc[0]['Ticker']})
     
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])

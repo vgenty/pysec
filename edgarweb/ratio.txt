@@ -1,29 +1,63 @@
 Activity Analysis
-	 inventory turnover days = 365/(cost of goods sold/average inventory)
-	 accounts receivable turnover days = 365/(credit sales/average accounts receivable)
-	 accounts payable turnover days = 365/(purchases / average accounts payable)
-	 cash conversion cycle (CCC) = A/R days + inventory days - A/P days === A/R = accounts receivable, A/P == accounts payable
+	1 inventory turnover days = 365/(cost of goods sold/average inventory)
+	2 accounts receivable turnover days = 365/(credit sales/average accounts receivable)
+	3 accounts payable turnover days = 365/(purchases / average accounts payable)
+	4 cash conversion cycle (CCC) = A/R days + inventory days - A/P days === A/R = accounts receivable, A/P == accounts payable
+
+~~fields~~
+1 365 / ( CostOfRevenue / ??? )
+2 365 / ( ??? / AccountsReceivable (not average...) )
+3 ???
+4 ???
+
 Liquidity Analysis
-	 current ratio = current asses / current liabilities
-	 quick ratio = (cash + marketable securities + accounts receivable) / ( current liabilities )
-	 cash ratio = (cash + marketable securities) / current liabilities
+	 1 current ratio = current asses / current liabilities
+	 2 quick ratio = (cash + marketable securities + accounts receivable) / ( current liabilities )
+	 3 cash ratio = (cash + marketable securities) / current liabilities
+
+~~fields~~
+*1 CurrentAssets/CurrentLiabilities
+*2 ( Cash + MarketableSecurities + AccountsReceivable ) / ( CurrentLiabilities )
+*3 ( Cash + MarketableSecurities ) / ( CurrentLiabilities )
+
 Long term debt and Solvency Analysis
-     	  debt to capital ratio = local debt / ( total debt + total equity )
-	  debt to equity ratio  = local debt / (total equity)
-	  times interest earned = EBIT / interest
+       	  1 debt to capital ratio = total debt / ( total debt + total equity )
+	  2 debt to equity ratio  = total debt / (total equity)
+	  3 times interest earned = EBIT / interest
+
+~~fields~~
+*1 (CurrentDebt + LongTermDebt) / ( Equity + C + LTD)
+*2 (C + LTD) / (Equity)
+3 (Revenue - Operating Expenses) / (???)
+
 Proftability analysis
-	  gross margin = gross profit / sales
-	  operating margin = operating income / sales
-	  profit margin = net income / sales
+	  1 gross margin = gross profit / sales
+	  2 operating margin = operating income / sales
+	  3 profit margin = net income / sales
+
+~~fields~~
+1 GrossProfit / (???)
+2 GrossProfit / (???)
+3 GrossProfit / (???)
+
 Return analysis
-          return on assets = net income / total assets
-	  return on total capital = net income / ( total debt + total equity)
-	  reuturn on equity = net income / total equity
+          1 return on assets = net income / total assets
+	  2 return on total capital = net income / ( total debt + total equity)
+	  3 reuturn on equity = net income / total equity
+
+~~fields~~
+*1 NetIncomeLoss / Assets
+*2 NetIncomeLoss / ( C + LTD + Equity)
+*3 NetIncomeLoss / Equity
+
 Market analysis
-          price to earnings ratio = stock price / earnings per share
-	  earnings yield = earnings per share / market price per share
-	  dividend yeidl = dividends per share / market price per share
-	  dividence payout equity = dividends per share / earnings per share
-	  price to book ratio = market price per share / book price per share
+          1 price to earnings ratio = stock price / earnings per share
+	  2 earnings yield = earnings per share / market price per share
+	  3 dividend yeidl = dividends per share / market price per share
+	  4 dividence payout equity = dividends per share / earnings per share
+	  5 price to book ratio = market price per share / book price per share
+
+~~fields~~
+later
 EVA (economic value added)
     	  net operating profi after taxes - capital * cost of capital

@@ -9,7 +9,7 @@ from flask.ext.login import login_required
 
 from bokeh.plotting import figure
 from bokeh.embed    import components
-from bokeh.models   import HoverTool, ColumnDataSource
+from bokeh.models   import HoverTool, ColumnDataSource, CustomJS, TapTool
 
 import pandas as pd
 
@@ -62,7 +62,7 @@ def getplot():
     choice = request.form['choice']
     tckr   = the_df.iloc[0]['Ticker']
         
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover"
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize,hover,tap"
     
     # at this point we should check choice and make sure tht it is
     # actually a valid XBRL but whatever maybe we just send
@@ -83,38 +83,72 @@ def getplot():
         ("Amount:", "@%s"%choice),
         ("Date:",   "@DateStr"),
     ]
-            
-    plot.line   ('Date',choice,color='#1F78B4',source=c)
-    plot.scatter('Date',choice,color='#1F78B4',source=c,size=10)
+
+
+    plot.line   ('Date',choice,color='#1F78B4',source=c,name="line")
+    plot.scatter('Date',choice,color='#1F78B4',source=c,size=10,name="scatter")
+
+    # renderer = plot.select(name="line")[0]
+    # renderer.nonselection_glyph=renderer.glyph.clone()
+
+    renderer = plot.select(name="scatter")[0]
+    renderer.nonselection_glyph = renderer.glyph.clone()
+
+    
+    #we need call back function to stupid.js
+    code = """ aho(); """
+    
+    taptool = plot.select(dict(type=TapTool))
+    print taptool
+    
+    callback = CustomJS(args={}, code=code)
+    
+    # hover.callback=callback
+    taptool.callback=callback
+
+    #Change me!!!!
+    taptool.names = [""]
     
     script, div = components(plot)
+
+
 
     #return this somehow probably JSON
     return render_template("plot.html",script=script,div=div,tckr=tckr,choice=choice)
 
+
 @datadisplay.route('/currentdfratios/<acc>')
 def currentdfratios(acc): # ratios already calculated when this is called
     global the_df
-    xxx = the_df[the_df.Acc==acc].iloc[0]['xbrl']
-    jjj = json.dumps( { 
-
-    }
-                      
-        })
+    xxx = the_df[the_df.Acc==acc]['Ratios']
+    print xxx
+    jjj = json.dumps(xxx)
     return jsonify(jjj)
 
 @datadisplay.route('/currentdfname')
 def currentdfname():
     global the_df
     return jsonify({'df_name' : the_df.iloc[0]['Ticker']})
+
+
+#######################
+# Celery Tasks
+#
+@datadisplay.route('/calcratios',methods=['POST'])
+def calcratios():
+    global the_df
+    result = tasks.calculate_ratios.apply_async(args=[the_df])
+    return jsonify({}), 202, {'Location': url_for('datadisplay.resultstatus',
+                                                  task_id = result.id) }
     
 @datadisplay.route('/getdataframe/<ticker>', methods=['POST'])
 def getdataframe(ticker):
     result = tasks.get_data_frame_background.apply_async(args=[ticker])
     return jsonify({}), 202, {'Location': url_for('datadisplay.resultstatus',
                                                   task_id = result.id) }
-
-
+#######################
+# Celery status display
+#
 @datadisplay.route('/status/<task_id>')
 def resultstatus(task_id):
     global the_df

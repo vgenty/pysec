@@ -1,3 +1,5 @@
+function aho() { console.log("AHO !!"); }
+
 function get_plot(choice) {
     if(choice.length != 0) {
 	$.post('/getplot', {'choice' : choice}, function(response){

@@ -28,8 +28,13 @@ def build_xbrl(df) :
         
     return df
 
-def calculate_ratios(df) :
+def calculate_ratios(df,celery_obj=None) :
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'Calculating ratios',
+                                                                   'percent': 50})
     df['Ratios'] = df['xbrl'].apply(ratios)
+    
+    if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'Done',
+                                                                   'percent': 99})
 
 def ratios(xbrl):
     fields = xbrl.fields
@@ -39,6 +44,7 @@ def ratios(xbrl):
         for ratio in ratiodata[ana]:
             value = ec.ratios.parse(fields,ratiodata[ana][ratio])
             ratiodata[ana][ratio] = (ratiodata[ana][ratio],value)
+
     return ratiodata                   
     
 

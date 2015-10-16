@@ -222,7 +222,9 @@ class FundamentantalAccountingConcepts(object):
         # Long Term Debt
         self.xbrl.fields['LongTermDebt'] = self.first_valid_field(
             [
-                'us-gaap:LongTermDebtAndCapitalLeaseObligations'
+                'us-gaap:LongTermDebtAndCapitalLeaseObligations',
+                'us-gaap:LongTermDebtNoncurrent',
+                'us-gaap:LongTermDebt'
             ],
             'Instant'
         )

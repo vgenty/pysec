@@ -17,6 +17,7 @@ import json
 
 from datetime import datetime
 
+import copy
 
 def build_xbrl(df) :
 
@@ -28,24 +29,18 @@ def build_xbrl(df) :
     return df
 
 def calculate_ratios(df) :
-    df['Ratios'] = df['xbrl'].apply(ratios,axis=1)
+    df['Ratios'] = df['xbrl'].apply(ratios)
 
 def ratios(xbrl):
     fields = xbrl.fields
-    ratios = ec.RATIOS.copy() # make a copy (ouch)
+    ratiodata = copy.deepcopy(ec.RATIOS) # make a (deep) copy  which includes nested lists(ouch)
 
-    for ana in ratios:
-        for ratio in ratios[ana]:
-            value = ec.ratios.parse(fields,ratios[ana][ratio])
-            ratios[ana][ratio] = (ratios[ana][ratio],value)
-
-    return ratios                   
+    for ana in ratiodata:
+        for ratio in ratiodata[ana]:
+            value = ec.ratios.parse(fields,ratiodata[ana][ratio])
+            ratiodata[ana][ratio] = (ratiodata[ana][ratio],value)
+    return ratiodata                   
     
-
-    
-def calculate_ratios(df):
-    df['ratios'] = df['xbrl'].apply(lambda x : ratios(x.fields))
-    return df # return might not be needed here
 
 def get_company_df(ticker,qk,celery_obj=None,init_p=None):
 

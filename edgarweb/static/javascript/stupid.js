@@ -1,4 +1,6 @@
-function aho() { console.log("AHO !!"); }
+function hhh(i) {
+    $.getJSON('/currentdfratios/' + i[0]).then(function(data) {	console.log("finished"); });
+}
 
 function get_plot(choice) {
     if(choice.length != 0) {

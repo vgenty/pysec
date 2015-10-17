@@ -15,6 +15,11 @@ import pandas as pd
 
 from edgarweb.modules.pysec.util import company_utilities as cu
 
+#temporary
+import edgarweb.modules.pysec
+from   edgarweb.modules.pysec.util import company_utilities as cu
+#/temporary
+
 datadisplay = Blueprint('datadisplay',__name__,
                         template_folder = 'templates')
 
@@ -96,31 +101,43 @@ def getplot():
 
     
     #we need call back function to stupid.js
-    code = """ aho(); """
+    code = """ 
+var ind = cb_obj.get('selected')['1d'].indices;
+        hhh(ind);
+           """
     
     taptool = plot.select(dict(type=TapTool))
     print taptool
     
-    callback = CustomJS(args={}, code=code)
+    callback = CustomJS(args={'source':c}, code=code)
     
     # hover.callback=callback
     taptool.callback=callback
 
     #Change me!!!!
-    taptool.names = [""]
+    taptool.names = ["scatter"]
     
     script, div = components(plot)
-
-
 
     #return this somehow probably JSON
     return render_template("plot.html",script=script,div=div,tckr=tckr,choice=choice)
 
 
-@datadisplay.route('/currentdfratios/<acc>')
-def currentdfratios(acc): # ratios already calculated when this is called
+@datadisplay.route('/currentdfratios/<i>')
+def currentdfratios(i): # ratios already calculated when this is called
     global the_df
-    xxx = the_df[the_df.Acc==acc]['Ratios']
+    print "im here..."
+    print i
+    i = int(i)
+    
+    #temporary
+    the_df = cu.calculate_ratios(the_df)
+    #/temporary
+    print ""
+    print ""
+    print ""
+    print the_df
+    xxx = the_df.iloc[i,'Ratios']
     print xxx
     jjj = json.dumps(xxx)
     return jsonify(jjj)

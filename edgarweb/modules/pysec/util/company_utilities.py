@@ -35,6 +35,7 @@ def calculate_ratios(df,celery_obj=None) :
     
     if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'Done',
                                                                    'percent': 99})
+    return df
 
 def ratios(xbrl):
     fields = xbrl.fields

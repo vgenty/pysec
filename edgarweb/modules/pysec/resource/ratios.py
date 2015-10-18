@@ -1,18 +1,17 @@
 import json
 
-
 ratios = {
    "Liquidity Analysis" : {
 	    
-     "Current Ratio" : ["CurrentAssets","/","CurrentLiabilities"],
-     "Quick Ratio"   : ["Cash","+","MarketableSecurities","+","AccountsReceivable", "/","CurrentLiabilities"],
-     "Cash Ratio"    : ["Cash","+","MarketableSecurities","/","AccountsReceivable"]
+     "Current" : ["CurrentAssets","/","CurrentLiabilities"],
+     "Quick"   : ["Cash","+","MarketableSecurities","+","AccountsReceivable", "/","CurrentLiabilities"],
+     "Cash"    : ["Cash","+","MarketableSecurities","/","AccountsReceivable"]
 
                           },
    "Long Term Debt and Solvency Analysis" : {
 
-     "Debt to Capital Ratio" : ["CurrentDebt","+","LongTermDebt","/","CurrentDebt","+","LongTermDebt","+","Equity"],
-     "Debt to Equity Ratio"  : ["CurrentDebt","+","LongTermDebt","/","Equity"]
+     "Debt to Capital" : ["CurrentDebt","+","LongTermDebt","/","CurrentDebt","+","LongTermDebt","+","Equity"],
+     "Debt to Equity"  : ["CurrentDebt","+","LongTermDebt","/","Equity"]
 
                                             },
    "Return Analysis" : {
@@ -28,11 +27,11 @@ ratios = {
 def parse(fields,expression): #expression is a list
     denominator = 0.0
     numerator   = 0.0
-    print expression
+    
     br = expression.index("/")
-    print br
+    
     for i in expression[0:br:2] : # I see all plus signs so lets just slice on evens
-        print i
+    
         if float(fields[i]) == 0: print "bad ratio"
         print numerator
         numerator += float(fields[i])

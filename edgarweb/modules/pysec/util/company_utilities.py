@@ -135,8 +135,10 @@ def get_complete_df(ticker,celery_obj=None):
     if ec.REDIS_CON.exists(ticker):
         #great its already there lets get it out, it should be missing XBRL 
         json_data = json.loads(ec.REDIS_CON.get(ticker))
+
         final_df  = pd.read_json(json_data)
         final_df  = build_xbrl(final_df)
+        final_df  = calculate_ratios(final_df)
         
     else: #not in database
         if celery_obj: celery_obj.update_state(state='PROGRESS', meta={'message': 'searching 10-Q data form',
@@ -167,6 +169,8 @@ def get_complete_df(ticker,celery_obj=None):
         ec.REDIS_CON.set(ticker,json_df)
 
         final_df  = build_xbrl(final_df)
+        final_df  = calculate_ratios(final_df)
+
         
         
         

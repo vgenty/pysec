@@ -83,7 +83,8 @@ def getplot():
                   y_axis_label = "Dollars ($)",
                   x_axis_type  = "datetime",
                   toolbar_location = "below",
-                  tools=TOOLS)
+                  tools=TOOLS,
+                  logo=None)
     
     hover = plot.select(dict(type=HoverTool))
     hover.tooltips = [
@@ -128,25 +129,12 @@ var ind = cb_obj.get('selected')['1d'].indices;
 @datadisplay.route('/currentdfratios/<i>')
 def currentdfratios(i): # ratios already calculated when this is called
     global the_df
-    print "im here..."
     print i
     i = int(i)
-    
-    #temporary
-    the_df = cu.calculate_ratios(the_df)
-    #/temporary
-    print ""
-    print ""
-    print ""
+    print i
     xxx = the_df.iloc[i]['Ratios']
-    print ""
-    print ""
-    print ""
-    # jjj = json.dumps(xxx)
-    # print jjj
-    print ""
-    print ""
-    return jsonify(xxx)
+    yyy = the_df.iloc[i]['DateStr']
+    return jsonify({'Ratios' : xxx,'Date' : yyy})
 
 @datadisplay.route('/currentdfname')
 def currentdfname():

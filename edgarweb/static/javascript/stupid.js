@@ -1,5 +1,25 @@
 function hhh(i) {
-    $.getJSON('/currentdfratios/' + i[0]).then(function(data) {	console.log("finished"); });
+    
+    $.getJSON('/currentdfratios/' + i[0],function(data) {
+	console.log(data);
+	console.log("wow i got the ratios");
+	
+	// var $ratiotable = $("#ratios");
+	//$ratiotable.append('<tbody>');
+	$("#ratios > tbody").empty();
+	$.each(data, function(key1,value1) {
+	    console.log("key1: " + key1);
+	    //$ratiotable.append('<tr>')
+	    $.each(value1, function(index,value2) {
+		console.log("index " + index + " value2: " + value2);
+		$('#ratios > tbody:last-child').append('<tr><td>' + index + '</td><td>' + value2[1] + '</td></tr>');
+		//$ratiotable.append('<td>' + index + '</td>');
+	    });
+	    //$ratiotable.append('</tr>');
+	});
+	//$ratiotable.append('</tbody>');
+    });
+    
 }
 
 function get_plot(choice) {

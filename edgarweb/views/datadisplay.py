@@ -15,6 +15,8 @@ import pandas as pd
 
 from edgarweb.modules.pysec.util import company_utilities as cu
 
+import json
+
 #temporary
 import edgarweb.modules.pysec
 from   edgarweb.modules.pysec.util import company_utilities as cu
@@ -136,11 +138,15 @@ def currentdfratios(i): # ratios already calculated when this is called
     print ""
     print ""
     print ""
-    print the_df
-    xxx = the_df.iloc[i,'Ratios']
-    print xxx
-    jjj = json.dumps(xxx)
-    return jsonify(jjj)
+    xxx = the_df.iloc[i]['Ratios']
+    print ""
+    print ""
+    print ""
+    # jjj = json.dumps(xxx)
+    # print jjj
+    print ""
+    print ""
+    return jsonify(xxx)
 
 @datadisplay.route('/currentdfname')
 def currentdfname():
